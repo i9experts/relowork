@@ -4,8 +4,8 @@
     <!-- Application Brand -->
     <div class="app-brand">
       <a href="/">
-        <!-- <img src="{{ url('assets/images/logo.png') }}" alt="Charity Management"> -->
-        <span class="brand-name">Charity Management</span>
+        <img src="{{ url('assets/images/logo.png') }}" alt="Charity Management">
+        <span class="brand-name">Charity</span>
       </a>
     </div>
 
