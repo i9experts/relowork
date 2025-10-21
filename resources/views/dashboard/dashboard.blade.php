@@ -146,7 +146,7 @@
                 <p class="mb-1 text-muted small">Al-Ahmad Family</p>
                 <span class="text-secondary small">5 min ago</span>
               </div>
-              <span class="badge badge-warning">Pending</span>
+              <span class="badge badge-pill badge-warning">Pending</span>
             </div>
 
             <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
@@ -155,7 +155,7 @@
                 <p class="mb-1 text-muted small">Al-Hassan Family</p>
                 <span class="text-secondary small">15 min ago</span>
               </div>
-              <span class="badge badge-success">Approved</span>
+              <span class="badge badge-pill badge-success">Approved</span>
             </div>
           </div>
         </div>

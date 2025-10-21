@@ -29,7 +29,7 @@
         </li>
 
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.aid-program.index') }}">
             <i class="mdi mdi-heart"></i>
             <span class="nav-text">Aid Programs</span>
           </a>
