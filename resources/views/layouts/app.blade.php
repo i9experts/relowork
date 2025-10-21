@@ -98,13 +98,6 @@
             </div>
 
             <ul class="nav navbar-nav">
-              <!-- Offcanvas -->
-              <li class="custom-dropdown">
-                <a class="offcanvas-toggler active custom-dropdown-toggler" data-offcanvas="contact-off"
-                  href="javascript:">
-                  <i class="mdi mdi-contacts icon"></i>
-                </a>
-              </li>
               <li class="custom-dropdown">
                 <button class="notify-toggler custom-dropdown-toggler">
                   <i class="mdi mdi-bell-outline icon"></i>
@@ -370,31 +363,19 @@
                 <button class="dropdown-toggle nav-link" data-toggle="dropdown">
                   <img src="{{ url('assets/images/user/user-xs-01.jpg')}}" class="user-image rounded-circle"
                     alt="User Image" />
-                  <span class="d-none d-lg-inline-block">John Doe</span>
+                  <span class="d-none d-lg-inline-block">Admin</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right">
                   <li>
                     <a class="dropdown-link-item" href="user-profile.html">
                       <i class="mdi mdi-account-outline"></i>
-                      <span class="nav-text">My Profile</span>
+                      <span class="nav-text">Profile</span>
                     </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-link-item" href="email-inbox.html">
-                      <i class="mdi mdi-email-outline"></i>
-                      <span class="nav-text">Message</span>
-                      <span class="badge badge-pill badge-primary">24</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-link-item" href="user-activities.html">
-                      <i class="mdi mdi-diamond-stone"></i>
-                      <span class="nav-text">Activitise</span></a>
                   </li>
                   <li>
                     <a class="dropdown-link-item" href="user-account-settings.html">
                       <i class="mdi mdi-settings"></i>
-                      <span class="nav-text">Account Setting</span>
+                      <span class="nav-text">Setting</span>
                     </a>
                   </li>
 

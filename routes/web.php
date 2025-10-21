@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\DashboardController;
 
 // Route::get('/', function () {
@@ -12,11 +13,21 @@ use App\Http\Controllers\DashboardController;
 // });
 
 Route::resource('/', DashboardController::class)->names([
-    'index' => 'saas.dashboard.index',
-    'create' => 'saas.dashboard.create',
-    'store' => 'saas.dashboard.store',
-    'show' => 'saas.dashboard.show',
-    'edit' => 'saas.dashboard.edit',
-    'update' => 'saas.dashboard.update',
-    'destroy' => 'saas.dashboard.destroy',
+    'index' => 'cms.dashboard.index',
+    'create' => 'cms.dashboard.create',
+    'store' => 'cms.dashboard.store',
+    'show' => 'cms.dashboard.show',
+    'edit' => 'cms.dashboard.edit',
+    'update' => 'cms.dashboard.update',
+    'destroy' => 'cms.dashboard.destroy',
+]);
+
+Route::resource('family', FamilyController::class)->names([
+    'index' => 'cms.family.index',
+    'create' => 'cms.family.create',
+    'store' => 'cms.family.store',
+    'show' => 'cms.family.show',
+    'edit' => 'cms.family.edit',
+    'update' => 'cms.family.update',
+    'destroy' => 'cms.family.destroy',
 ]);

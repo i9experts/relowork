@@ -14,15 +14,15 @@
       <!-- Sidebar menu -->
       <ul class="nav sidebar-inner" id="sidebar-menu">
         
-        <li class="active">
-          <a class="sidenav-item-link" href="index.html">
+        <li>
+          <a class="sidenav-item-link" href="{{ route('cms.dashboard.index') }}">
             <i class="mdi mdi-view-dashboard"></i>
             <span class="nav-text">Dashboard</span>
           </a>
         </li>
 
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.family.index') }}">
             <i class="mdi mdi-home"></i>
             <span class="nav-text">Families</span>
           </a>
