@@ -47,7 +47,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
-                <span class="h2 d-block mb-0">Total Families</span>
+                <span class="h5 d-block mb-0">Total Families</span>
                 <p class="mb-1">476</p>
                 <small class="text-muted">+12 from last month</small>
                 </div>
@@ -63,7 +63,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
-                <span class="h2 d-block mb-0">Active Recipients</span>
+                <span class="h5 d-block mb-0">Active Recipients</span>
                 <p class="mb-1">342</p>
                 <small class="text-muted">71.8% of total</small>
                 </div>
@@ -79,7 +79,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
-                <span class="h2 d-block mb-0">Pending Reviews</span>
+                <span class="h5 d-block mb-0">Pending Reviews</span>
                 <p class="mb-1">89</p>
                 <small class="text-muted">Awaiting approval</small>
                 </div>

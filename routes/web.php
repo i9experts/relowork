@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AidProgramController;
+use App\Http\Controllers\FinancialManagementController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -42,3 +43,14 @@ Route::resource('aid-program', AidProgramController::class)->names([
     'update' => 'cms.aid-program.update',
     'destroy' => 'cms.aid-program.destroy',
 ]);
+
+Route::resource('financial-management', FinancialManagementController::class)->names([
+    'index' => 'cms.financial-management.index',
+    'create' => 'cms.financial-management.create',
+    'store' => 'cms.financial-management.store',
+    'show' => 'cms.financial-management.show',
+    'edit' => 'cms.financial-management.edit',
+    'update' => 'cms.financial-management.update',
+    'destroy' => 'cms.financial-management.destroy',
+]);
+

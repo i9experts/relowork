@@ -36,7 +36,7 @@
         </li>
 
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.financial-management.index') }}">
             <i class="mdi mdi-cash-multiple"></i>
             <span class="nav-text">Financials</span>
           </a>

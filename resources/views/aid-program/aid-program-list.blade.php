@@ -47,7 +47,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
-                        <span class="h2 d-block mb-0">Active prog</span>
+                        <span class="h5 d-block mb-0">Active prog</span>
                         <p class="mb-1">3</p>
                         <small class="text-muted">Currently running</small>
                     </div>
@@ -63,7 +63,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
-                        <span class="h2 d-block mb-0">Total Budget</span>
+                        <span class="h5 d-block mb-0">Total Budget</span>
                         <p class="mb-1">670,000</p>
                         <small class="text-muted">Active programs</small>
                     </div>
@@ -79,7 +79,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
-                        <span class="h2 d-block mb-0">Distributed</span>
+                        <span class="h5 d-block mb-0">Distributed</span>
                         <p class="mb-1">500,000</p>
                         <small class="text-muted">74.6% of budget</small>
                     </div>
@@ -95,7 +95,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
-                        <span class="h2 d-block mb-0">Beneficiaries</span>
+                        <span class="h5 d-block mb-0">Beneficiaries</span>
                         <p class="mb-1">772</p>
                         <small class="text-muted">Total recipients</small>
                     </div>
