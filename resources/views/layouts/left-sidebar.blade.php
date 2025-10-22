@@ -43,7 +43,7 @@
         </li>
 
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.Survey.index') }}">
             <i class="mdi mdi-clipboard-text"></i>
             <span class="nav-text">Surveys</span>
           </a>

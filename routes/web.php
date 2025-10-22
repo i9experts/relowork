@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\SurveysController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AidProgramController;
 use App\Http\Controllers\FinancialManagementController;
@@ -52,5 +53,15 @@ Route::resource('financial-management', FinancialManagementController::class)->n
     'edit' => 'cms.financial-management.edit',
     'update' => 'cms.financial-management.update',
     'destroy' => 'cms.financial-management.destroy',
+]);
+
+Route::resource('Survey', SurveysController::class)->names([
+    'index' => 'cms.Survey.index',
+    'create' => 'cms.Survey.create',
+    'store' => 'cms.Survey.store',
+    'show' => 'cms.Survey.show',
+    'edit' => 'cms.Survey.edit',
+    'update' => 'cms.Survey.update',
+    'destroy' => 'cms.Survey.destroy',
 ]);
 
