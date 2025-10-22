@@ -50,7 +50,7 @@
         </li>
 
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.report.index') }}">
             <i class="mdi mdi-chart-bar"></i>
             <span class="nav-text">Reports</span>
           </a>

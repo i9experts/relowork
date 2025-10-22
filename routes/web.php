@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveysController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AidProgramController;
@@ -63,5 +64,15 @@ Route::resource('Survey', SurveysController::class)->names([
     'edit' => 'cms.Survey.edit',
     'update' => 'cms.Survey.update',
     'destroy' => 'cms.Survey.destroy',
+]);
+
+Route::resource('report', ReportController::class)->names([
+    'index' => 'cms.report.index',
+    'create' => 'cms.report.create',
+    'store' => 'cms.report.store',
+    'show' => 'cms.report.show',
+    'edit' => 'cms.report.edit',
+    'update' => 'cms.report.update',
+    'destroy' => 'cms.report.destroy',
 ]);
 
