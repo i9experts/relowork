@@ -57,7 +57,7 @@
         </li>
         
         <li>
-          <a class="sidenav-item-link" href="#">
+          <a class="sidenav-item-link" href="{{ route('cms.volunteer.index') }}">
             <i class="mdi mdi-account-heart"></i>
             <span class="nav-text">Volunteers</span>
           </a>

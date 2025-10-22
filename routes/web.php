@@ -5,6 +5,7 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurveysController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VolunteerController;
 use App\Http\Controllers\AidProgramController;
 use App\Http\Controllers\FinancialManagementController;
 
@@ -75,4 +76,15 @@ Route::resource('report', ReportController::class)->names([
     'update' => 'cms.report.update',
     'destroy' => 'cms.report.destroy',
 ]);
+
+Route::resource('volunteer', VolunteerController::class)->names([
+    'index' => 'cms.volunteer.index',
+    'create' => 'cms.volunteer.create',
+    'store' => 'cms.volunteer.store',
+    'show' => 'cms.volunteer.show',
+    'edit' => 'cms.volunteer.edit',
+    'update' => 'cms.volunteer.update',
+    'destroy' => 'cms.volunteer.destroy',
+]);
+
 
