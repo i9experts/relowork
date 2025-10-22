@@ -293,7 +293,7 @@ $(document).ready(function () {
 
   /*======== 11. TOASTER ========*/
   var toaster = $("#toaster");
-  function callToaster(positionClass) {
+  function callToaster(positionClass, title, message) {
     toastr.options = {
       closeButton: true,
       debug: false,
@@ -311,15 +311,15 @@ $(document).ready(function () {
       showMethod: "fadeIn",
       hideMethod: "fadeOut",
     };
-    toastr.success("Welcome to Mono Dashboard", "Howdy!");
+    if (typeof title !== 'undefined' || typeof message !== 'undefined') {
+      toastr.success(message || "", title || "");
+    }
   }
 
-  if (toaster.length != 0) {
-    if (document.dir != "rtl") {
-      callToaster("toast-top-right");
-    } else {
-      callToaster("toast-top-left");
-    }
+  // Disable default auto-toast; only trigger if explicitly opted-in
+  if (toaster.length != 0 && toaster.data('autoToast') === true) {
+    var pos = (document.dir != "rtl") ? "toast-top-right" : "toast-top-left";
+    callToaster(pos, "", "");
   }
 
   /*======== 12. INFO BAR ========*/

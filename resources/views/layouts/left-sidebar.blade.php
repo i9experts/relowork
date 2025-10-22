@@ -14,50 +14,50 @@
       <!-- Sidebar menu -->
       <ul class="nav sidebar-inner" id="sidebar-menu">
         
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.dashboard.index') }}">
+        <li class="{{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}" href="{{ route('cms.dashboard.index') }}">
             <i class="mdi mdi-view-dashboard"></i>
             <span class="nav-text">Dashboard</span>
           </a>
         </li>
 
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.family.index') }}">
+        <li class="{{ request()->routeIs('cms.family.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.family.*') ? 'active' : '' }}" href="{{ route('cms.family.index') }}">
             <i class="mdi mdi-home"></i>
             <span class="nav-text">Families</span>
           </a>
         </li>
 
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.aid-program.index') }}">
+        <li class="{{ request()->routeIs('cms.aid-program.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.aid-program.*') ? 'active' : '' }}" href="{{ route('cms.aid-program.index') }}">
             <i class="mdi mdi-heart"></i>
             <span class="nav-text">Aid Programs</span>
           </a>
         </li>
 
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.financial-management.index') }}">
+        <li class="{{ request()->routeIs('cms.financial-management.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.financial-management.*') ? 'active' : '' }}" href="{{ route('cms.financial-management.index') }}">
             <i class="mdi mdi-cash-multiple"></i>
             <span class="nav-text">Financials</span>
           </a>
         </li>
 
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.Survey.index') }}">
+        <li class="{{ request()->routeIs('cms.Survey.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.Survey.*') ? 'active' : '' }}" href="{{ route('cms.Survey.index') }}">
             <i class="mdi mdi-clipboard-text"></i>
             <span class="nav-text">Surveys</span>
           </a>
         </li>
 
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.report.index') }}">
+        <li class="{{ request()->routeIs('cms.report.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.report.*') ? 'active' : '' }}" href="{{ route('cms.report.index') }}">
             <i class="mdi mdi-chart-bar"></i>
             <span class="nav-text">Reports</span>
           </a>
         </li>
         
-        <li>
-          <a class="sidenav-item-link" href="{{ route('cms.volunteer.index') }}">
+        <li class="{{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}" href="{{ route('cms.volunteer.index') }}">
             <i class="mdi mdi-account-heart"></i>
             <span class="nav-text">Volunteers</span>
           </a>

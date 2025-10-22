@@ -29,6 +29,16 @@
   <!-- FAVICON -->
   <link href="{{ url('assets/images/favicon.png') }}" rel="shortcut icon" />
 
+  <style>
+    /* Ensure active state applies when <a> has .active too */
+    .sidebar .sidebar-inner > li > a.active {
+      position: relative;
+      z-index: 10;
+      color: #ffffff;
+      background-color: rgba(158, 109, 224, 0.4);
+    }
+  </style>
+
   <!--
     HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries
   -->
@@ -47,6 +57,15 @@
   </script>
 
   <div id="toaster"></div>
+
+  <div id="global-loader" class="position-fixed top-0 start-0 w-100 h-100 bg-white" style="z-index:2000; display:block;">
+    <div class="d-flex align-items-center justify-content-center h-100">
+      <div class="sk-wonder-cube">
+        <div class="cube1"></div>
+        <div class="cube2"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="wrapper">
 
@@ -450,6 +469,42 @@
   <script src="{{ url('assets/js/chart.js') }}"></script>
   <script src="{{ url('assets/js/map.js') }}"></script>
   <script src="{{ url('assets/js/custom.js') }}"></script>
+
+  <script>
+    (function($){
+      $(function(){
+        // Show loader on any global AJAX activity
+        $(document).ajaxStart(function(){ $('#global-loader').show(); });
+        $(document).ajaxStop(function(){ $('#global-loader').hide(); });
+        // Show loader on any form submit
+        $('form').on('submit', function(){ $('#global-loader').show(); });
+        // Ensure hidden once page fully ready
+        $(window).on('load', function(){
+          $('#global-loader').hide();
+          if (window.NProgress && typeof NProgress.done === 'function') { NProgress.done(); }
+        });
+      });
+    })(jQuery);
+  </script>
+
+  <script>
+    (function($){
+      $(function(){
+        try {
+          var pageTitle = @json(trim($__env->yieldContent('title')));
+          if (pageTitle && window.toastr) {
+            toastr.options = {
+              closeButton: true,
+              progressBar: true,
+              positionClass: 'toast-top-right',
+              timeOut: 3000
+            };
+            toastr.success('Welcome to ' + pageTitle);
+          }
+        } catch (e) { /* no-op */ }
+      });
+    })(jQuery);
+  </script>
 
   @stack('page-scripts')
 
