@@ -63,8 +63,8 @@
           </a>
         </li>
         
-        <li>
-          <a class="sidenav-item-link" href="#">
+        <li class="{{ request()->routeIs('cms.setting.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.setting.*') ? 'active' : '' }}" href="{{ route('cms.setting.index') }}">
             <i class="mdi mdi-settings"></i>
             <span class="nav-text">Settings</span>
           </a>

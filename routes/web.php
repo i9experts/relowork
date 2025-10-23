@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SurveysController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VolunteerController;
@@ -85,6 +86,16 @@ Route::resource('volunteer', VolunteerController::class)->names([
     'edit' => 'cms.volunteer.edit',
     'update' => 'cms.volunteer.update',
     'destroy' => 'cms.volunteer.destroy',
+]);
+
+Route::resource('setting', SettingController::class)->names([
+    'index' => 'cms.setting.index',
+    'create' => 'cms.setting.create',
+    'store' => 'cms.setting.store',
+    'show' => 'cms.setting.show',
+    'edit' => 'cms.setting.edit',
+    'update' => 'cms.setting.update',
+    'destroy' => 'cms.setting.destroy',
 ]);
 
 
