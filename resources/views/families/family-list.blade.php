@@ -32,9 +32,9 @@
         </div>
 
         <div>
-            <button type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
+            <a href="{{ route('cms.family.create') }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Add New Family
-            </button>
+            </a>
         </div>
     </div>
 

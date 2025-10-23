@@ -20,7 +20,7 @@ class FamilyController extends Controller
      */
     public function create()
     {
-        //
+        return view('families.family-registration-form');
     }
 
     /**
