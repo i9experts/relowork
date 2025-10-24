@@ -20,7 +20,7 @@ class FinancialManagementController extends Controller
      */
     public function create()
     {
-        //
+        return view('financial-management.financial_transaction_form');
     }
 
     /**

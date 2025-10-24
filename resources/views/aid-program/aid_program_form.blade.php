@@ -195,10 +195,10 @@
 @push('page-scripts')
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 <script>
-    $(function () {
-        $('#program_type, #status, #fund_source, #volunteer_id, #monitoring_frequency').select2({
-            width: '100%'
-        });
+  $(function () {
+    $('.select2').select2({
+      width: '100%'
     });
+  });
 </script>
 @endpush

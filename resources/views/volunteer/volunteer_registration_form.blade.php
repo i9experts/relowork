@@ -212,10 +212,10 @@
 @push('page-scripts')
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 <script>
-    $(function () {
-        $('#education_level, #availability, #preferred_projects, #role, #assigned_projects').select2({
-            width: '100%'
-        });
+  $(function () {
+    $('.select2').select2({
+      width: '100%'
     });
+  });
 </script>
 @endpush

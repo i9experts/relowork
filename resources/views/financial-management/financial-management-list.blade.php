@@ -40,6 +40,10 @@
                 <option>This Year</option>
             </select>
 
+            <a href="{{ route('cms.financial-management.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
+                <i class="mdi mdi-plus-circle-outline mr-1"></i>  Add New Transaction
+            </a>
+
             <button type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-download me-1"></i> Export Report
             </button>
