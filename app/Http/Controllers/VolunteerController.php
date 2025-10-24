@@ -20,7 +20,7 @@ class VolunteerController extends Controller
      */
     public function create()
     {
-        //
+        return view('volunteer.volunteer_registration_form');
     }
 
     /**
