@@ -20,7 +20,7 @@ class AidProgramController extends Controller
      */
     public function create()
     {
-        //
+        return view('aid-program.aid_program_form');
     }
 
     /**
