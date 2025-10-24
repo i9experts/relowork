@@ -42,8 +42,8 @@
           </a>
         </li>
 
-        <li class="{{ request()->routeIs('cms.Survey.*') ? 'active' : '' }}">
-          <a class="sidenav-item-link {{ request()->routeIs('cms.Survey.*') ? 'active' : '' }}" href="{{ route('cms.Survey.index') }}">
+        <li class="{{ request()->routeIs('cms.survey.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.survey.*') ? 'active' : '' }}" href="{{ route('cms.survey.index') }}">
             <i class="mdi mdi-clipboard-text"></i>
             <span class="nav-text">Surveys</span>
           </a>

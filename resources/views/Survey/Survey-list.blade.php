@@ -32,9 +32,9 @@
             <p class="text-muted fs-5 mb-0">Manage family assessments and survey data</p>
         </div>
 
-        <button type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
-        <i class="mdi mdi-plus-circle-outline mr-1"></i> Create New Survey
-        </button>
+        <a href="{{ route('cms.survey.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
+            <i class="mdi mdi-plus-circle-outline mr-1"></i> Create New Survey
+        </a>
 
     </div>
 

@@ -58,14 +58,14 @@ Route::resource('financial-management', FinancialManagementController::class)->n
     'destroy' => 'cms.financial-management.destroy',
 ]);
 
-Route::resource('Survey', SurveysController::class)->names([
-    'index' => 'cms.Survey.index',
-    'create' => 'cms.Survey.create',
-    'store' => 'cms.Survey.store',
-    'show' => 'cms.Survey.show',
-    'edit' => 'cms.Survey.edit',
-    'update' => 'cms.Survey.update',
-    'destroy' => 'cms.Survey.destroy',
+Route::resource('survey', SurveysController::class)->names([
+    'index' => 'cms.survey.index',
+    'create' => 'cms.survey.create',
+    'store' => 'cms.survey.store',
+    'show' => 'cms.survey.show',
+    'edit' => 'cms.survey.edit',
+    'update' => 'cms.survey.update',
+    'destroy' => 'cms.survey.destroy',
 ]);
 
 Route::resource('report', ReportController::class)->names([
