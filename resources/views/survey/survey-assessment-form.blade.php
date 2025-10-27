@@ -104,13 +104,15 @@
 
                 <div class="col-md-6 mb-3">
                   <label>Revisit Needed?</label>
-                  <div class="form-check form-check-inline ms-1">
-                    <input class="form-check-input" type="radio" name="revisit_needed" id="revisit_yes" value="yes">
-                    <label class="form-check-label" for="revisit_yes">Yes</label>
+
+                  <div class="custom-control custom-radio d-inline-block mr-3 mb-3">
+                    <input type="radio" id="revisit_yes" name="revisit_needed" class="custom-control-input" value="yes">
+                    <label class="custom-control-label" for="revisit_yes">Yes</label>
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="revisit_needed" id="revisit_no" value="no" checked>
-                    <label class="form-check-label" for="revisit_no">No</label>
+
+                  <div class="custom-control custom-radio d-inline-block mr-3 mb-3">
+                    <input type="radio" id="revisit_no" name="revisit_needed" class="custom-control-input" value="no" checked>
+                    <label class="custom-control-label" for="revisit_no">No</label>
                   </div>
 
                   <div id="revisitBlock" style="display:none; margin-top:8px;">
@@ -158,7 +160,7 @@
                   <div id="membersList">
                     <!-- template row appended here -->
                   </div>
-                  <button type="button" id="addMemberBtn" class="btn btn-outline-secondary btn-sm mt-2">+ Add Member</button>
+                  <button type="button" id="addMemberBtn" class="btn btn-outline-secondary btn-sm mt-1"><i class="mdi mdi-plus mr-1"></i> Add Member</button>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -260,23 +262,28 @@
 
                 <div class="col-md-6 mb-3">
                   <label>Asset Ownership</label>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="assets[]" value="Livestock" id="asset_ls">
-                    <label class="form-check-label" for="asset_ls">Livestock</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="asset_ls" name="assets[]" value="Livestock">
+                    <label class="custom-control-label" for="asset_ls">Livestock</label>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="assets[]" value="Motorcycle" id="asset_mc">
-                    <label class="form-check-label" for="asset_mc">Motorcycle</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="asset_mc" name="assets[]" value="Motorcycle">
+                    <label class="custom-control-label" for="asset_mc">Motorcycle</label>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="assets[]" value="Smartphone" id="asset_sp">
-                    <label class="form-check-label" for="asset_sp">Smartphone</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="asset_sp" name="assets[]" value="Smartphone">
+                    <label class="custom-control-label" for="asset_sp">Smartphone</label>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="assets[]" value="Refrigerator" id="asset_rf">
-                    <label class="form-check-label" for="asset_rf">Refrigerator</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="asset_rf" name="assets[]" value="Refrigerator">
+                    <label class="custom-control-label" for="asset_rf">Refrigerator</label>
                   </div>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="banking_access">Banking Access</label>
@@ -363,7 +370,7 @@
                     <p class="text-center fw-bold mb-3">E) Vulnerability & Eligibility Flags</p>
                     <hr>
                 </div> 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-6 mb-3">
                   <label for="zakat_elig">Zakat Eligibility</label>
                   <select id="zakat_elig" name="zakat_elig" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option value="no" selected>No</option><option value="yes">Yes</option><option value="unsure">Unsure</option>
@@ -378,20 +385,24 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label>Special categories</label>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="special_categories[]" value="Widow" id="sp_w">
-                    <label class="form-check-label" for="sp_w">Widow</label>
+                  <label>Special Categories</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="sp_w" name="special_categories[]" value="Widow">
+                    <label class="custom-control-label" for="sp_w">Widow</label>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="special_categories[]" value="Orphan" id="sp_o">
-                    <label class="form-check-label" for="sp_o">Orphan(s)</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="sp_o" name="special_categories[]" value="Orphan">
+                    <label class="custom-control-label" for="sp_o">Orphan(s)</label>
                   </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="special_categories[]" value="PWD" id="sp_p">
-                    <label class="form-check-label" for="sp_p">PWD</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="sp_p" name="special_categories[]" value="PWD">
+                    <label class="custom-control-label" for="sp_p">PWD</label>
                   </div>
                 </div>
+
 
                 <!-- F) Assistance Preferences -->
                 <div class="col-md-12 mt-3">
@@ -415,7 +426,12 @@
                 </div>
 
                 <!-- G,H,I,J,K condensed inputs -->
-                <h5>G) Past Aid & Duplication</h5>
+                <div class="col-md-12 mt-3">
+                    <hr>
+                    <p class="text-center fw-bold mb-3">G) Past Aid & Duplication</p>
+                    <hr>
+                </div> 
+
                 <hr class="mt-1 mb-3">
                 <div class="col-md-6 mb-3">
                   <label for="received_aid_6m">Received aid last 6 months?</label>
@@ -433,13 +449,19 @@
 
                 <!-- Submission -->
                 <div class="col-md-6 mb-3">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="purpose_explained" name="purpose_explained">
-                    <label class="form-check-label" for="purpose_explained">Purpose explained to respondent</label>
+
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="purpose_explained" name="purpose_explained">
+                    <label class="custom-control-label" for="purpose_explained">
+                      Purpose explained to respondent
+                    </label>
                   </div>
-                  <div class="form-check mt-1">
-                    <input class="form-check-input" type="checkbox" id="consent_statement" name="consent_statement">
-                    <label class="form-check-label" for="consent_statement">Consent statement acknowledged</label>
+
+                  <div class="custom-control custom-checkbox mt-1">
+                    <input type="checkbox" class="custom-control-input" id="consent_statement" name="consent_statement">
+                    <label class="custom-control-label" for="consent_statement">
+                      Consent statement acknowledged
+                    </label>
                   </div>
                 </div>
 
@@ -480,23 +502,25 @@
       <div class="member-row">
         <div class="d-flex justify-content-between">
           <strong>Member</strong>
-          <button type="button" class="btn btn-sm btn-danger removeMemberBtn">Remove</button>
         </div>
         <div class="row mt-2">
           <div class="col-md-3 mb-2"><input name="members[][name]" class="form-control rounded-0 bg-light" placeholder="Name"></div>
-          <div class="col-md-2 mb-2"><input name="members[][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
-          <div class="col-md-2 mb-2">
+          <div class="col-md-3 mb-2"><input name="members[][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
+          <div class="col-md-3 mb-2">
             <select name="members[][gender]" class="form-control select2 rounded-0 bg-light" style="width:100%;">
               <option>Male</option><option>Female</option><option>Other</option>
             </select>
           </div>
           <div class="col-md-3 mb-2"><input name="members[][relation]" class="form-control rounded-0 bg-light" placeholder="Relation"></div>
-          <div class="col-md-2 mb-2"><input name="members[][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
-          <div class="col-md-4 mb-2">
-            <label class="form-label small-muted">Disability?</label>
-            <input name="members[][disability]" class="form-control rounded-0 bg-light" placeholder="Y/N + type">
+          <div class="col-md-3 mb-2"><input name="members[][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
+          <div class="col-md-3 mb-2">
+            <input name="members[][disability]" class="form-control rounded-0 bg-light" placeholder="Disability?">
           </div>
-          <div class="col-md-4 mb-2"><input name="members[][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
+          <div class="col-md-3 mb-2"><input name="members[][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
+      
+          <div class="col-md-3 mb-2 text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm removeMemberBtn"><i class="mdi mdi-delete"></i> Remove</button>
+            </div>
         </div>
       </div>`;
 
