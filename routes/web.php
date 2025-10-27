@@ -14,9 +14,9 @@ use App\Http\Controllers\FinancialManagementController;
 //     return view('welcome');
 // });
 
-// Route::get('/', function () {
-//     return view('dashboard.dashboard');
-// });
+Route::get('/login-page', function () {
+    return view('auth.login-view');
+});
 
 Route::resource('/', DashboardController::class)->names([
     'index' => 'cms.dashboard.index',

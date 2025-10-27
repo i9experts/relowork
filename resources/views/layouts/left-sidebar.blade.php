@@ -3,7 +3,7 @@
   <div id="sidebar" class="sidebar sidebar-with-footer">
     <!-- Application Brand -->
     <div class="app-brand">
-      <a href="/">
+      <a href="{{ route('cms.dashboard.index') }}">
         <img src="{{ url('assets/images/logo.png') }}" alt="Charity Management">
         <span class="brand-name">Charity</span>
       </a>
@@ -77,7 +77,7 @@
     <div class="sidebar-footer">
       <div class="sidebar-footer-content">
         <ul class="d-flex">
-          <li><a href="user-account-settings.html" data-toggle="tooltip" title="Profile settings"><i class="mdi mdi-settings"></i></a></li>
+          <li><a href="{{ route('cms.setting.index') }}" data-toggle="tooltip" title="Profile settings"><i class="mdi mdi-settings"></i></a></li>
           <li><a href="#" data-toggle="tooltip" title="No chat messages"><i class="mdi mdi-chat-processing"></i></a></li>
         </ul>
       </div>

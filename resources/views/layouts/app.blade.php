@@ -88,7 +88,7 @@
 
             <!-- search form -->
             <div class="search-form">
-              <form action="index.html" method="get">
+              <form action="#" method="get">
                 <div class="input-group input-group-sm" id="input-group-search">
                   <input type="text" autocomplete="off" name="query" id="search-input" class="form-control"
                     placeholder="Search..." />
@@ -386,20 +386,20 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right">
                   <li>
-                    <a class="dropdown-link-item" href="user-profile.html">
+                    <a class="dropdown-link-item" href="#">
                       <i class="mdi mdi-account-outline"></i>
                       <span class="nav-text">Profile</span>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-link-item" href="user-account-settings.html">
+                    <a class="dropdown-link-item" href="{{ route('cms.setting.index') }}">
                       <i class="mdi mdi-settings"></i>
                       <span class="nav-text">Setting</span>
                     </a>
                   </li>
 
                   <li class="dropdown-footer">
-                    <a class="dropdown-link-item" href="sign-in.html"> <i class="mdi mdi-logout"></i> Log Out </a>
+                    <a class="dropdown-link-item" href="#"> <i class="mdi mdi-logout"></i> Log Out </a>
                   </li>
                 </ul>
               </li>
