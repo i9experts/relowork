@@ -13,6 +13,20 @@ return new class extends Migration
     {
         Schema::create('aid_programs', function (Blueprint $table) {
             $table->id();
+            $table->string('program_code')->unique()->nullable();
+            $table->string('program_title');
+            $table->enum('program_type', ['Food','Education','Water','Medical','Housing','Emergency'])->nullable();
+            $table->text('description')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('location')->nullable();
+            $table->unsignedInteger('target_beneficiaries')->nullable();
+            $table->enum('status', ['Planned','Active','Completed','On Hold'])->default('Planned');
+            $table->unsignedBigInteger('total_budget')->nullable();
+            $table->enum('fund_source', ['Zakat','Sadaqah','General Donation','Grant'])->nullable();
+            $table->unsignedBigInteger('volunteer_id')->nullable()->index();
+            $table->enum('monitoring_frequency', ['Weekly','Monthly','Quarterly'])->nullable();
+            $table->text('progress_notes')->nullable();
             $table->timestamps();
         });
     }

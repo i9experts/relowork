@@ -56,21 +56,32 @@
 
                     <h4 class="text-dark mb-6 text-center">Sign in for free</h4>
 
-                    <form action="">
+                    @if ($errors->any())
+                      <div class="alert alert-danger">
+                        <ul class="mb-0">
+                          @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                          @endforeach
+                        </ul>
+                      </div>
+                    @endif
+
+                    <form action="{{ route('login.post') }}" method="POST">
+                      @csrf
                       <div class="row">
                         <div class="form-group col-md-12 mb-4">
-                          <input type="email" class="form-control input-lg" id="email" aria-describedby="emailHelp"
-                            placeholder="email">
+                          <input type="email" class="form-control input-lg" id="email" name="email" aria-describedby="emailHelp"
+                            placeholder="Enter email" value="{{ old('email') }}" required>
                         </div>
                         <div class="form-group col-md-12 ">
-                          <input type="password" class="form-control input-lg" id="password" placeholder="Password">
+                          <input type="password" class="form-control input-lg" id="password" name="password" placeholder="Enter Password" required>
                         </div>
                         <div class="col-md-12">
 
                           <div class="d-flex justify-content-between mb-3">
 
                             <div class="custom-control custom-checkbox mr-3 mb-3">
-                              <input type="checkbox" class="custom-control-input" id="customCheck2">
+                              <input type="checkbox" class="custom-control-input" id="customCheck2" name="remember">
                               <label class="custom-control-label" for="customCheck2">Remember me</label>
                             </div>
 

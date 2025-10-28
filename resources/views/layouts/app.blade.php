@@ -88,30 +88,20 @@
 
             <!-- search form -->
             <div class="search-form">
-              <form action="#" method="get">
+              <form action="#" method="get" onsubmit="return false;">
                 <div class="input-group input-group-sm" id="input-group-search">
                   <input type="text" autocomplete="off" name="query" id="search-input" class="form-control"
                     placeholder="Search..." />
                   <div class="input-group-append">
-                    <button class="btn" type="button">/</button>
+                  <button class="btn btn-outline-secondary" type="button" id="search-kbd">
+                    <i class="mdi mdi-magnify"></i>
+                  </button>
+
                   </div>
                 </div>
               </form>
-              <ul class="dropdown-menu dropdown-menu-search">
-
-                <li class="nav-item">
-                  <a class="nav-link" href="index.html">Morbi leo risus</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="index.html">Dapibus ac facilisis in</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="index.html">Porta ac consectetur ac</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="index.html">Vestibulum at eros</a>
-                </li>
-
+              <ul class="dropdown-menu dropdown-menu-search" style="min-width: 260px;">
+                <!-- dynamic search suggestions here -->
               </ul>
 
             </div>
@@ -399,8 +389,15 @@
                   </li>
 
                   <li class="dropdown-footer">
-                    <a class="dropdown-link-item" href="#"> <i class="mdi mdi-logout"></i> Log Out </a>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+                      @csrf
+                      <button type="submit" class="dropdown-item d-flex align-items-center">
+                        <i class="mdi mdi-logout mr-2"></i>
+                        <span>Log Out</span>
+                      </button>
+                    </form>
                   </li>
+                  
                 </ul>
               </li>
             </ul>
@@ -482,6 +479,126 @@
         $(window).on('load', function(){
           $('#global-loader').hide();
           if (window.NProgress && typeof NProgress.done === 'function') { NProgress.done(); }
+        });
+
+        // --- Global Client-side Typeahead Search ---
+        var $input = $('#search-input');
+        var $menu = $('.dropdown-menu-search');
+        var index = [];
+        function buildIndex(){
+          index = [];
+          // Collect from left sidebar
+          $('#left-sidebar a[href]').each(function(){
+            var $a = $(this);
+            var label = ($a.text() || '').trim();
+            var url = $a.attr('href');
+            if (label && url && url !== '#') {
+              index.push({ label: label, url: url, key: label.toLowerCase() });
+            }
+          });
+          // Add common shortcuts (ensure unique by url)
+          var extras = [
+            { label: 'Dashboard', url: '{{ route('cms.dashboard.index') }}' },
+            { label: 'Families', url: '{{ route('cms.family.index') }}' },
+            { label: 'Aid Programs', url: '{{ route('cms.aid-program.index') }}' },
+            { label: 'Financials', url: '{{ route('cms.financial-management.index') }}' },
+            { label: 'Surveys', url: '{{ route('cms.survey.index') }}' },
+            { label: 'Reports', url: '{{ route('cms.report.index') }}' },
+            { label: 'Volunteers', url: '{{ route('cms.volunteer.index') }}' },
+            { label: 'Settings', url: '{{ route('cms.setting.index') }}' },
+          ];
+          var seen = {};
+          index.forEach(function(i){ seen[i.url] = true; });
+          extras.forEach(function(e){ if (!seen[e.url]) { index.push({ label: e.label, url: e.url, key: e.label.toLowerCase() }); } });
+        }
+        buildIndex();
+
+        // Rebuild when sidebar changes (simple hook; can be enhanced)
+        $(document).on('cms:sidebar-updated', buildIndex);
+
+        function filterIndex(q){
+          q = q.toLowerCase();
+          if (!q) return [];
+          // simple contains + starts-with boost
+          var res = index
+            .map(function(it){
+              var pos = it.key.indexOf(q);
+              if (pos === -1) return null;
+              var score = (pos === 0 ? 0 : 1) + (it.key.length - q.length) * 0.001; // smaller is better
+              return { item: it, score: score };
+            })
+            .filter(Boolean)
+            .sort(function(a,b){ return a.score - b.score; })
+            .slice(0, 8)
+            .map(function(s){ return s.item; });
+          return res;
+        }
+
+        function render(items, activeIndex){
+          $menu.empty();
+          if (!items.length) {
+            $menu.append('<li class="dropdown-item text-muted">No results found</li>');
+          } else {
+            items.forEach(function(it, i){
+              var a = $('<a/>', { 'class': 'dropdown-item d-flex align-items-center', 'href': it.url })
+                .append($('<i class="mdi mdi-magnify mr-2"></i>'))
+                .append($('<span/>').text(it.label));
+              var li = $('<li/>').append(a);
+              if (i === activeIndex) { a.addClass('active'); }
+              $menu.append(li);
+            });
+          }
+          $menu.addClass('show').show();
+        }
+
+        var debounce;
+        var current = [];
+        var active = -1;
+        function update(){
+          var q = ($input.val() || '').trim();
+          current = filterIndex(q);
+          active = current.length ? 0 : -1;
+          render(current, active);
+        }
+
+        $input.on('focus keyup', function(e){
+          // Keyboard navigation
+          if (e.type === 'keyup') {
+            if (e.key === 'ArrowDown' && current.length) { active = (active + 1) % current.length; render(current, active); return; }
+            if (e.key === 'ArrowUp' && current.length) { active = (active - 1 + current.length) % current.length; render(current, active); return; }
+            if (e.key === 'Enter') { if (current.length) { window.location.href = current[Math.max(active,0)].url; } return; }
+            if (e.key === 'Escape') { $menu.removeClass('show').hide(); return; }
+          }
+          clearTimeout(debounce);
+          debounce = setTimeout(function(){
+            if (($input.val() || '').trim().length === 0) { $menu.removeClass('show').hide(); return; }
+            update();
+          }, 150);
+        });
+
+        $(document).on('click', function(e){
+          if (!$(e.target).closest('#input-group-search, .dropdown-menu-search').length) {
+            $menu.removeClass('show').hide();
+          }
+        });
+
+        // Quick focus with /
+        $('#search-kbd').on('click', function(){ $input.trigger('focus'); });
+        $(document).on('keydown', function(e){ if (e.key === '/' && !$(e.target).is('input,textarea')) { e.preventDefault(); $input.trigger('focus'); } });
+
+        // Ensure selecting a suggestion always navigates
+        // Use mousedown to fire before blur/document click closes the menu
+        $menu.on('mousedown', 'a.dropdown-item', function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          var url = $(this).attr('href');
+          if (url) { window.location.href = url; }
+        });
+        $menu.on('click', 'a.dropdown-item', function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          var url = $(this).attr('href');
+          if (url) { window.location.href = url; }
         });
       });
     })(jQuery);

@@ -13,7 +13,21 @@ return new class extends Migration
     {
         Schema::create('financial_management', function (Blueprint $table) {
             $table->id();
+            $table->string('transaction_code')->unique()->nullable();
+            $table->date('date');
+            $table->enum('transaction_type', ['Donation','Expense','Disbursement','Transfer']);
+            $table->enum('category', ['Zakat','Sadaqah','Project Fund','Admin Cost'])->nullable();
+            $table->enum('payment_mode', ['Cash','Bank Transfer','Easypaisa','Cheque'])->nullable();
+            $table->unsignedBigInteger('amount');
+            $table->string('donor_name')->nullable();
+            $table->foreignId('aid_program_id')->nullable()->constrained('aid_programs')->nullOnDelete();
+            $table->foreignId('family_id')->nullable()->constrained('families')->nullOnDelete();
+            $table->string('payment_proof_path')->nullable();
+            $table->foreignId('recorded_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->text('remarks')->nullable();
             $table->timestamps();
+            $table->index(['aid_program_id','family_id']);
         });
     }
 

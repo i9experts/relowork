@@ -13,6 +13,25 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
+            // Organization Information
+            $table->string('organization_name')->nullable();
+            $table->string('email_address')->nullable();
+            $table->string('phone_number', 20)->nullable();
+            $table->string('address')->nullable();
+
+            // Notification Preferences
+            $table->boolean('email_notifications')->default(true);
+            $table->boolean('push_notifications')->default(true);
+            $table->boolean('aid_approval_alerts')->default(true);
+
+            // Security Settings
+            $table->boolean('two_factor_enabled')->default(false);
+            $table->boolean('session_timeout_enabled')->default(false);
+
+            // Appearance
+            $table->enum('theme', ['Light','Dark'])->default('Light');
+            $table->enum('language', ['English','Urdu'])->default('English');
+
             $table->timestamps();
         });
     }
