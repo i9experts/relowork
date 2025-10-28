@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
         'update' => 'cms.setting.update',
         'destroy' => 'cms.setting.destroy',
     ]);
+    Route::post('setting/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
 });
 
 
