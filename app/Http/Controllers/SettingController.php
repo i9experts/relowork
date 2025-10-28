@@ -37,6 +37,8 @@ class SettingController extends Controller
             'address' => ['nullable','string','max:500'],
             'theme' => ['nullable','in:Light,Dark'],
             'language' => ['nullable','in:English,Urdu'],
+            'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+            'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
         ]);
 
         $validated['email_notifications'] = $request->boolean('email_notifications');
@@ -44,6 +46,18 @@ class SettingController extends Controller
         $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
         $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
         $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            $validated['logo_path'] = $path;
+        }
+        if ($request->hasFile('favicon')) {
+            $fpath = $request->file('favicon')->store('favicons', 'public');
+            $validated['favicon_path'] = $fpath;
+        }
+        // Remove non-persisted input key
+        unset($validated['logo'], $validated['favicon']);
 
         $settings = Setting::first();
         if ($settings) {
@@ -84,6 +98,8 @@ class SettingController extends Controller
             'address' => ['nullable','string','max:500'],
             'theme' => ['nullable','in:Light,Dark'],
             'language' => ['nullable','in:English,Urdu'],
+            'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+            'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
         ]);
 
         $validated['email_notifications'] = $request->boolean('email_notifications');
@@ -91,6 +107,19 @@ class SettingController extends Controller
         $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
         $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
         $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            $validated['logo_path'] = $path;
+        }
+        // Handle favicon upload
+        if ($request->hasFile('favicon')) {
+            $fpath = $request->file('favicon')->store('favicons', 'public');
+            $validated['favicon_path'] = $fpath;
+        }
+        // Remove non-persisted input keys
+        unset($validated['logo'], $validated['favicon']);
 
         if ($setting && $setting->exists) {
             $setting->update($validated);

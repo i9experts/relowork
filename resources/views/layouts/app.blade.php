@@ -27,7 +27,12 @@
   <!-- MONO CSS -->
   <link id="main-css-href" rel="stylesheet" href="{{ url('assets/css/style.css') }}" />
   <!-- FAVICON -->
-  <link href="{{ url('assets/images/favicon.png') }}" rel="shortcut icon" />
+  @php($__settings = optional(\App\Models\Setting::first()))
+  @if($__settings && $__settings->favicon_path)
+    <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
+  @else
+    <link href="{{ url('assets/images/favicon.png') }}" rel="shortcut icon" />
+  @endif
 
   <style>
     /* Ensure active state applies when <a> has .active too */
@@ -82,9 +87,9 @@
             <span class="sr-only">Toggle navigation</span>
           </button>
 
-          <span class="page-title">Charity Association Management</span>
+          <span class="page-title">{{ optional(\App\Models\Setting::first())->organization_name ?: 'Your Name' }}</span>
 
-          <div class="navbar-right ">
+          <div class="navbar-right">
 
             <!-- search form -->
             <div class="search-form">
@@ -93,10 +98,7 @@
                   <input type="text" autocomplete="off" name="query" id="search-input" class="form-control"
                     placeholder="Search..." />
                   <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" id="search-kbd">
-                    <i class="mdi mdi-magnify"></i>
-                  </button>
-
+                    <button class="btn" type="button" id="search-kbd">/</button>
                   </div>
                 </div>
               </form>
@@ -585,21 +587,6 @@
         // Quick focus with /
         $('#search-kbd').on('click', function(){ $input.trigger('focus'); });
         $(document).on('keydown', function(e){ if (e.key === '/' && !$(e.target).is('input,textarea')) { e.preventDefault(); $input.trigger('focus'); } });
-
-        // Ensure selecting a suggestion always navigates
-        // Use mousedown to fire before blur/document click closes the menu
-        $menu.on('mousedown', 'a.dropdown-item', function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          var url = $(this).attr('href');
-          if (url) { window.location.href = url; }
-        });
-        $menu.on('click', 'a.dropdown-item', function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          var url = $(this).attr('href');
-          if (url) { window.location.href = url; }
-        });
       });
     })(jQuery);
   </script>

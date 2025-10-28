@@ -60,6 +60,26 @@
                             @endif
                             <div class="form-row">
 
+                                <div class="col-md-6 mb-3 text-center">
+                                    <label class="d-block mb-2">Logo</label>
+                                    @if(optional($current)->logo_path)
+                                      <div class="mb-2 d-flex justify-content-center">
+                                        <img src="{{ asset('storage/'.optional($current)->logo_path) }}" alt="Logo" style="max-height:90px; max-width:100%; height:auto;">
+                                      </div>
+                                    @endif
+                                    <input type="file" class="form-control-file mx-auto d-block" name="logo" accept="image/png,image/jpeg,image/jpg,image/webp">
+                                </div>
+
+                                <div class="col-md-6 mb-3 text-center">
+                                    <label class="d-block mb-2">Favicon</label>
+                                    @if(optional($current)->favicon_path)
+                                      <div class="mb-2 d-flex justify-content-center">
+                                        <img src="{{ asset('storage/'.optional($current)->favicon_path) }}" alt="Favicon" style="max-height:64px; max-width:100%; height:auto;">
+                                      </div>
+                                    @endif
+                                    <input type="file" class="form-control-file mx-auto d-block" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/webp">
+                                </div>
+
                                 <div class="col-md-6 mb-3">
                                     <input type="text" class="form-control rounded-0 bg-light" placeholder="Enter Organization Name" name="organization_name" value="{{ old('organization_name', optional($current)->organization_name) }}">
                                 </div>

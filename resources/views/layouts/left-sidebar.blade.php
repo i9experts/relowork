@@ -3,9 +3,13 @@
   <div id="sidebar" class="sidebar sidebar-with-footer">
     <!-- Application Brand -->
     <div class="app-brand">
-      <a href="{{ route('cms.dashboard.index') }}">
-        <img src="{{ url('assets/images/logo.png') }}" alt="Charity Management">
-        <span class="brand-name">Charity</span>
+      @php($settings = optional(\App\Models\Setting::first()))
+      <a href="{{ route('cms.dashboard.index') }}" class="d-flex align-items-center">
+        @if($settings && $settings->logo_path)
+          <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" style="max-height:40px;" />
+        @else
+          <span class="brand-name mb-0">Logo</span>
+        @endif
       </a>
     </div>
 
