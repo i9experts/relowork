@@ -211,13 +211,12 @@
                                 </div>
 
                                 <!-- Appearance Section -->
-                                <div class="col-md-12 mt-3">
+                                <!-- <div class="col-md-12 mt-3">
                                     <hr>
                                     <p class="text-center fw-bold mb-3"> Appearance Section</p>
                                     <hr>
                                 </div> 
 
-                                <!-- Appearance Preferences Section -->
                                 <div class="col-md-12 mt-3">
                                     <h4 class="card-title fw-bold mb-1">Appearance Preferences</h4>
                                     <p class="text-muted mb-4">Customize how the application looks</p>
@@ -235,7 +234,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Appearance Preferences Section -->
                                 <div class="col-md-12 mt-3">
                                     <hr>
                                 </div>  
@@ -249,7 +247,7 @@
                                         <button type="button" class="btn btn-outline-secondary flex-fill mr-2" data-value="English">English</button>
                                         <button type="button" class="btn btn-outline-secondary flex-fill" data-value="Urdu">Urdu</button>
                                     </div>
-                                </div> 
+                                </div>  -->
 
 
 

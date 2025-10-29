@@ -4,9 +4,9 @@
     <!-- Application Brand -->
     <div class="app-brand">
       @php($settings = optional(\App\Models\Setting::first()))
-      <a href="{{ route('cms.dashboard.index') }}" class="d-flex align-items-center">
+      <a href="{{ route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
         @if($settings && $settings->logo_path)
-          <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" style="max-height:40px;" />
+          <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" class="brand-logo" />
         @else
           <span class="brand-name mb-0">Logo</span>
         @endif

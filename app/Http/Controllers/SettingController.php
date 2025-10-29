@@ -35,8 +35,8 @@ class SettingController extends Controller
             'email_address' => ['nullable','string','max:255'],
             'phone_number' => ['nullable','string','max:50'],
             'address' => ['nullable','string','max:500'],
-            'theme' => ['nullable','in:Light,Dark'],
-            'language' => ['nullable','in:English,Urdu'],
+            // 'theme' => ['nullable','in:Light,Dark'],
+            // 'language' => ['nullable','in:English,Urdu'],
             'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
             'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
         ]);
@@ -96,8 +96,8 @@ class SettingController extends Controller
             'email_address' => ['nullable','string','max:255'],
             'phone_number' => ['nullable','string','max:50'],
             'address' => ['nullable','string','max:500'],
-            'theme' => ['nullable','in:Light,Dark'],
-            'language' => ['nullable','in:English,Urdu'],
+            // 'theme' => ['nullable','in:Light,Dark'],
+            // 'language' => ['nullable','in:English,Urdu'],
             'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
             'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
         ]);

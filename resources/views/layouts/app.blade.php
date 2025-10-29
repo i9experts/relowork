@@ -42,6 +42,26 @@
       color: #ffffff;
       background-color: rgba(158, 109, 224, 0.4);
     }
+
+    /* Sidebar brand logo - professional, responsive, and centered */
+    .app-brand a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px;
+    }
+    .app-brand .brand-logo {
+      display: block;
+      max-height: 140px; /* default size in expanded state */
+      max-width: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain; /* keep aspect ratio, no cropping */
+    }
+    /* Collapsed/minified state: smaller but crisp */
+    .sidebar-minified .app-brand .brand-logo {
+      max-height: 56px;
+    }
   </style>
 
   <!--
