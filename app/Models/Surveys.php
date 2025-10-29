@@ -6,5 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Surveys extends Model
 {
-    //
+    public function family()
+    {
+        return $this->belongsTo(Family::class);
+    }
+
+    public function enumerator()
+    {
+        return $this->belongsTo(Volunteer::class, 'enumerator_id');
+    }
+
+    public function members()
+    {
+        return $this->hasMany(SurveyMember::class, 'survey_id');
+    }
+
+    public function needs()
+    {
+        return $this->hasMany(SurveyNeed::class, 'survey_id');
+    }
+
+    public function assets()
+    {
+        return $this->hasMany(SurveyAsset::class, 'survey_id');
+    }
+
+    public function uploads()
+    {
+        return $this->hasMany(SurveyUpload::class, 'survey_id');
+    }
+
+    public function outcomes()
+    {
+        return $this->hasMany(SurveyOutcome::class, 'survey_id');
+    }
 }

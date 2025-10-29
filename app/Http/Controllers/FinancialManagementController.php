@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FinancialManagement;
+use App\Models\Volunteer;
 use Illuminate\Http\Request;
 
 class FinancialManagementController extends Controller
@@ -12,7 +13,8 @@ class FinancialManagementController extends Controller
      */
     public function index()
     {
-        return view('financial-management.financial-management-list');
+        $volunteers = Volunteer::latest()->paginate(10);
+        return view('financial-management.financial-management-list', compact('volunteers'));
     }
 
     /**

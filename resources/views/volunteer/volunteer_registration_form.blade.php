@@ -36,7 +36,8 @@
 
         <div class="row">
           <div class="col-md-12">
-            <form method="POST" action="" enctype="multipart/form-data">
+            @include('partials.errors')
+            <form method="POST" action="{{ route('cms.volunteer.store') }}" enctype="multipart/form-data">
               @csrf
               <div class="form-row">
 
@@ -73,13 +74,18 @@
                     <label for="gender" class="d-block mb-2">Gender :</label>
 
                     <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
-                        <input type="radio" id="genderMale" name="gender" class="custom-control-input" checked>
+                        <input type="radio" id="genderMale" name="gender" value="Male" class="custom-control-input" {{ old('gender','Male')=='Male' ? 'checked' : '' }}>
                         <label class="custom-control-label" for="genderMale">Male</label>
                     </div>
 
                     <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
-                        <input type="radio" id="genderFemale" name="gender" class="custom-control-input">
+                        <input type="radio" id="genderFemale" name="gender" value="Female" class="custom-control-input" {{ old('gender')=='Female' ? 'checked' : '' }}>
                         <label class="custom-control-label" for="genderFemale">Female</label>
+                    </div>
+
+                    <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
+                        <input type="radio" id="genderOther" name="gender" value="Other" class="custom-control-input" {{ old('gender')=='Other' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="genderOther">Other</label>
                     </div>
 
                 </div>

@@ -19,17 +19,20 @@ class DatabaseSeeder extends Seeder
         // Seed default roles
         $roles = [
             ['name' => 'Admin', 'slug' => 'admin', 'description' => 'System Administrator', 'is_system' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Volunteer', 'slug' => 'volunteer', 'description' => 'Volunteer User', 'is_system' => true, 'created_at' => now(), 'updated_at' => now()],
         ];
         foreach ($roles as $role) {
             DB::table('roles')->updateOrInsert(['slug' => $role['slug']], $role);
         }
 
-        // Create a test admin user
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create/update only the Admin user (volunteers will be created by Admin later)
+        $user = User::query()->updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Administrator',
+                // Laravel 12 will hash via casts on the User model
+                'password' => 'password',
+            ]
+        );
 
         // Attach Admin role to test user
         $adminRoleId = DB::table('roles')->where('slug', 'admin')->value('id');

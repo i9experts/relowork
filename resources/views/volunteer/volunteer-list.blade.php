@@ -48,8 +48,8 @@
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
                 <span class="h5 d-block mb-0">Total Volunteers</span>
-                <p class="mb-1">5</p>
-                <small class="text-muted">+3 new this month</small>
+                <p class="mb-1">{{ number_format($totalVolunteers) }}</p>
+                <small class="text-muted">Active this month: {{ number_format($activeThisMonth) }}</small>
                 </div>
                 <div class="bg-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px; height:50px;">
                 <i class="mdi mdi-account-multiple text-white fs-4" style="font-size:26px;"></i> <!-- Volunteer Group -->
@@ -64,8 +64,8 @@
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
                 <span class="h5 d-block mb-0">Active This Month</span>
-                <p class="mb-1">5</p>
-                <small class="text-muted">100% participation</small>
+                <p class="mb-1">{{ number_format($activeThisMonth) }}</p>
+                <small class="text-muted">Participation</small>
                 </div>
                 <div class="bg-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px; height:50px;">
                 <i class="mdi mdi-check-circle-outline text-white fs-4" style="font-size:26px;"></i> <!-- Active -->
@@ -80,7 +80,7 @@
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
                 <span class="h5 d-block mb-0">Total Hours</span>
-                <p class="mb-1">178</p>
+                <p class="mb-1">{{ number_format($totalHours) }}</p>
                 <small class="text-muted">This month</small>
                 </div>
                 <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px; height:50px;">
@@ -96,7 +96,7 @@
             <div class="d-flex justify-content-between align-items-center p-4">
                 <div class="text-left">
                 <span class="h5 d-block mb-0">Avg Hours/Volunteer</span>
-                <p class="mb-1">35.6</p>
+                <p class="mb-1">{{ number_format($avgHours, 1) }}</p>
                 <small class="text-muted">Per volunteer</small>
                 </div>
                 <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:50px; height:50px;">
@@ -118,17 +118,21 @@
                             class="table table-striped table-bordered nowrap w-100"
                             cellspacing="0" width="100%">
                             <tbody id="tbl_data">
+                                @forelse($topVolunteers as $v)
                                 <tr>
                                     <td>
                                         <div class="d-flex justify-content-between">
-                                            <span class="fw-semibold text-dark">Ahmed Mohammed</span>
-                                            <small class="text-muted">45 hours</small>
+                                            <span class="fw-semibold text-dark">{{ $v->full_name }}</span>
+                                            <small class="text-muted">Joined: {{ optional($v->joining_date)->format('Y-m-d') }}</small>
                                         </div>
                                         <div>
-                                            <small class="text-primary">850 points • Gold</small>
+                                            <small class="text-primary">Last update • {{ optional($v->updated_at)->diffForHumans() }}</small>
                                         </div>
                                     </td>
                                 </tr>
+                                @empty
+                                <tr><td class="text-muted">No data</td></tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -145,17 +149,21 @@
                             class="table table-striped table-bordered nowrap w-100"
                             cellspacing="0" width="100%">
                             <tbody id="tbl_data">
+                                @forelse($recentActivity as $v)
                                 <tr>
                                     <td>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="fw-semibold text-dark">Ahmed Mohammed</span>
-                                            <small class="text-muted">4h</small>
+        							<div class="d-flex justify-content-between">
+                                            <span class="fw-semibold text-dark">{{ $v->full_name }}</span>
+                                            <small class="text-muted">{{ optional($v->updated_at)->diffForHumans() }}</small>
                                         </div>
                                         <div>
-                                            <small class="text-primary">Food distribution - District 12 • 2024-10-13</small>
+                                            <small class="text-primary">Last updated • {{ optional($v->updated_at)->format('Y-m-d H:i') }}</small>
                                         </div>
                                     </td>
                                 </tr>
+                                @empty
+                                <tr><td class="text-muted">No recent activity</td></tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -163,6 +171,80 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Total Volunteers List -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-body">
+                    <!-- Example single secondary button -->
+                    <div class="dropdown d-inline-block mb-1">
+                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButtonTop" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" data-display="static">
+                        Secondary
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonTop">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                      </div>
+                    </div>
+
+                    <table id="productsTable" class="table table-hover table-product" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>S.no</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @php $sn = method_exists($volunteers,'firstItem') ? $volunteers->firstItem() : 1; @endphp
+                        @forelse($volunteers as $vol)
+                            <tr>
+                                <td>{{ $sn++ }}</td>
+                                <td>{{ optional($vol->joining_date)->format('Y-m-d') }}</td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ $vol->full_name }}</div>
+                                    <small class="text-muted">{{ $vol->email }} • {{ $vol->contact_number }}</small>
+                                </td>
+                                <td>{{ $vol->availability ?? '—' }}</td>
+                                <td>—</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                      <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton{{ $vol->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
+                                        Actions
+                                      </button>
+                                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $vol->id }}">
+                                        <a class="dropdown-item" href="{{ route('cms.volunteer.show', $vol->id) }}">View</a>
+                                        <a class="dropdown-item" href="{{ route('cms.volunteer.edit', $vol->id) }}">Edit</a>
+                                        <form action="{{ route('cms.volunteer.destroy', $vol->id) }}" method="POST" onsubmit="return confirm('Delete this volunteer?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                        </form>
+                                      </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-muted">No volunteers found</td>
+                            </tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+
+                    <div class="mt-2">{{ method_exists($volunteers,'links') ? $volunteers->links() : '' }}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
   </div>
