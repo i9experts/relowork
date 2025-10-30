@@ -178,20 +178,7 @@
         <div class="col-12">
             <div class="card card-default">
                 <div class="card-body">
-                    <!-- Example single secondary button -->
-                    <div class="dropdown d-inline-block mb-1">
-                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButtonTop" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" data-display="static">
-                        Secondary
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonTop">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                      </div>
-                    </div>
-
-                    <table id="productsTable" class="table table-hover table-product" style="width:100%">
+                    <table id="productsTable" class="table table-product" style="width:100%">
                         <thead>
                         <tr>
                             <th>S.no</th>
@@ -204,7 +191,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @php $sn = method_exists($volunteers,'firstItem') ? $volunteers->firstItem() : 1; @endphp
+                        @php $sn = 1 @endphp
                         @forelse($volunteers as $vol)
                             <tr>
                                 <td>{{ $sn++ }}</td>
@@ -215,7 +202,12 @@
                                 </td>
                                 <td>{{ $vol->availability ?? '—' }}</td>
                                 <td>—</td>
-                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    @php
+                                        $isActive = ($vol->status ?? 'Active') === 'Active';
+                                    @endphp
+                                    <span class="badge {{ $isActive ? 'badge-success' : 'badge-light' }}">{{ $isActive ? 'Active' : 'Inactive' }}</span>
+                                </td>
                                 <td>
                                     <div class="dropdown">
                                       <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton{{ $vol->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
@@ -237,6 +229,7 @@
                             <tr>
                                 <td colspan="7" class="text-muted">No volunteers found</td>
                             </tr>
+                        @php $sn++ @endphp
                         @endforelse
                         </tbody>
                     </table>

@@ -16,9 +16,9 @@ class VolunteerController extends Controller
     public function index()
     {
         $totalVolunteers = Volunteer::count();
-        $activeThisMonth = Volunteer::whereNotNull('joining_date')
-            ->whereMonth('joining_date', now()->month)
-            ->whereYear('joining_date', now()->year)
+        $activeThisMonth = Volunteer::where('status', 'Active')
+            ->whereMonth('updated_at', now()->month)
+            ->whereYear('updated_at', now()->year)
             ->count();
 
         $topVolunteers = Volunteer::orderByDesc('joining_date')
@@ -132,6 +132,7 @@ class VolunteerController extends Controller
                 'joining_date' => $validated['joining_date'] ?? null,
                 'picture_path' => $picturePath,
                 'remarks' => $validated['remarks'] ?? null,
+                'status' => 'Active',
             ]);
         });
 
@@ -143,7 +144,7 @@ class VolunteerController extends Controller
      */
     public function show(Volunteer $volunteer)
     {
-        //
+        return view('volunteer.view-user-profile', compact('volunteer'));
     }
 
     /**
@@ -151,7 +152,7 @@ class VolunteerController extends Controller
      */
     public function edit(Volunteer $volunteer)
     {
-        //
+        return view('volunteer.volunteer_registration_edit_form', compact('volunteer'));
     }
 
     /**
@@ -159,7 +160,72 @@ class VolunteerController extends Controller
      */
     public function update(Request $request, Volunteer $volunteer)
     {
-        //
+        $validated = $request->validate([
+            'full_name' => ['nullable','string','max:255'],
+            'email' => ['nullable','email','max:255','unique:users,email,' . ($volunteer->user_id ?? 'NULL')],
+            'contact_number' => ['nullable','string','max:20'],
+            'cnic' => ['nullable','string','max:15'],
+            'gender' => ['nullable','in:Male,Female,Other'],
+            'dob' => ['nullable','date'],
+            'address' => ['nullable','string','max:255'],
+            'education_level' => ['nullable','in:Matric,Intermediate,Graduate,Post-Graduate'],
+            'skills' => ['nullable','string'],
+            'languages' => ['nullable','string','max:255'],
+            'availability' => ['nullable','in:Full-time,Part-time,Event-based'],
+            'preferred_projects' => ['nullable','array'],
+            'preferred_projects.*' => ['string'],
+            'emergency_contact' => ['nullable','string','max:20'],
+            'role' => ['nullable','in:Field Volunteer,Data Verifier,Supervisor'],
+            'joining_date' => ['nullable','date'],
+            'picture' => ['nullable','image','max:2048'],
+            'remarks' => ['nullable','string'],
+            'status' => ['required','in:Active,Inactive'],
+        ]);
+
+        $picturePath = $volunteer->picture_path;
+        if ($request->hasFile('picture')) {
+            $path = $request->file('picture')->store('volunteers', 'public');
+            $picturePath = 'storage/'.$path;
+        }
+
+        DB::transaction(function () use ($validated, $volunteer, $picturePath) {
+            // Update linked user name/email if provided
+            if ($volunteer->user) {
+                $userUpdates = [];
+                if (!empty($validated['full_name'])) {
+                    $userUpdates['name'] = $validated['full_name'];
+                }
+                if (!empty($validated['email'])) {
+                    $userUpdates['email'] = $validated['email'];
+                }
+                if (!empty($userUpdates)) {
+                    $volunteer->user->update($userUpdates);
+                }
+            }
+
+            $volunteer->update([
+                'full_name' => $validated['full_name'] ?? $volunteer->full_name,
+                'email' => $validated['email'] ?? $volunteer->email,
+                'contact_number' => $validated['contact_number'] ?? $volunteer->contact_number,
+                'cnic' => $validated['cnic'] ?? $volunteer->cnic,
+                'gender' => $validated['gender'] ?? $volunteer->gender,
+                'dob' => $validated['dob'] ?? $volunteer->dob,
+                'address' => $validated['address'] ?? $volunteer->address,
+                'education_level' => $validated['education_level'] ?? $volunteer->education_level,
+                'skills' => $validated['skills'] ?? $volunteer->skills,
+                'languages' => $validated['languages'] ?? $volunteer->languages,
+                'availability' => $validated['availability'] ?? $volunteer->availability,
+                'preferred_projects' => $validated['preferred_projects'] ?? $volunteer->preferred_projects,
+                'emergency_contact' => $validated['emergency_contact'] ?? $volunteer->emergency_contact,
+                'role' => $validated['role'] ?? $volunteer->role,
+                'joining_date' => $validated['joining_date'] ?? $volunteer->joining_date,
+                'picture_path' => $picturePath,
+                'remarks' => $validated['remarks'] ?? $volunteer->remarks,
+                'status' => $validated['status'],
+            ]);
+        });
+
+        return redirect()->route('cms.volunteer.index')->with('success', 'Volunteer updated successfully.');
     }
 
     /**
@@ -167,6 +233,13 @@ class VolunteerController extends Controller
      */
     public function destroy(Volunteer $volunteer)
     {
-        //
+        DB::transaction(function () use ($volunteer) {
+            if (method_exists($volunteer, 'aidPrograms')) {
+                $volunteer->aidPrograms()->detach();
+            }
+            $volunteer->delete();
+        });
+
+        return redirect()->route('cms.volunteer.index')->with('warning', 'Volunteer deleted successfully.');
     }
 }

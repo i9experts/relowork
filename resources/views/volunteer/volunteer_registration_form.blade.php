@@ -5,8 +5,8 @@
 @push('page-styles')
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
 <style>
-  /* Make all cards in the same row equal height */
-  .row > [class*='col-'] {
+  /* Make cards equal height only when explicitly opted-in */
+  .row.equal-height > [class*='col-'] {
     display: flex;
   }
   .card {
@@ -36,7 +36,9 @@
 
         <div class="row">
           <div class="col-md-12">
-            @include('partials.errors')
+            <div class="w-100 mb-3">
+              @include('partials.errors')
+            </div>
             <form method="POST" action="{{ route('cms.volunteer.store') }}" enctype="multipart/form-data">
               @csrf
               <div class="form-row">

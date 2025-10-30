@@ -615,16 +615,47 @@
     (function($){
       $(function(){
         try {
-          var pageTitle = @json(trim($__env->yieldContent('title')));
-          if (pageTitle && window.toastr) {
+          // Only show welcome toast on Dashboard
+          var onDashboard = @json(request()->routeIs('cms.dashboard.index'));
+          if (!onDashboard) return;
+
+          if (window.toastr) {
+            var orgName = @json(optional(\App\Models\Setting::first())->organization_name ?: 'Organization');
+            var userName = @json(optional(auth()->user())->name ?: 'User');
             toastr.options = {
               closeButton: true,
               progressBar: true,
               positionClass: 'toast-top-right',
               timeOut: 3000
             };
-            toastr.success('Welcome to ' + pageTitle);
+            toastr.success('Welcome to ' + orgName + ', ' + userName + '!');
           }
+        } catch (e) { /* no-op */ }
+      });
+    })(jQuery);
+  </script>
+
+  <script>
+    (function($){
+      $(function(){
+        try {
+          if (!window.toastr) return;
+          toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: 3000
+          };
+          var flash = {
+            success: @json(session('success')),
+            warning: @json(session('warning')),
+            error: @json(session('error')),
+            info: @json(session('info'))
+          };
+          if (flash.success) { toastr.success(flash.success); }
+          if (flash.warning) { toastr.warning(flash.warning); }
+          if (flash.error) { toastr.error(flash.error); }
+          if (flash.info) { toastr.info(flash.info); }
         } catch (e) { /* no-op */ }
       });
     })(jQuery);
