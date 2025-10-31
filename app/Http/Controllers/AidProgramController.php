@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Family;
+use App\Models\Volunteer;
 use App\Models\AidProgram;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AidProgramController extends Controller
 {
@@ -12,7 +16,22 @@ class AidProgramController extends Controller
      */
     public function index()
     {
-        return view('aid-program.aid-program-list');
+        $status = request('status');
+        $query = AidProgram::withCount(['families','volunteers','attachments'])
+            ->withSum(['transactions as disbursed_amount' => function ($q) {
+                $q->where('transaction_type', 'Disbursement');
+            }], 'amount');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $data['programs'] = $query->orderBy('id','desc')->get();
+        $data['active_programs'] = AidProgram::where('status','Active')->count();
+        $data['total_budget_active'] = AidProgram::where('status','Active')->sum('total_budget');
+        $data['beneficiaries_total'] = AidProgram::sum('target_beneficiaries');
+        $data['current_status'] = $status;
+        return view('aid-program.aid-program-list')->with($data);
     }
 
     /**
@@ -20,7 +39,9 @@ class AidProgramController extends Controller
      */
     public function create()
     {
-        return view('aid-program.aid_program_form');
+        $data['volunteers'] = Volunteer::get();
+        $data['families'] = Family::select('id','family_code','head_of_family_name')->orderBy('id','desc')->get();
+        return view('aid-program.aid_program_form')->with($data);
     }
 
     /**
@@ -28,7 +49,69 @@ class AidProgramController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'program_title' => ['required','string','max:255'],
+            'program_type' => ['nullable','in:Food,Education,Water,Medical,Housing,Emergency'],
+            'description' => ['nullable','string'],
+            'start_date' => ['nullable','date'],
+            'end_date' => ['nullable','date','after_or_equal:start_date'],
+            'location' => ['nullable','string','max:255'],
+            'target_beneficiaries' => ['nullable','integer','min:0'],
+            'status' => ['nullable','in:Planned,Active,Completed,On Hold'],
+            'total_budget' => ['nullable','integer','min:0'],
+            'fund_source' => ['nullable','in:Zakat,Sadaqah,General Donation,Grant'],
+            'monitoring_frequency' => ['nullable','in:Weekly,Monthly,Quarterly'],
+            'progress_notes' => ['nullable','string'],
+            'volunteer_id' => ['nullable','exists:volunteers,id'],
+            'families' => ['nullable','array'],
+            'families.*' => ['integer','exists:families,id'],
+            'attachments.*' => ['file','max:5120'],
+        ]);
+
+        $programCode = 'PRG-' . str_pad((string)((AidProgram::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+
+        DB::transaction(function () use ($validated, $request, $programCode) {
+            $program = AidProgram::create([
+                'program_code' => $programCode,
+                'program_title' => $validated['program_title'],
+                'program_type' => $validated['program_type'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
+                'location' => $validated['location'] ?? null,
+                'target_beneficiaries' => $validated['target_beneficiaries'] ?? null,
+                'status' => $validated['status'] ?? 'Planned',
+                'total_budget' => $validated['total_budget'] ?? null,
+                'fund_source' => $validated['fund_source'] ?? null,
+                'monitoring_frequency' => $validated['monitoring_frequency'] ?? null,
+                'progress_notes' => $validated['progress_notes'] ?? null,
+            ]);
+
+            // attach single volunteer if provided via pivot table
+            if (!empty($validated['volunteer_id'])) {
+                $program->volunteers()->syncWithoutDetaching([$validated['volunteer_id']]);
+            }
+
+            // attach families via pivot
+            if (!empty($validated['families'])) {
+                $program->families()->sync($validated['families']);
+            }
+
+            // handle attachments
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if (!$file->isValid()) { continue; }
+                    $path = $file->store('public/aid_attachments');
+                    $program->attachments()->create([
+                        'type' => $file->getClientMimeType(),
+                        'path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('cms.aid-program.index')->with('success', 'Aid program created successfully!');
     }
 
     /**

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AidProgram extends Model
 {
+    protected $guarded = [];
     public function families()
     {
         return $this->belongsToMany(Family::class, 'aid_program_family');
