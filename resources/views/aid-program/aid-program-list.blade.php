@@ -47,7 +47,7 @@
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
-                        <span class="h5 d-block mb-0">Active prog</span>
+                        <span class="h5 d-block mb-0">Active Program</span>
                         <p class="mb-1">{{ $active_programs ?? 0 }}</p>
                         <small class="text-muted">Currently running</small>
                     </div>
@@ -116,14 +116,14 @@
               <a href="{{ route('cms.aid-program.index', ['status' => 'Active']) }}" class="btn {{ $st==='Active' ? 'btn-primary' : 'btn-outline-primary' }} btn-lg px-4 fw-semibold">Active</a>
               <a href="{{ route('cms.aid-program.index', ['status' => 'Completed']) }}" class="btn {{ $st==='Completed' ? 'btn-primary' : 'btn-outline-primary' }} btn-lg px-4 fw-semibold">Completed</a>
               <a href="{{ route('cms.aid-program.index', ['status' => 'On Hold']) }}" class="btn {{ $st==='On Hold' ? 'btn-primary' : 'btn-outline-primary' }} btn-lg px-4 fw-semibold">On Hold</a>
-              <a href="{{ route('cms.aid-program.index') }}" class="btn {{ $st ? 'btn-outline-secondary' : 'btn-secondary' }} btn-lg px-4 fw-semibold">All</a>
+              <a href="{{ route('cms.aid-program.index') }}" class="btn {{ $st ? 'btn-outline-primary' : 'btn-primary' }} btn-lg px-4 fw-semibold">All</a>
             </div>
         </div>
     </div>
 
     <div class="row mb-5">
         @forelse($programs as $program)
-        <div class="col-lg-6 col-xl-6">
+        <div class="col-lg-6 col-xl-6 mb-3">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
 
@@ -144,9 +144,9 @@
                 <p class="text-muted mb-2 fw-semibold">{{ $program->program_code }} &nbsp;·&nbsp; {{ $program->start_date ?? '—' }} — {{ $program->end_date ?? '—' }}</p>
 
                 @php
-                  $budget = (int)($program->total_budget ?? 0);
-                  $disbursed = (int)($program->disbursed_amount ?? 0);
-                  $pct = $budget > 0 ? min(100, (int) round(($disbursed / $budget) * 100)) : 0;
+                  $budget = (float)($program->total_budget ?? 0);
+                  $disbursed = (float)($program->disbursed_amount ?? 0);
+                  $pct = $budget > 0 ? max(0, min(100, (int) round(($disbursed / $budget) * 100))) : 0;
                 @endphp
                 <div class="progress mb-3">
                     <div class="progress-bar" role="progressbar" style="width: {{ $pct }}%" aria-valuenow="{{ $pct }}" aria-valuemin="0"
@@ -177,7 +177,7 @@
                     </div>
                 </div>
 
-                <a href="#" class="btn btn-outline-primary w-100 mt-3">View Details</a>
+                <a href="{{ route('cms.aid-program.show', $program->id) }}" class="btn btn-outline-primary w-100 mt-3">View Details</a>
 
                 </div>
             </div>
@@ -188,7 +188,6 @@
           </div>
         @endforelse
     </div>
-
   </div>
 </div>
 @endsection

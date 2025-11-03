@@ -101,7 +101,7 @@ class AidProgramController extends Controller
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
                     if (!$file->isValid()) { continue; }
-                    $path = $file->store('public/aid_attachments');
+                    $path = $file->store('aid_attachments', 'public');
                     $program->attachments()->create([
                         'type' => $file->getClientMimeType(),
                         'path' => $path,
@@ -119,7 +119,14 @@ class AidProgramController extends Controller
      */
     public function show(AidProgram $aidProgram)
     {
-        //
+        $aidProgram->loadCount(['families','volunteers','attachments'])
+            ->load(['families:id,family_code,head_of_family_name', 'volunteers:id,full_name', 'attachments']);
+
+        $aidProgram->loadSum(['transactions as disbursed_amount' => function ($q) {
+            $q->where('transaction_type', 'Disbursement');
+        }], 'amount');
+
+        return view('aid-program.aid-program-show', compact('aidProgram'));
     }
 
     /**
@@ -127,7 +134,11 @@ class AidProgramController extends Controller
      */
     public function edit(AidProgram $aidProgram)
     {
-        //
+        $volunteers = Volunteer::get();
+        $families = Family::select('id','family_code','head_of_family_name')->orderBy('id','desc')->get();
+        // Preload relationships used by the form for defaults
+        $aidProgram->load(['families:id', 'volunteers:id']);
+        return view('aid-program.aid_program_form', compact('aidProgram','volunteers','families'));
     }
 
     /**
@@ -135,7 +146,64 @@ class AidProgramController extends Controller
      */
     public function update(Request $request, AidProgram $aidProgram)
     {
-        //
+        $validated = $request->validate([
+            'program_title' => ['required','string','max:255'],
+            'program_type' => ['nullable','in:Food,Education,Water,Medical,Housing,Emergency'],
+            'description' => ['nullable','string'],
+            'start_date' => ['nullable','date'],
+            'end_date' => ['nullable','date','after_or_equal:start_date'],
+            'location' => ['nullable','string','max:255'],
+            'target_beneficiaries' => ['nullable','integer','min:0'],
+            'status' => ['nullable','in:Planned,Active,Completed,On Hold'],
+            'total_budget' => ['nullable','integer','min:0'],
+            'fund_source' => ['nullable','in:Zakat,Sadaqah,General Donation,Grant'],
+            'monitoring_frequency' => ['nullable','in:Weekly,Monthly,Quarterly'],
+            'progress_notes' => ['nullable','string'],
+            'volunteer_id' => ['nullable','exists:volunteers,id'],
+            'families' => ['nullable','array'],
+            'families.*' => ['integer','exists:families,id'],
+            'attachments.*' => ['file','max:5120'],
+        ]);
+
+        DB::transaction(function () use ($validated, $request, $aidProgram) {
+            $aidProgram->update([
+                'program_title' => $validated['program_title'],
+                'program_type' => $validated['program_type'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
+                'location' => $validated['location'] ?? null,
+                'target_beneficiaries' => $validated['target_beneficiaries'] ?? null,
+                'status' => $validated['status'] ?? $aidProgram->status,
+                'total_budget' => $validated['total_budget'] ?? null,
+                'fund_source' => $validated['fund_source'] ?? null,
+                'monitoring_frequency' => $validated['monitoring_frequency'] ?? null,
+                'progress_notes' => $validated['progress_notes'] ?? null,
+                'volunteer_id' => $validated['volunteer_id'] ?? null,
+            ]);
+
+            if (!empty($validated['volunteer_id'])) {
+                $aidProgram->volunteers()->syncWithoutDetaching([$validated['volunteer_id']]);
+            }
+
+            if (array_key_exists('families', $validated)) {
+                $aidProgram->families()->sync($validated['families'] ?? []);
+            }
+
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    if (!$file->isValid()) { continue; }
+                    $path = $file->store('aid_attachments', 'public');
+                    $aidProgram->attachments()->create([
+                        'type' => $file->getClientMimeType(),
+                        'path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('cms.aid-program.show', $aidProgram->id)->with('success', 'Aid program updated successfully!');
     }
 
     /**
@@ -143,6 +211,32 @@ class AidProgramController extends Controller
      */
     public function destroy(AidProgram $aidProgram)
     {
-        //
+        DB::transaction(function () use ($aidProgram) {
+            // Detach relationships
+            if (method_exists($aidProgram, 'families')) {
+                $aidProgram->families()->detach();
+            }
+            if (method_exists($aidProgram, 'volunteers')) {
+                $aidProgram->volunteers()->detach();
+            }
+            // Delete attachments (including files if present)
+            if (method_exists($aidProgram, 'attachments')) {
+                foreach ($aidProgram->attachments as $att) {
+                    if (!empty($att->path)) {
+                        $p = $att->path;
+                        if (function_exists('str_starts_with') && str_starts_with($p, 'public/')) {
+                            $p = substr($p, 7);
+                        }
+                        Storage::disk('public')->delete($p);
+                        // fallback in case older records used full 'public/...'
+                        Storage::delete($att->path);
+                    }
+                    $att->delete();
+                }
+            }
+            $aidProgram->delete();
+        });
+
+        return redirect()->route('cms.aid-program.index')->with('warning', 'Aid program deleted successfully.');
     }
 }
