@@ -33,25 +33,25 @@
 
             <div class="row">
               <div class="col-md-12">
-                <form method="POST" action="" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('cms.financial-management.store') }}" enctype="multipart/form-data">
                   @csrf
                   <div class="form-row">
 
                     <!-- Date -->
                     <div class="col-md-6 mb-3">
                       <label for="date">Date</label>
-                      <input type="date" class="form-control rounded-0 bg-light" id="date" name="date">
+                      <input type="date" class="form-control rounded-0 bg-light" id="date" name="date" value="{{ old('date') }}">
                     </div>
 
                     <!-- Transaction Type -->
                     <div class="col-md-6 mb-3">
                       <label for="transaction_type">Transaction Type</label>
                       <select class="form-control rounded-0 bg-light select2" id="transaction_type" name="transaction_type" style="width: 100%;">
-                        <option selected disabled>Select Transaction Type</option>
-                        <option value="Donation">Donation</option>
-                        <option value="Expense">Expense</option>
-                        <option value="Disbursement">Disbursement</option>
-                        <option value="Transfer">Transfer</option>
+                        <option>Select Transaction Type</option>
+                        <option value="Donation" {{ old('transaction_type')=='Donation'?'selected':'' }}>Donation</option>
+                        <option value="Expense" {{ old('transaction_type')=='Expense'?'selected':'' }}>Expense</option>
+                        <option value="Disbursement" {{ old('transaction_type')=='Disbursement'?'selected':'' }}>Disbursement</option>
+                        <option value="Transfer" {{ old('transaction_type')=='Transfer'?'selected':'' }}>Transfer</option>
                       </select>
                     </div>
 
@@ -59,11 +59,10 @@
                     <div class="col-md-6 mb-3">
                       <label for="category">Category</label>
                       <select class="form-control rounded-0 bg-light select2" id="category" name="category" style="width: 100%;">
-                        <option selected disabled>Select Category</option>
-                        <option value="Zakat">Zakat</option>
-                        <option value="Sadaqah">Sadaqah</option>
-                        <option value="Project Fund">Project Fund</option>
-                        <option value="Admin Cost">Admin Cost</option>
+                        <option>Select Category</option>
+                        @foreach($categories as $category)
+                          <option value="{{ $category }}" {{ old('category')==$category?'selected':'' }}>{{ $category }}</option>
+                        @endforeach
                       </select>
                     </div>
 
@@ -71,46 +70,45 @@
                     <div class="col-md-6 mb-3">
                       <label for="payment_mode">Mode of Payment</label>
                       <select class="form-control rounded-0 bg-light select2" id="payment_mode" name="payment_mode" style="width: 100%;">
-                        <option selected disabled>Select Mode of Payment</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Easypaisa">Easypaisa</option>
-                        <option value="Cheque">Cheque</option>
+                        <option>Select Mode of Payment</option>
+                        <option value="Cash" {{ old('payment_mode')=='Cash'?'selected':'' }}>Cash</option>
+                        <option value="Bank Transfer" {{ old('payment_mode')=='Bank Transfer'?'selected':'' }}>Bank Transfer</option>
+                        <option value="Easypaisa" {{ old('payment_mode')=='Easypaisa'?'selected':'' }}>Easypaisa</option>
+                        <option value="Cheque" {{ old('payment_mode')=='Cheque'?'selected':'' }}>Cheque</option>
                       </select>
                     </div>
 
                     <!-- Amount -->
                     <div class="col-md-6 mb-3">
                       <label for="amount">Amount (PKR)</label>
-                      <input type="number" class="form-control rounded-0 bg-light" id="amount" name="amount" placeholder="10000">
+                      <input type="number" class="form-control rounded-0 bg-light" id="amount" name="amount" placeholder="10000" value="{{ old('amount') }}" min="1">
                     </div>
 
                     <!-- Donor Name -->
                     <div class="col-md-6 mb-3">
                       <label for="donor_name">Donor Name</label>
-                      <input type="text" class="form-control rounded-0 bg-light" id="donor_name" name="donor_name" placeholder="e.g., Mr. Abdul Wahab">
+                      <input type="text" class="form-control rounded-0 bg-light" id="donor_name" name="donor_name" placeholder="e.g., Mr. Abdul Wahab" value="{{ old('donor_name') }}">
                     </div>
 
                     <!-- Project / Program Linked -->
                     <div class="col-md-6 mb-3">
-                      <label for="project_linked">Project / Program Linked</label>
-                      <select class="form-control rounded-0 bg-light select2" id="project_linked" name="project_linked" style="width: 100%;">
-                        <option selected disabled>Select Project / Program</option>
-                        <option value="Education">Education Program</option>
-                        <option value="Food">Food Distribution</option>
-                        <option value="Medical">Medical Camp</option>
-                        <option value="Ramadan">Ramadan Relief</option>
+                      <label for="aid_program_id">Project / Program Linked</label>
+                      <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;">
+                        <option>Select Project / Program</option>
+                        @foreach($programs as $p)
+                          <option value="{{ $p->id }}" {{ old('aid_program_id')==$p->id?'selected':'' }}>{{ $p->program_title }}</option>
+                        @endforeach
                       </select>
                     </div>
 
                     <!-- Beneficiary Family Linked -->
                     <div class="col-md-6 mb-3">
-                      <label for="beneficiary_linked">Beneficiary Family Linked</label>
-                      <select class="form-control rounded-0 bg-light select2" id="beneficiary_linked" name="beneficiary_linked" style="width: 100%;">
-                        <option selected disabled>Select Family</option>
-                        <option value="Family 001">Family 001</option>
-                        <option value="Family 002">Family 002</option>
-                        <option value="Family 003">Family 003</option>
+                      <label for="family_id">Beneficiary Family Linked</label>
+                      <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;">
+                        <option >Select Family</option>
+                        @foreach($families as $fam)
+                          <option value="{{ $fam->id }}" {{ old('family_id')==$fam->id?'selected':'' }}>{{ $fam->family_code }} - {{ $fam->head_of_family_name }}</option>
+                        @endforeach
                       </select>
                     </div>
 
@@ -125,9 +123,10 @@
                     <div class="col-md-6 mb-3">
                       <label for="recorded_by">Recorded By</label>
                       <select class="form-control rounded-0 bg-light select2" id="recorded_by" name="recorded_by" style="width: 100%;">
-                        <option selected disabled>Select User</option>
-                        <option value="Volunteer">Volunteer</option>
-                        <option value="Admin">Admin</option>
+                        <option>Select User</option>
+                        @foreach($users as $u)
+                          <option value="{{ $u->id }}" {{ old('recorded_by')==$u->id?'selected':'' }}>{{ $u->name }}</option>
+                        @endforeach
                       </select>
                     </div>
 
@@ -135,16 +134,17 @@
                     <div class="col-md-6 mb-3">
                       <label for="approved_by">Approved By</label>
                       <select class="form-control rounded-0 bg-light select2" id="approved_by" name="approved_by" style="width: 100%;">
-                        <option selected disabled>Select Supervisor</option>
-                        <option value="Supervisor A">Supervisor A</option>
-                        <option value="Supervisor B">Supervisor B</option>
+                        <option>Select Supervisor</option>
+                        @foreach($users as $u)
+                          <option value="{{ $u->id }}" {{ old('approved_by')==$u->id?'selected':'' }}>{{ $u->name }}</option>
+                        @endforeach
                       </select>
                     </div>
 
                     <!-- Remarks / Notes -->
                     <div class="col-md-12 mb-3">
                       <label for="remarks">Remarks / Notes</label>
-                      <textarea class="form-control rounded-0 bg-light" id="remarks" name="remarks" rows="3" placeholder="Enter any justification or notes"></textarea>
+                      <textarea class="form-control rounded-0 bg-light" id="remarks" name="remarks" rows="3" placeholder="Enter any justification or notes">{{ old('remarks') }}</textarea>
                     </div>
 
                   </div>

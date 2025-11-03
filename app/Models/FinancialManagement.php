@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialManagement extends Model
 {
+    protected $table = 'financial_management';
+    protected $guarded = [];
     public function aidProgram()
     {
         return $this->belongsTo(AidProgram::class, 'aid_program_id');

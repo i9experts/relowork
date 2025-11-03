@@ -3,6 +3,7 @@
 @section('title', 'Financial Management List')
 
 @push('page-styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
 <style>
   /* Make all cards in the same row equal height */
   .row > [class*='col-'] {
@@ -62,8 +63,8 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                     <span class="h5 d-block mb-0">Total Income</span>
-                    <p class="mb-1 fw-semibold">65,000</p>
-                    <small class="text-muted">+15.2% from last month</small>
+                    <p class="mb-1 fw-semibold">{{ number_format($totalIncome ?? 0) }}</p>
+                    <small class="text-muted">Selected range</small>
                     </div>
                     <div class="icon-md bg-info rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
                     <i class="mdi mdi-trending-up text-white" style="font-size:26px;"></i> <!-- Income Icon -->
@@ -78,8 +79,8 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                     <span class="h5 d-block mb-0">Total Expenses</span>
-                    <p class="mb-1 fw-semibold">18,000</p>
-                    <small class="text-muted">+8.4% from last month</small>
+                    <p class="mb-1 fw-semibold">{{ number_format($totalExpenses ?? 0) }}</p>
+                    <small class="text-muted">Selected range</small>
                     </div>
                     <div class="icon-md bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
                     <i class="mdi mdi-trending-down text-white" style="font-size:26px;"></i> <!-- Expenses Icon -->
@@ -94,8 +95,8 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                     <span class="h5 d-block mb-0">Net Balance</span>
-                    <p class="mb-1 fw-semibold">47,000</p>
-                    <small class="text-muted">72.3% margin</small>
+                    <p class="mb-1 fw-semibold">{{ number_format(($netBalance ?? 0)) }}</p>
+                    <small class="text-muted">Income - Expenses</small>
                     </div>
                     <div class="icon-md bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
                     <i class="mdi mdi-wallet text-white" style="font-size:26px;"></i> <!-- Balance Icon -->
@@ -110,7 +111,7 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                     <span class="h5 d-block mb-0">Pending Transactions</span>
-                    <p class="mb-1 fw-semibold">1</p>
+                    <p class="mb-1 fw-semibold">{{ $pendingCount ?? 0 }}</p>
                     <small class="text-muted">Awaiting approval</small>
                     </div>
                     <div class="icon-md bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -148,29 +149,40 @@
                 <thead>
                 <tr>
                     <th>S.no</th>
+                    <th>Transaction Code </th>
                     <th>Date</th>
-                    <th>Description</th>
-                    <th>Type</th>
+                    <th>Donation Type</th>
+                    <th>Payment Mode</th>
+                    <th>Donar Name</th>
                     <th>Amount</th>
-                    <th>Status</th>
+                    <th>Aid Program Name</th>
+                    <th>Family Name</th>
+                    <th>Recorded By</th>
+                    <th>Approved By</th>
                     <th>Action</th>
                 </tr>
                 </thead>
                 <tbody>
+                    @php $sn = ($financialTransactions->currentPage() - 1) * $financialTransactions->perPage() + 1; @endphp
+                    @foreach($financialTransactions as $transaction)
+                    <tr>
+                        <td>{{ $sn++ }}</td>
+                        <td>{{ $transaction->transaction_code ?? '-' }}</td>
+                        <td>{{ $transaction->date ?? '-' }}</td>
+                        <td>{{ $transaction->transaction_type ?? '-' }}</td>
+                        <td>{{ $transaction->payment_mode ?? '-' }}</td>
+                        <td>{{ $transaction->donor_name ?? '-' }}</td>
+                        <td>{{ number_format($transaction->amount ?? 0) }}</td>
+                        <td>{{ optional($transaction->aidProgram)->program_title ?? '-' }}</td>
+                        <td>{{ optional($transaction->family)->head_of_family_name ?? '-' }}</td>
+                        <td>{{ optional($transaction->recordedBy)->name ?? '-' }}</td>
+                        <td>{{ optional($transaction->approvedBy)->name ?? '-' }}</td>
+                        <td>
 
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                        </td>
 
-                </tr>
-
-
-
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
 
@@ -185,4 +197,49 @@
 @endsection
 
 @push('page-scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+<script>
+  $(function () {
+    // Initialize Select2 if class present
+    if ($.fn.select2) {
+      $('.select2').select2({ width: '100%', minimumResultsForSearch: Infinity });
+    }
+
+    // Map dropdown text to range keys and sync with controller
+    (function() {
+      const rangeKey = @json($range ?? 'this_month');
+      const el = document.getElementById('exampleFormControlSelect15');
+      if (!el) return;
+      const toKey = {
+        'This Month': 'this_month',
+        'Last Month': 'last_month',
+        'This Quarter': 'this_quarter',
+        'This Year': 'this_year',
+      };
+      const fromKey = {
+        'this_month': 'This Month',
+        'last_month': 'Last Month',
+        'this_quarter': 'This Quarter',
+        'this_year': 'This Year',
+      };
+
+      // Set current selection from $range
+      const wantText = fromKey[rangeKey] || 'This Month';
+      Array.from(el.options).forEach(opt => { opt.selected = (opt.text.trim() === wantText); });
+
+      // If Select2 is applied, update its value display
+      if ($(el).hasClass('select2') && $.fn.select2) {
+        $(el).trigger('change.select2');
+      }
+
+      // On change, redirect with ?range=
+      el.addEventListener('change', function() {
+        const key = toKey[this.value] || 'this_month';
+        const url = new URL(window.location.href);
+        url.searchParams.set('range', key);
+        window.location.href = url.toString();
+      });
+    })();
+  });
+</script>
 @endpush
