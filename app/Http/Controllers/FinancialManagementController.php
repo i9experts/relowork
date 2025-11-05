@@ -244,7 +244,13 @@ class FinancialManagementController extends Controller
      */
     public function edit(FinancialManagement $financialManagement)
     {
-        //
+        $data['programs'] = AidProgram::orderByDesc('id')->get(['id','program_title']);
+        $data['families'] = Family::orderByDesc('id')->get(['id','family_code','head_of_family_name']);
+        $data['users'] = User::orderBy('name')->get(['id','name']);
+        $data['categories'] = ['Zakat','Sadaqah','Project Fund','Admin Cost'];
+        $data['financialManagement'] = $financialManagement;
+
+        return view('financial-management.financial-transaction-edit-form')->with($data);
     }
 
     /**
@@ -252,7 +258,51 @@ class FinancialManagementController extends Controller
      */
     public function update(Request $request, FinancialManagement $financialManagement)
     {
-        //
+        $validated = $request->validate([
+            'date' => ['required','date'],
+            'transaction_type' => ['required','in:Donation,Expense,Disbursement,Transfer'],
+            'category' => ['nullable','in:Zakat,Sadaqah,Project Fund,Admin Cost'],
+            'payment_mode' => ['nullable','in:Cash,Bank Transfer,Easypaisa,Cheque'],
+            'amount' => ['required','integer','min:1'],
+            'donor_name' => ['nullable','string','max:255'],
+            'aid_program_id' => ['nullable','exists:aid_programs,id'],
+            'family_id' => ['nullable','exists:families,id'],
+            'payment_proof' => ['nullable','file','max:5120'],
+            'recorded_by' => ['nullable','exists:users,id'],
+            'approved_by' => ['nullable','exists:users,id'],
+            'remarks' => ['nullable','string'],
+        ]);
+
+        DB::transaction(function () use ($request, $validated, $financialManagement) {
+            // Handle file replacement if provided
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+                if ($file->isValid()) {
+                    // delete old proof if any
+                    if ($financialManagement->payment_proof_path && Storage::disk('public')->exists($financialManagement->payment_proof_path)) {
+                        Storage::disk('public')->delete($financialManagement->payment_proof_path);
+                    }
+                    $stored = $file->store('financial_proofs', 'public');
+                    $financialManagement->payment_proof_path = $stored;
+                }
+            }
+
+            $financialManagement->date = $validated['date'];
+            $financialManagement->transaction_type = $validated['transaction_type'];
+            $financialManagement->category = $validated['category'] ?? null;
+            $financialManagement->payment_mode = $validated['payment_mode'] ?? null;
+            $financialManagement->amount = $validated['amount'];
+            $financialManagement->donor_name = $validated['donor_name'] ?? null;
+            $financialManagement->aid_program_id = $validated['aid_program_id'] ?? null;
+            $financialManagement->family_id = $validated['family_id'] ?? null;
+            $financialManagement->recorded_by = $validated['recorded_by'] ?? $financialManagement->recorded_by;
+            $financialManagement->approved_by = $validated['approved_by'] ?? $financialManagement->approved_by;
+            $financialManagement->remarks = $validated['remarks'] ?? null;
+
+            $financialManagement->save();
+        });
+
+        return redirect()->route('cms.financial-management.index')->with('success', 'Transaction updated successfully.');
     }
 
     /**
@@ -260,7 +310,14 @@ class FinancialManagementController extends Controller
      */
     public function destroy(FinancialManagement $financialManagement)
     {
-        //
+        DB::transaction(function () use ($financialManagement) {
+            if ($financialManagement->payment_proof_path && Storage::disk('public')->exists($financialManagement->payment_proof_path)) {
+                Storage::disk('public')->delete($financialManagement->payment_proof_path);
+            }
+            $financialManagement->delete();
+        });
+
+        return redirect()->route('cms.financial-management.index')->with('success', 'Transaction deleted successfully.');
     }
 
     public function export(Request $request)

@@ -185,7 +185,7 @@
                               </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="{{ route('cms.financial-management.edit', $transaction->id) }}">Edit</a>
-                                <form action="{{ route('cms.financial-management.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('');">
+                                <form action="{{ route('cms.financial-management.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="dropdown-item text-danger">Delete</button>
