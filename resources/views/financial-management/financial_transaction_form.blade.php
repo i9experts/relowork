@@ -26,6 +26,9 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body">
+            <div class="w-100 mb-3">
+                @include('partials.errors')
+            </div>      
             <h4 class="card-title fw-bold mb-1">Financial Transaction Form</h4>
             <p class="text-muted mb-4">
               Purpose: To record all charity inflows/outflows for audit and reporting.

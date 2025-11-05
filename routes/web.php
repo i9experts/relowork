@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'cms.aid-program.destroy',
     ]);
 
+    // Place export route BEFORE resource to avoid conflict with the 'show' route
+    Route::get('financial-management/export', [FinancialManagementController::class, 'export'])
+        ->name('cms.financial-management.export');
     Route::resource('financial-management', FinancialManagementController::class)->names([
         'index' => 'cms.financial-management.index',
         'create' => 'cms.financial-management.create',

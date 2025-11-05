@@ -1712,9 +1712,11 @@ if (lineChart1 !== null) {
     colors: ["#9e6de0", "#fec400"],
     series: [
       {
+        name: "Income",
         data: [6, 10, 8, 20, 15, 6, 21],
       },
       {
+        name: "Expenses",
         data: [8, 6, 15, 10, 25, 8, 32],
       },
     ],
@@ -1912,6 +1914,7 @@ var lineChart4 = document.querySelector("#line-chart-4");
 if (lineChart4 !== null) {
   var lineChartOption4 = {
     chart: {
+      id: "financial-overview",
       height: 350,
       type: "line",
       toolbar: {

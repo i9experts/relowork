@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Carbon\CarbonPeriod;
 
 class FinancialManagementController extends Controller
 {
@@ -46,6 +47,94 @@ class FinancialManagementController extends Controller
                 break;
         }
         $data['range'] = $range;
+
+        // Build dynamic titles for chart/header based on selected range
+        $labelMap = [
+            'this_month'   => 'This Month',
+            'last_month'   => 'Last Month',
+            'this_quarter' => 'This Quarter',
+            'this_year'    => 'This Year',
+            'all_time'     => 'All Time',
+        ];
+        $periodLabel = $labelMap[$range] ?? 'This Month';
+
+        // More detailed period for subtitle
+        if ($range === 'this_month') {
+            $periodDetail = $now->format('F Y');
+        } elseif ($range === 'last_month') {
+            $periodDetail = $from->format('F Y');
+        } elseif ($range === 'this_quarter') {
+            $periodDetail = 'Q' . $from->quarter . ' ' . $from->format('Y');
+        } elseif ($range === 'this_year') {
+            $periodDetail = $from->format('Y');
+        } elseif ($range === 'all_time') {
+            $periodDetail = 'All Time';
+        } else {
+            $periodDetail = $periodLabel;
+        }
+
+        $data['chartTitle'] = 'Financial Overview — ' . $periodLabel;
+        $data['chartSubtitle'] = 'Income vs Expenses for ' . $periodDetail;
+
+        // Build dynamic chart data (labels + income/expense series)
+        $labels = [];
+        $incomeSeries = [];
+        $expenseSeries = [];
+
+        $incomeTypes = ['Donation','Transfer'];
+        $expenseTypes = ['Expense','Disbursement'];
+
+        if (!isset($from, $to) || !$from || !$to) {
+            $start = $now->copy()->subMonthsNoOverflow(11)->startOfMonth();
+            $end = $now->copy()->endOfMonth();
+            $period = CarbonPeriod::create($start, '1 month', $end);
+            foreach ($period as $m) {
+                $mStart = $m->copy()->startOfMonth();
+                $mEnd = $m->copy()->endOfMonth();
+                $labels[] = $m->format('M Y');
+                $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
+                    ->sum('amount');
+                $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                    ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
+                    ->sum('amount');
+            }
+        } else {
+            $isDaily = in_array($range, ['this_month','last_month'], true);
+            if ($isDaily) {
+                $period = CarbonPeriod::create($from->copy()->startOfDay(), '1 day', $to->copy()->endOfDay());
+                foreach ($period as $d) {
+                    $dStart = $d->copy()->startOfDay();
+                    $dEnd = $d->copy()->endOfDay();
+                    $labels[] = $d->format('d M');
+                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                        ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
+                        ->sum('amount');
+                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                        ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
+                        ->sum('amount');
+                }
+            } else {
+                $mStart = $from->copy()->startOfMonth();
+                $mEnd = $to->copy()->endOfMonth();
+                $period = CarbonPeriod::create($mStart, '1 month', $mEnd);
+                foreach ($period as $m) {
+                    $mmStart = $m->copy()->startOfMonth();
+                    $mmEnd = $m->copy()->endOfMonth();
+                    $labels[] = $m->format('M Y');
+                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                        ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
+                        ->sum('amount');
+                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                        ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
+                        ->sum('amount');
+                }
+            }
+        }
+
+        $data['chartLabels'] = $labels;
+        $data['chartIncome'] = $incomeSeries;
+        $data['chartExpenses'] = $expenseSeries;
 
         // Transactions list (respect range if provided)
         $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->latest();
@@ -172,5 +261,202 @@ class FinancialManagementController extends Controller
     public function destroy(FinancialManagement $financialManagement)
     {
         //
+    }
+
+    public function export(Request $request)
+    {
+        // 1) Resolve range (same as index)
+        $range = $request->query('range', 'this_month');
+        $now = now();
+        switch ($range) {
+            case 'last_month':
+                $from = $now->copy()->subMonthNoOverflow()->startOfMonth();
+                $to = $now->copy()->subMonthNoOverflow()->endOfMonth();
+                break;
+            case 'this_quarter':
+                $from = $now->copy()->firstOfQuarter()->startOfDay();
+                $to = $now->copy()->lastOfQuarter()->endOfDay();
+                break;
+            case 'this_year':
+                $from = $now->copy()->startOfYear();
+                $to = $now->copy()->endOfYear();
+                break;
+            case 'all_time':
+                $from = null; $to = null; // no filter
+                break;
+            case 'this_month':
+            default:
+                $from = $now->copy()->startOfMonth();
+                $to = $now->copy()->endOfMonth();
+                break;
+        }
+
+        $labelMap = [
+            'this_month'   => 'This Month',
+            'last_month'   => 'Last Month',
+            'this_quarter' => 'This Quarter',
+            'this_year'    => 'This Year',
+            'all_time'     => 'All Time',
+        ];
+        $periodLabel = $labelMap[$range] ?? 'This Month';
+        if ($range === 'this_month') {
+            $periodDetail = $now->format('F Y');
+        } elseif ($range === 'last_month') {
+            $periodDetail = $from->format('F Y');
+        } elseif ($range === 'this_quarter') {
+            $periodDetail = 'Q' . $from->quarter . ' ' . $from->format('Y');
+        } elseif ($range === 'this_year') {
+            $periodDetail = $from->format('Y');
+        } elseif ($range === 'all_time') {
+            $periodDetail = 'All Time';
+        } else {
+            $periodDetail = $periodLabel;
+        }
+
+        // 2) Build chart labels + series (same logic as index)
+        $labels = [];
+        $incomeSeries = [];
+        $expenseSeries = [];
+        $incomeTypes = ['Donation','Transfer'];
+        $expenseTypes = ['Expense','Disbursement'];
+
+        if (!isset($from, $to) || !$from || !$to) {
+            $start = $now->copy()->subMonthsNoOverflow(11)->startOfMonth();
+            $end = $now->copy()->endOfMonth();
+            $period = \Carbon\CarbonPeriod::create($start, '1 month', $end);
+            foreach ($period as $m) {
+                $mStart = $m->copy()->startOfMonth();
+                $mEnd = $m->copy()->endOfMonth();
+                $labels[] = $m->format('M Y');
+                $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
+                    ->sum('amount');
+                $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                    ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
+                    ->sum('amount');
+            }
+        } else {
+            $isDaily = in_array($range, ['this_month','last_month'], true);
+            if ($isDaily) {
+                $period = \Carbon\CarbonPeriod::create($from->copy()->startOfDay(), '1 day', $to->copy()->endOfDay());
+                foreach ($period as $d) {
+                    $dStart = $d->copy()->startOfDay();
+                    $dEnd = $d->copy()->endOfDay();
+                    $labels[] = $d->format('d M');
+                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                        ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
+                        ->sum('amount');
+                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                        ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
+                        ->sum('amount');
+                }
+            } else {
+                $mStart = $from->copy()->startOfMonth();
+                $mEnd = $to->copy()->endOfMonth();
+                $period = \Carbon\CarbonPeriod::create($mStart, '1 month', $mEnd);
+                foreach ($period as $m) {
+                    $mmStart = $m->copy()->startOfMonth();
+                    $mmEnd = $m->copy()->endOfMonth();
+                    $labels[] = $m->format('M Y');
+                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                        ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
+                        ->sum('amount');
+                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                        ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
+                        ->sum('amount');
+                }
+            }
+        }
+
+        // 3) KPIs
+        $incomeQ = FinancialManagement::whereIn('transaction_type', $incomeTypes);
+        $expenseQ = FinancialManagement::whereIn('transaction_type', $expenseTypes);
+        if (isset($from, $to) && $from && $to) {
+            $incomeQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+            $expenseQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        }
+        $totalIncome = (int) $incomeQ->sum('amount');
+        $totalExpenses = (int) $expenseQ->sum('amount');
+        $netBalance = $totalIncome - $totalExpenses;
+        $pendingQ = FinancialManagement::whereNull('approved_by');
+        if (isset($from, $to) && $from && $to) {
+            $pendingQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        }
+        $pendingCount = (int) $pendingQ->count();
+
+        // 4) Transactions for the section
+        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->orderByDesc('date');
+        if (isset($from, $to) && $from && $to) {
+            $tx->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        }
+        $rows = $tx->get();
+
+        // 5) Stream CSV with sections
+        $filename = 'financial-report-' . $range . '-' . now()->format('Ymd_His') . '.csv';
+        return response()->streamDownload(function() use ($periodLabel, $periodDetail, $labels, $incomeSeries, $expenseSeries, $totalIncome, $totalExpenses, $netBalance, $pendingCount, $rows) {
+            $out = fopen('php://output', 'w');
+
+            // Header section
+            fputcsv($out, ['Financial Overview — ' . $periodLabel]);
+            fputcsv($out, ['Income vs Expenses for ' . $periodDetail]);
+            fputcsv($out, ['Generated At', now()->toDateTimeString()]);
+            fputcsv($out, []);
+
+            // KPIs
+            fputcsv($out, ['Top Statistics']);
+            fputcsv($out, ['Total Income', $totalIncome]);
+            fputcsv($out, ['Total Expenses', $totalExpenses]);
+            fputcsv($out, ['Net Balance', $netBalance]);
+            fputcsv($out, ['Pending Transactions', $pendingCount]);
+            fputcsv($out, []);
+
+            // Chart Data
+            fputcsv($out, ['Chart Data']);
+            fputcsv($out, ['Label', 'Income', 'Expenses']);
+            $count = max(count($labels), count($incomeSeries), count($expenseSeries));
+            for ($i = 0; $i < $count; $i++) {
+                $lbl = $labels[$i] ?? '';
+                $inc = (int) ($incomeSeries[$i] ?? 0);
+                $exp = (int) ($expenseSeries[$i] ?? 0);
+                fputcsv($out, [$lbl, $inc, $exp]);
+            }
+            fputcsv($out, []);
+
+            // Transactions
+            fputcsv($out, ['Transactions']);
+            fputcsv($out, [
+                'S.no',
+                'Transaction Code',
+                'Date',
+                'Donation Type',
+                'Payment Mode',
+                'Donor Name',
+                'Amount',
+                'Aid Program Name',
+                'Family Name',
+                'Recorded By',
+                'Approved By',
+            ]);
+            $sn = 1;
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $sn++,
+                    $r->transaction_code,
+                    $r->date,
+                    $r->transaction_type,
+                    $r->payment_mode,
+                    $r->donor_name,
+                    (int) $r->amount,
+                    optional($r->aidProgram)->program_title,
+                    optional($r->family)->head_of_family_name,
+                    optional($r->recordedBy)->name,
+                    optional($r->approvedBy)->name,
+                ]);
+            }
+
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 }

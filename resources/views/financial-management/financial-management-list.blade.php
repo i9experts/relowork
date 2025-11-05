@@ -35,19 +35,20 @@
         <!-- Select + Button side by side -->
         <div class="d-flex align-items-center" style="gap: 12px;">
             <select class="form-control rounded-0 bg-light" id="exampleFormControlSelect15" style="width: 160px;">
-                <option>This Month</option>
-                <option>Last Month</option>
-                <option>This Quarter</option>
-                <option>This Year</option>
+                <option value="this_month"   {{ ($range ?? 'this_month') === 'this_month' ? 'selected' : '' }}>This Month</option>
+                <option value="last_month"   {{ ($range ?? 'this_month') === 'last_month' ? 'selected' : '' }}>Last Month</option>
+                <option value="this_quarter" {{ ($range ?? 'this_month') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
+                <option value="this_year"    {{ ($range ?? 'this_month') === 'this_year' ? 'selected' : '' }}>This Year</option>
+                <option value="all_time"     {{ ($range ?? 'this_month') === 'all_time' ? 'selected' : '' }}>All Time</option>
             </select>
 
             <a href="{{ route('cms.financial-management.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i>  Add New Transaction
             </a>
 
-            <button type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
+            <a href="{{ route('cms.financial-management.export', ['range' => $range ?? 'this_month']) }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-download me-1"></i> Export Report
-            </button>
+            </a>
         </div>
 
     </div>
@@ -128,8 +129,8 @@
             <!-- Monthly Financial Overview -->
             <div class="card card-default shadow-sm border-0 rounded-4">
                 <div class="card-header bg-white border-0 pb-0">
-                    <h2 class="fw-bold text-dark mb-0">Monthly Financial Overview</h2>
-                    <p class="text-muted fs-6 mt-1 mb-0">Income vs Expenses over the last 6 months</p>
+                    <h2 class="fw-bold text-dark mb-0">{{ $chartTitle ?? 'Financial Overview' }}</h2>
+                    <p class="text-muted fs-6 mt-1 mb-0">{{ $chartSubtitle ?? 'Income vs Expenses' }}</p>
                 </div>
                 <div class="card-body">
                     <div class="chart-wrapper">
@@ -178,7 +179,19 @@
                         <td>{{ optional($transaction->recordedBy)->name ?? '-' }}</td>
                         <td>{{ optional($transaction->approvedBy)->name ?? '-' }}</td>
                         <td>
-
+                            <div class="dropdown">
+                              <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
+                                Actions
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="{{ route('cms.financial-management.edit', $transaction->id) }}">Edit</a>
+                                <form action="{{ route('cms.financial-management.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                </form>
+                              </div>
+                            </div>
                         </td>
 
                     </tr>
@@ -207,25 +220,14 @@
 
     // Map dropdown text to range keys and sync with controller
     (function() {
-      const rangeKey = @json($range ?? 'this_month');
       const el = document.getElementById('exampleFormControlSelect15');
       if (!el) return;
-      const toKey = {
-        'This Month': 'this_month',
-        'Last Month': 'last_month',
-        'This Quarter': 'this_quarter',
-        'This Year': 'this_year',
-      };
-      const fromKey = {
-        'this_month': 'This Month',
-        'last_month': 'Last Month',
-        'this_quarter': 'This Quarter',
-        'this_year': 'This Year',
-      };
+      const rangeKey = @json($range ?? 'this_month');
 
-      // Set current selection from $range
-      const wantText = fromKey[rangeKey] || 'This Month';
-      Array.from(el.options).forEach(opt => { opt.selected = (opt.text.trim() === wantText); });
+      // Ensure current selection reflects $range (already set by Blade, but keep safe)
+      if (el.value !== rangeKey) {
+        el.value = rangeKey;
+      }
 
       // If Select2 is applied, update its value display
       if ($(el).hasClass('select2') && $.fn.select2) {
@@ -234,12 +236,93 @@
 
       // On change, redirect with ?range=
       el.addEventListener('change', function() {
-        const key = toKey[this.value] || 'this_month';
+        const key = this.value || 'this_month';
         const url = new URL(window.location.href);
         url.searchParams.set('range', key);
         window.location.href = url.toString();
       });
     })();
   });
+</script>
+<script>
+  (function() {
+    let labels = @json($chartLabels ?? []);
+    let income = (@json($chartIncome ?? []) || []).map(function(n){ n = Number(n); return isNaN(n) ? 0 : n; });
+    let expenses = (@json($chartExpenses ?? []) || []).map(function(n){ n = Number(n); return isNaN(n) ? 0 : n; });
+
+    // Normalize lengths: series should match labels length
+    function normalize() {
+      const len = Array.isArray(labels) ? labels.length : 0;
+      if (!Array.isArray(labels)) labels = [];
+      function fix(arr){
+        if (!Array.isArray(arr)) arr = [];
+        if (arr.length < len) { arr = arr.concat(Array(len - arr.length).fill(0)); }
+        if (arr.length > len) { arr = arr.slice(0, len); }
+        return arr;
+      }
+      income = fix(income);
+      expenses = fix(expenses);
+    }
+    normalize();
+
+    function ensureChart() {
+      if (!document.getElementById('line-chart-4')) return; // container missing
+      if (!window.ApexCharts) return; // library not loaded yet
+
+      // Try updating an existing chart first
+      try {
+        ApexCharts.exec('financial-overview', 'updateOptions', {
+          labels: [],
+          xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false } },
+          tooltip: { theme: 'dark', shared: true, intersect: false, x: { show: true } },
+          stroke: { width: [2, 3], curve: 'smooth', dashArray: [0, 5] },
+          legend: { show: true, position: 'top', horizontalAlign: 'right', markers: { width: 20, height: 5, radius: 0 } },
+          colors: ['#9e6de0', '#fec400'],
+          yaxis: { min: 0 }
+        }, false, true);
+        ApexCharts.exec('financial-overview', 'updateSeries', [
+          { name: 'Income', data: income },
+          { name: 'Expenses', data: expenses },
+        ], true);
+        window.__fin_overview_ready = true;
+        return true;
+      } catch (e) {
+        // If no existing instance, or update failed, create a new chart aligned to theme
+        try {
+          const el = document.querySelector('#line-chart-4');
+          if (!el) return false;
+          el.innerHTML = '';
+          const options = {
+            chart: { id: 'financial-overview', type: 'line', height: 350, toolbar: { show: false } },
+            stroke: { width: [2, 3], curve: 'smooth', dashArray: [0, 5] },
+            colors: ['#9e6de0', '#fec400'],
+            legend: { show: true, position: 'top', horizontalAlign: 'right', markers: { width: 20, height: 5, radius: 0 } },
+            series: [
+              { name: 'Income', data: income },
+              { name: 'Expenses', data: expenses },
+            ],
+            xaxis: { categories: labels, axisBorder: { show: false }, axisTicks: { show: false } },
+            markers: { size: [5, 0] },
+            tooltip: { theme: 'dark', shared: true, intersect: false, x: { show: true } },
+            yaxis: { min: 0 },
+            noData: { text: 'No data for selected range', align: 'center' }
+          };
+          const chart = new ApexCharts(el, options);
+          chart.render();
+          window.__fin_overview_ready = true;
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+    }
+
+    // Retry a few times until the chart is ready or created
+    (function retry(max = 15, delay = 150) {
+      if (labels && labels.length && ensureChart()) return;
+      if (max <= 0) return;
+      setTimeout(() => retry(max - 1, delay), delay);
+    })();
+  })();
 </script>
 @endpush
