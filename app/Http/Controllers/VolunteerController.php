@@ -112,8 +112,15 @@ class VolunteerController extends Controller
                 ['created_at' => now(), 'updated_at' => now()]
             );
 
+            // Generate unique volunteer code
+            $volunteerCode = 'VOL-' . strtoupper(Str::random(6));
+            while (Volunteer::where('volunteer_code', $volunteerCode)->exists()) {
+                $volunteerCode = 'VOL-' . strtoupper(Str::random(6));
+            }
+
             // Create volunteer record
             Volunteer::create([
+                'volunteer_code' => $volunteerCode,
                 'user_id' => $user->id,
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SurveyMember extends Model
 {
+    protected $guarded = [];
+
     public function survey()
     {
         return $this->belongsTo(Surveys::class);

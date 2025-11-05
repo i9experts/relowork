@@ -21,10 +21,13 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body">
+            <div class="w-100 mb-3">
+                @include('partials.errors')
+            </div>  
             <h4 class="card-title fw-bold mb-1">Survey / Needs-Assessment Form</h4>
             <p class="text-muted mb-4">Purpose: Planning & projections — capture household & multi-sector needs, geo, consent and media.</p>
 
-            <form method="POST" action="" enctype="multipart/form-data" id="surveyForm">
+            <form method="POST" action="{{ route('cms.survey.store') }}" enctype="multipart/form-data" id="surveyForm">
               @csrf
               <div class="form-row">
 
@@ -39,7 +42,9 @@
                   <label for="enumerator_id">Enumerator (Volunteer)</label>
                   <select id="enumerator_id" name="enumerator_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option disabled selected>Select Enumerator</option>
-                    {{-- @foreach($volunteers as $v) <option value="{{ $v->id }}">{{ $v->name }}</option> @endforeach --}}
+                    @foreach($volunteers as $vol)
+                    <option value="{{ $vol->id }}" {{ (old('vol_id') == $vol->id) ? 'selected' : '' }}>{{ $vol->volunteer_code ?? '' }} - {{ $vol->full_name }}</option>
+                    @endforeach
                   </select>
                 </div>
 
@@ -132,10 +137,12 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="linked_family">Linked Family</label>
-                  <select id="linked_family" name="linked_family" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                  <label for="family_id">Linked Family</label>
+                  <select id="family_id" name="family_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option value="new" selected>New family</option>
-                    {{-- @foreach($families as $f) <option value="{{ $f->id }}">{{ $f->head_of_family_name }}</option> @endforeach --}}
+                    @foreach($families as $fam)
+                    <option value="{{ $fam->id }}" {{ (old('fam_id') == $fam->id) ? 'selected' : '' }}>{{ $fam->family_code ?? '' }} - {{ $fam->head_of_family_name }}</option>
+                    @endforeach
                   </select>
                 </div>
 

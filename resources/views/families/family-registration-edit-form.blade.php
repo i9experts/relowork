@@ -290,7 +290,7 @@
                                       <select class="form-control rounded-0 bg-light select2" id="volunteer_id" name="volunteer_id" style="width: 100%;">
                                         <option value="">Select Volunteer</option>
                                         @foreach($volunteer as $vol)
-                                          <option value="{{ $vol->id }}"{{ (old('volunteer_id', $family->volunteer_id) == $vol->id) ? 'selected' : '' }}>{{ $vol->full_name }}</option>
+                                          <option value="{{ $vol->id }}"{{ (old('volunteer_id', $family->volunteer_id) == $vol->id) ? 'selected' : '' }}>{{ $vol->full_name }} - {{ $vol->volunteer_code ?? '' }}</option>
                                         @endforeach
                                       </select>
                                     </div>

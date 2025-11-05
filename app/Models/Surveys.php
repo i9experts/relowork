@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Surveys extends Model
 {
+    protected $guarded = [];
+
+    protected $casts = [
+        'flags_json' => 'array',
+        'recommendations_json' => 'array',
+    ];
+
     public function family()
     {
         return $this->belongsTo(Family::class);
