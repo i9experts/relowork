@@ -84,6 +84,8 @@
                   <label for="audio_note">Audio Note (optional)</label>
                   <input type="file" id="audio_note" name="audio_note" accept="audio/*" class="form-control rounded-0 bg-light">
                   <small class="small-muted">Recommended 60–180 sec. We will warn if duration > 180s</small>
+                  <br>
+                  <small id="audioWarning" class="small-muted" style="color:#d9534f;"></small>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -505,25 +507,26 @@
     });
 
     // Members repeatable
-    const memberTemplate = () => `
+    let memberIdx = 0;
+    const memberTemplate = (i) => `
       <div class="member-row">
         <div class="d-flex justify-content-between">
           <strong>Member</strong>
         </div>
         <div class="row mt-2">
-          <div class="col-md-3 mb-2"><input name="members[][name]" class="form-control rounded-0 bg-light" placeholder="Name"></div>
-          <div class="col-md-3 mb-2"><input name="members[][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][name]" class="form-control rounded-0 bg-light" placeholder="Name"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
           <div class="col-md-3 mb-2">
-            <select name="members[][gender]" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+            <select name="members[${i}][gender]" class="form-control select2 rounded-0 bg-light" style="width:100%;">
               <option>Male</option><option>Female</option><option>Other</option>
             </select>
           </div>
-          <div class="col-md-3 mb-2"><input name="members[][relation]" class="form-control rounded-0 bg-light" placeholder="Relation"></div>
-          <div class="col-md-3 mb-2"><input name="members[][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][relation]" class="form-control rounded-0 bg-light" placeholder="Relation"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
           <div class="col-md-3 mb-2">
-            <input name="members[][disability]" class="form-control rounded-0 bg-light" placeholder="Disability?">
+            <input name="members[${i}][disability]" class="form-control rounded-0 bg-light" placeholder="Disability?">
           </div>
-          <div class="col-md-3 mb-2"><input name="members[][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
       
           <div class="col-md-3 mb-2 text-end">
             <button type="button" class="btn btn-outline-danger btn-sm removeMemberBtn"><i class="mdi mdi-delete"></i> Remove</button>
@@ -532,7 +535,8 @@
       </div>`;
 
     $('#addMemberBtn').click(function(){
-      const $row = $(memberTemplate());
+      const idx = memberIdx++;
+      const $row = $(memberTemplate(idx));
       $('#membersList').append($row);
       $row.find('.select2').select2({ width: '100%' });
     });
@@ -540,12 +544,12 @@
 
     // Geo capture
     $('#btnCaptureGeo').click(function(){
-      if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      if (!navigator.geolocation) { $('#geoAccuracy').text('Geolocation not supported'); return; }
       navigator.geolocation.getCurrentPosition(function(pos){
         $('#gps_lat').val(pos.coords.latitude.toFixed(6));
         $('#gps_long').val(pos.coords.longitude.toFixed(6));
         $('#geoAccuracy').text('Accuracy: ' + (pos.coords.accuracy || 'n/a') + ' meters');
-      }, function(err){ alert('Geo error: ' + err.message); }, { enableHighAccuracy: true, timeout: 10000 });
+      }, function(err){ $('#geoAccuracy').text('Geo error: ' + err.message); }, { enableHighAccuracy: true, timeout: 10000 });
     });
 
     // Audio duration check
@@ -556,21 +560,15 @@
       const audio = new Audio(url);
       audio.addEventListener('loadedmetadata', function(){
         const dur = audio.duration;
-        if (dur > 180) alert('Audio longer than 180 seconds. Please trim.');
+        if (dur > 180) {
+          $('#audioWarning').text('Audio longer than 180 seconds. Please trim.');
+        } else {
+          $('#audioWarning').text('');
+        }
         URL.revokeObjectURL(url);
       });
     });
 
-    // Form submit checks (photos min 1)
-    $('#surveyForm').on('submit', function(e){
-      const photos = $('#photos')[0].files;
-      if (!photos || photos.length < 1) {
-        e.preventDefault();
-        alert('Please upload at least one photo proof.');
-        return false;
-      }
-      // additional client-side checks (if any) can be added
-    });
 
   });
 </script>

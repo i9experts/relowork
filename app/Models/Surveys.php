@@ -2,6 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Family;
+use App\Models\Volunteer;
+use App\Models\SurveyNeed;
+use App\Models\SurveyAsset;
+use App\Models\SurveyMember;
+use App\Models\SurveyUpload;
+use App\Models\SurveyOutcome;
 use Illuminate\Database\Eloquent\Model;
 
 class Surveys extends Model

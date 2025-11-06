@@ -12,6 +12,7 @@ use App\Models\SurveyUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class SurveysController extends Controller
 {
@@ -45,21 +46,35 @@ class SurveysController extends Controller
             'datetime' => ['nullable','date'],
             'gps_lat' => ['nullable','numeric'],
             'gps_long' => ['nullable','numeric'],
+
             'consent_captured' => ['nullable'],
-            'consent_type' => ['nullable','in:Text,Voice,Signature Photo'],
-            'consent_attachment' => ['nullable','file','max:5120'],
+            'consent_type' => ['required_if:consent_captured,1,on,true','in:Text,Voice,Signature Photo'],
+            'consent_attachment' => ['required_if:consent_type,Voice,Signature Photo','file','max:5120'],
+
             'revisit_needed' => ['nullable','in:yes,no'],
-            'revisit_reason' => ['nullable','string','max:255'],
-            'revisit_from' => ['nullable','date'],
-            'revisit_to' => ['nullable','date','after_or_equal:revisit_from'],
-            'photos' => ['required'],
+            'revisit_reason' => ['required_if:revisit_needed,yes','string','max:255'],
+            'revisit_from' => ['required_if:revisit_needed,yes','date'],
+            'revisit_to' => ['required_if:revisit_needed,yes','date','after_or_equal:revisit_from'],
+
+            'photos' => ['required','array'],
             'photos.*' => ['file','mimes:jpg,jpeg,png','max:5120'],
             'audio_note' => ['nullable','file','mimetypes:audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg','max:20480'],
+
             'family_id' => ['nullable'],
             'head_of_family' => ['nullable','string','max:255'],
-            'survey_cnic' => ['nullable','string','max:20'],
+            'survey_cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
             'household_size' => ['nullable','integer','min:1'],
+
             'members' => ['nullable','array'],
+            'members.*.person_id' => ['nullable','integer','exists:family_members,id'],
+            'members.*.name' => ['required_with:members.*.age,members.*.gender,members.*.relation,members.*.cnic,members.*.disability,members.*.school_work','string','max:255'],
+            'members.*.age' => ['nullable','integer','min:0','max:120'],
+            'members.*.gender' => ['nullable','in:Male,Female,Other'],
+            'members.*.relation' => ['nullable','string','max:100'],
+            'members.*.cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
+            'members.*.disability' => ['nullable','string','max:100'],
+            'members.*.school_work' => ['nullable','string','max:100'],
+
             'address_full' => ['nullable','string'],
             'province' => ['nullable','string','max:100'],
             'district' => ['nullable','string','max:100'],
@@ -79,6 +94,7 @@ class SurveysController extends Controller
             'digital_literacy' => ['nullable','string','max:50'],
             'female_led' => ['nullable','in:yes,no'],
             'pwd_count' => ['nullable','integer','min:0'],
+
             'meals_per_day' => ['nullable','integer','min:0'],
             'food_stocks' => ['nullable','integer','min:0'],
             'child_maln' => ['nullable','in:unknown,yes,no'],
@@ -86,8 +102,10 @@ class SurveysController extends Controller
             'water_source' => ['nullable','string','max:50'],
             'water_distance' => ['nullable','integer','min:0'],
             'water_quality' => ['nullable','in:yes,no'],
+
             'received_aid_6m' => ['nullable','in:yes,no'],
             'aid_details' => ['nullable','string','max:255'],
+
             'purpose_explained' => ['nullable'],
             'consent_statement' => ['nullable'],
         ]);
@@ -95,7 +113,10 @@ class SurveysController extends Controller
         return DB::transaction(function () use ($request, $validated) {
             // Create Survey
             $survey = new Surveys();
-            $survey->survey_code = 'SVY-' . strtoupper(Str::random(6));
+            // Generate Survey ID: SUR-YYYY-00001 (yearly reset)
+            $year = now()->year;
+            $yearCount = Surveys::whereYear('created_at', $year)->lockForUpdate()->count() + 1;
+            $survey->survey_code = sprintf('SUR-%d-%05d', $year, $yearCount);
             // Set family_id if provided (and not the "new" placeholder)
             $familyId = $request->input('family_id');
             if ($familyId && $familyId !== 'new') {
@@ -217,7 +238,8 @@ class SurveysController extends Controller
                         $ageVal = null;
                     }
 
-                    SurveyMember::create([
+                    Log::info('Survey member raw input', ['member' => $m]);
+                    $createPayload = [
                         'survey_id' => $survey->id,
                         'person_id' => null,
                         'name' => $nameVal,
@@ -227,7 +249,9 @@ class SurveysController extends Controller
                         'cnic' => $m['cnic'] ?? null,
                         'school_work' => $m['school_work'] ?? null,
                         'disability' => $m['disability'] ?? null,
-                    ]);
+                    ];
+                    Log::info('Survey member create payload', $createPayload);
+                    SurveyMember::create($createPayload);
                 }
             }
 

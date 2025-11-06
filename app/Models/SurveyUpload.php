@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Surveys;
 use Illuminate\Database\Eloquent\Model;
 
 class SurveyUpload extends Model

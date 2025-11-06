@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Surveys;
+use App\Models\FamilyMember;
 use Illuminate\Database\Eloquent\Model;
 
 class SurveyMember extends Model
