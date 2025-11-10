@@ -24,8 +24,22 @@
             <div class="w-100 mb-3">
                 @include('partials.errors')
             </div>  
-            <h4 class="card-title fw-bold mb-1">Survey / Needs-Assessment Form</h4>
+            <h4 class="card-title fw-bold mb-1">Edit Survey / Needs-Assessment Form</h4>
             <p class="text-muted mb-4">Purpose: Planning & projections — capture household & multi-sector needs, geo, consent and media.</p>
+            <p class="text-muted mb-3 small">
+              @php
+                $familyName = optional($survey->family)->family_name ?? optional($survey->family)->head_of_family_name;
+                $familyId = optional($survey->family)->id;
+                $enumName = optional($survey->enumerator)->full_name ?? optional($survey->enumerator)->name;
+                $enumId = optional($survey->enumerator)->id;
+              @endphp
+              @if($survey->family)
+                Family name & Id : {{ $familyName ?? '-' }} | {{ $familyId ? '#'.$familyId : '-' }}
+              @endif
+              @if($survey->enumerator)
+                {{ $survey->family ? ' • ' : '' }}Volunteer Name & Id : {{ $enumName ?? '-' }} | {{ $enumId ? '#'.$enumId : '-' }}
+              @endif
+            </p>
 
             <form method="POST" action="{{ route('cms.survey.update', $survey->id) }}" enctype="multipart/form-data" id="surveyForm">
               @csrf
@@ -40,9 +54,9 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="enumerator_id">Enumerator (Volunteer)</label>
+                  <label for="enumerator_id">Volunteer</label>
                   <select id="enumerator_id" name="enumerator_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ $survey->enumerator_id ? '' : 'selected' }}>Select Enumerator</option>
+                    <option disabled {{ $survey->enumerator_id ? '' : 'selected' }}>Select Volunteer</option>
                     @foreach($volunteers as $vol)
                     <option value="{{ $vol->id }}" {{ (string)($survey->enumerator_id) === (string)$vol->id ? 'selected' : '' }}>{{ $vol->volunteer_code ?? '' }} - {{ $vol->full_name }}</option>
                     @endforeach
@@ -172,7 +186,7 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="family_id">Linked Family</label>
+                  <label for="family_id">Family</label>
                   <select id="family_id" name="family_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option value="new" {{ $survey->family_id ? '' : 'selected' }}>New family</option>
                     @foreach($families as $fam)
@@ -194,6 +208,45 @@
                 <div class="col-md-6 mb-3">
                   <label for="household_size">Household Size</label>
                   <input type="number" id="household_size" name="household_size" class="form-control rounded-0 bg-light" min="1" value="{{ data_get($survey->flags_json,'household_size') }}">
+                </div>
+
+                <!-- Gender -->
+                @php $genderVal = old('gender', data_get($survey->flags_json,'gender','Male')); @endphp
+                <div class="col-md-6 mb-3">
+                  <label for="gender" class="d-block mb-2">Gender :</label>
+                  <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
+                    <input type="radio" id="genderMale" name="gender" class="custom-control-input" value="Male" {{ $genderVal=='Male' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="genderMale">Male</label>
+                  </div>
+                  <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
+                    <input type="radio" id="genderFemale" name="gender" class="custom-control-input" value="Female" {{ $genderVal=='Female' ? 'checked' : '' }}>
+                    <label class="custom-control-label" for="genderFemale">Female</label>
+                  </div>
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-6 mb-3">
+                  <label for="age">Age</label>
+                  <input type="number" class="form-control rounded-0 bg-light" id="age" placeholder="Enter Age" name="age" value="{{ old('age', data_get($survey->flags_json,'age')) }}" min="0">
+                </div>
+
+                <!-- Marital Status -->
+                @php $msVal = old('marital_status', data_get($survey->flags_json,'marital_status')); @endphp
+                <div class="col-md-6 mb-3">
+                  <label for="marital_status">Marital Status</label>
+                  <select class="form-control rounded-0 bg-light select2" id="marital_status" name="marital_status" style="width: 100%;">
+                    <option disabled {{ $msVal ? '' : 'selected' }}>Select Marital Status</option>
+                    <option value="Married" {{ $msVal=='Married'?'selected':'' }}>Married</option>
+                    <option value="Widowed" {{ $msVal=='Widowed'?'selected':'' }}>Widowed</option>
+                    <option value="Divorced" {{ $msVal=='Divorced'?'selected':'' }}>Divorced</option>
+                    <option value="Single" {{ $msVal=='Single'?'selected':'' }}>Single</option>
+                  </select>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="col-md-6 mb-3">
+                  <label for="contact_number">Contact Number</label>
+                  <input type="text" class="form-control rounded-0 bg-light" id="contact_number" placeholder="+92-300-1234567" name="contact_number" value="{{ old('contact_number', data_get($survey->flags_json,'contact_number')) }}">
                 </div>
 
                 <!-- Members detail (repeatable) -->
@@ -497,10 +550,10 @@
                   <label for="pref_assistance">Preferred Assistance Modality</label>
                   @php $prefAssistance = (array) data_get($survey->flags_json,'pref_assistance',[]); @endphp
                   <select id="pref_assistance" name="pref_assistance[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option {{ in_array('Cash',$prefAssistance) ? 'selected' : '' }}>Cash</option>
-                    <option {{ in_array('In-kind',$prefAssistance) ? 'selected' : '' }}>In-kind</option>
-                    <option {{ in_array('Services',$prefAssistance) ? 'selected' : '' }}>Services</option>
-                    <option {{ in_array('Vouchers',$prefAssistance) ? 'selected' : '' }}>Vouchers</option>
+                    <option value="Cash" {{ in_array('Cash',$prefAssistance) ? 'selected' : '' }}>Cash</option>
+                    <option value="In-kind" {{ in_array('In-kind',$prefAssistance) ? 'selected' : '' }}>In-kind</option>
+                    <option value="Services" {{ in_array('Services',$prefAssistance) ? 'selected' : '' }}>Services</option>
+                    <option value="Vouchers" {{ in_array('Vouchers',$prefAssistance) ? 'selected' : '' }}>Vouchers</option>
                   </select>
                 </div>
 
@@ -508,11 +561,11 @@
                   <label for="program_pref">Program Type Preference</label>
                   @php $programPref = (array) data_get($survey->flags_json,'program_pref',[]); @endphp
                   <select id="program_pref" name="program_pref[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option {{ in_array('Food',$programPref) ? 'selected' : '' }}>Food</option>
-                    <option {{ in_array('Water',$programPref) ? 'selected' : '' }}>Water</option>
-                    <option {{ in_array('Education',$programPref) ? 'selected' : '' }}>Education</option>
-                    <option {{ in_array('Medical',$programPref) ? 'selected' : '' }}>Medical</option>
-                    <option {{ in_array('Livelihood',$programPref) ? 'selected' : '' }}>Livelihood</option>
+                    <option value="Food" {{ in_array('Food',$programPref) ? 'selected' : '' }}>Food</option>
+                    <option value="Water" {{ in_array('Water',$programPref) ? 'selected' : '' }}>Water</option>
+                    <option value="Education" {{ in_array('Education',$programPref) ? 'selected' : '' }}>Education</option>
+                    <option value="Medical" {{ in_array('Medical',$programPref) ? 'selected' : '' }}>Medical</option>
+                    <option value="Livelihood" {{ in_array('Livelihood',$programPref) ? 'selected' : '' }}>Livelihood</option>
                   </select>
                 </div>
 
@@ -588,41 +641,115 @@
     // Initialize revisit block state
     $('input[name="revisit_needed"]').change(function(){ if ($(this).val() === 'yes') $('#revisitBlock').show(); else $('#revisitBlock').hide(); });
 
-    // Members repeatable
+
+  // Members repeatable + Family auto-fill (no immediate DB save)
     let memberIdx = 0;
-    const memberTemplate = (i) => `
-      <div class="member-row">
+    const csrf = $('form#surveyForm input[name="_token"]').val();
+    const endpoints = {
+      familyJson: (id) => "{{ url('family') }}/"+id+"/json"
+    };
+
+    const memberTemplate = (i, data = {}) => {
+      const pid = data.id || '';
+      const name = data.name || '';
+      const age = data.age || '';
+      const relation = data.relation || '';
+      const education = data.education || '';
+      const occupation = data.occupation || '';
+      const cnic = data.cnic || '';
+      return `
+      <div class="member-row" data-person-id="${pid}">
         <div class="d-flex justify-content-between">
           <strong>Member</strong>
         </div>
         <div class="row mt-2">
-          <div class="col-md-3 mb-2"><input name="members[${i}][name]" class="form-control rounded-0 bg-light" placeholder="Name"></div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][name]" class="form-control rounded-0 bg-light" placeholder="Name" value="${name}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age" value="${age}"></div>
           <div class="col-md-3 mb-2">
             <select name="members[${i}][gender]" class="form-control select2 rounded-0 bg-light" style="width:100%;">
               <option>Male</option><option>Female</option><option>Other</option>
             </select>
           </div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][relation]" class="form-control rounded-0 bg-light" placeholder="Relation"></div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][relation]" class="form-control rounded-0 bg-light" placeholder="Relation" value="${relation}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][education]" class="form-control rounded-0 bg-light" placeholder="Education" value="${education}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][occupation]" class="form-control rounded-0 bg-light" placeholder="Occupation" value="${occupation}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)" value="${cnic}"></div>
           <div class="col-md-3 mb-2">
             <input name="members[${i}][disability]" class="form-control rounded-0 bg-light" placeholder="Disability?">
           </div>
           <div class="col-md-3 mb-2"><input name="members[${i}][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
-      
           <div class="col-md-3 mb-2 text-end">
             <button type="button" class="btn btn-outline-danger btn-sm removeMemberBtn"><i class="mdi mdi-delete"></i> Remove</button>
-            </div>
+          </div>
         </div>
       </div>`;
+    }
+
+    function mapZakatToSelect(val){
+      if (val === true || val === 'Yes' || val === 'yes') return 'yes';
+      if (val === false || val === 'No' || val === 'no') return 'no';
+      return 'unsure';
+    }
+
+    function renderMembers(list){
+      $('#membersList').empty();
+      memberIdx = 0;
+      (list || []).forEach(function(m){
+        const $row = $(memberTemplate(memberIdx++, m));
+        $('#membersList').append($row);
+        $row.find('.select2').select2({ width: '100%' });
+      });
+    }
+
+    function fillFromFamily(f){
+      $('#head_of_family').val(f.head_of_family_name || '');
+      $('#survey_cnic').val(f.cnic || '');
+      $('#household_size').val((f.family_members_count!=null? f.family_members_count : ''));
+      $('#zakat_elig').val(mapZakatToSelect(f.zakat_eligibility)).trigger('change');
+      // Extra profile fields
+      if (f.gender === 'Male' || f.gender === 'Female') {
+        $("input[name='gender'][value='"+f.gender+"']").prop('checked', true);
+      }
+      if (typeof f.age !== 'undefined' && f.age !== null) { $('#age').val(f.age); }
+      if (f.marital_status) { $('#marital_status').val(f.marital_status).trigger('change'); }
+      $('#contact_number').val(f.contact_number || '');
+      if (typeof f.monthly_income !== 'undefined' && f.monthly_income !== null) $('#monthly_income').val(f.monthly_income);
+      if (typeof f.monthly_expense !== 'undefined' && f.monthly_expense !== null) $('#monthly_expenses').val(f.monthly_expense);
+      const addr = [f.address, f.area, f.city, f.province].filter(Boolean).join(', ');
+      $('#address_full').val(addr);
+      if (f.province) { $('#province').val(f.province).trigger('change'); }
+      // Only render members if none exist yet (avoid overwriting edited/saved members)
+      if ($('#membersList .member-row').length === 0) {
+        const members = (f.members || []).map(function(m){ return { id:m.id, name:m.name, age:m.age, relation:m.relation, education:m.education, occupation:m.occupation, cnic:m.cnic }; });
+        renderMembers(members);
+      }
+    }
+
+    $('#family_id').on('change', function(){
+      const famId = $(this).val();
+      if (!famId || famId === 'new') { return; }
+      $.get(endpoints.familyJson(famId))
+        .done(function(f){ fillFromFamily(f); })
+        .fail(function(){ if (window.toastr) toastr.error('Failed to load family'); });
+    });
+
+    // Auto-load if family is already selected on edit
+    const initFam = $('#family_id').val();
+    if (initFam && initFam !== 'new') {
+      $.get(endpoints.familyJson(initFam)).done(fillFromFamily);
+    }
 
     $('#addMemberBtn').click(function(){
-      const idx = memberIdx++;
-      const $row = $(memberTemplate(idx));
+      const $row = $(memberTemplate(memberIdx++));
       $('#membersList').append($row);
       $row.find('.select2').select2({ width: '100%' });
     });
-    $(document).on('click','.removeMemberBtn', function(){ $(this).closest('.member-row').remove(); });
+
+    $(document).on('click','.removeMemberBtn', function(){
+      const $row = $(this).closest('.member-row');
+      if (!confirm('Are you sure to delete this record?')) return;
+      $row.remove();
+    });
 
     // Geo capture
     $('#btnCaptureGeo').click(function(){

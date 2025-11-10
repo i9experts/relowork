@@ -50,6 +50,12 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'cms.family.destroy',
     ]);
 
+    // AJAX helpers for family auto-fill and member CRUD
+    Route::get('family/{family}/json', [FamilyController::class, 'json'])->name('cms.family.json');
+    Route::post('family/{family}/members', [FamilyController::class, 'addMember'])->name('cms.family.members.add');
+    Route::delete('family-members/{member}', [FamilyController::class, 'deleteMember'])->name('cms.family.members.delete');
+    Route::post('family/quick-create', [FamilyController::class, 'quickCreate'])->name('cms.family.quick-create');
+
     Route::resource('aid-program', AidProgramController::class)->names([
         'index' => 'cms.aid-program.index',
         'create' => 'cms.aid-program.create',

@@ -18,6 +18,9 @@
     color: #6c757d;
     margin-top: 4px;
   }
+  /* Make progress bar clearly visible */
+  .progress { height: 8px; background-color: #eee; }
+  .progress-bar { background-color: #6f42c1 !important; }
 </style>
 @endpush
 
@@ -115,19 +118,28 @@
                     <div class="card shadow-sm border-0 rounded-4">
                         <div class="card-body p-4">
 
-                            <!-- Title + Status -->
+                           <!-- Title + Status --> 
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div>
                                     <h5 class="fw-bold mb-1 text-dark">{{ $survey->survey_code ?? 'Survey #'.$survey->id }}</h5>
                                     <p class="text-muted mb-0 small">
+                                        @php
+                                            $familyName = optional($survey->family)->family_name ?? optional($survey->family)->head_of_family_name;
+                                            $familyId = optional($survey->family)->id;
+                                            $enumName = optional($survey->enumerator)->full_name ?? optional($survey->enumerator)->name;
+                                            $enumId = optional($survey->enumerator)->id;
+                                        @endphp
+
                                         @if($survey->family)
-                                            Family : {{ $survey->family->family_name ?? ('#'.$survey->family->id) }}
+                                            Family Name: {{ $familyName ?? '-' }} | Family ID: {{ $familyId ? '#'.$familyId : '-' }} <br>
                                         @endif
+
                                         @if($survey->enumerator)
-                                            {{ $survey->family ? ' • ' : '' }}Volunteer : {{ $survey->enumerator->name ?? ('#'.$survey->enumerator->id) }}
+                                            Volunteer Name: {{ $enumName ?? '-' }} | Volunteer ID: {{ $enumId ? '#'.$enumId : '-' }}
                                         @endif
                                     </p>
                                 </div>
+
                                 @if($survey->revisit_flag)
                                     <span class="badge badge-pill badge-success">Active</span>
                                 @else
@@ -138,34 +150,48 @@
                             <!-- Dates -->
                             <div class="d-flex justify-content-between mb-3">
                                 <div>
-                                    <span class="text-muted d-block">Created: {{ $survey->revisit_from ? \Illuminate\Support\Carbon::parse($survey->revisit_from)->format('Y-m-d') : optional($survey->created_at)->format('Y-m-d') }}</span>
+                                    <span class="text-muted d-block">
+                                        Created:
+                                        {{ $survey->revisit_from ? \Illuminate\Support\Carbon::parse($survey->revisit_from)->format('Y-m-d') : ($survey->created_at ? \Illuminate\Support\Carbon::parse($survey->created_at)->format('Y-m-d') : '-') }}
+                                    </span>
                                 </div>
                                 <div class="text-end">
-                                    @php 
-                                        $deadline = $survey->revisit_to ?: data_get($survey->flags_json, 'revisit_to');
+                                    @php
+                                        $deadlineRaw = $survey->revisit_to ?: data_get($survey->flags_json, 'revisit_to');
                                     @endphp
-                                    @if($deadline)
-                                        <span class="text-muted d-block">Deadline: {{ \Illuminate\Support\Carbon::parse($deadline)->format('Y-m-d') }}</span>
+                                    @if($deadlineRaw)
+                                        <span class="text-muted d-block">Deadline: {{ \Illuminate\Support\Carbon::parse($deadlineRaw)->format('Y-m-d') }}</span>
                                     @endif
                                 </div>
                             </div>
 
                             @php
-                                $startDate = !empty($survey->revisit_from) ? \Illuminate\Support\Carbon::parse($survey->revisit_from) : optional($survey->created_at);
-                                $endDate = $deadline ? \Illuminate\Support\Carbon::parse($deadline) : null;
-                                $now = now();
-                                $progress = 0;
-                                if($startDate && $endDate && $endDate->greaterThan($startDate)){
+                                $startDate = $survey->revisit_from
+                                    ? \Illuminate\Support\Carbon::parse($survey->revisit_from)
+                                    : ($survey->created_at ? \Illuminate\Support\Carbon::parse($survey->created_at) : null);
+                                $endDate = $deadlineRaw ? \Illuminate\Support\Carbon::parse($deadlineRaw) : null;
+                                $progress = 0; $elapsed = 0; $displayWidth = 0;
+                                if ($startDate && $endDate && $endDate->greaterThan($startDate)) {
                                     $total = $endDate->diffInSeconds($startDate);
-                                    $elapsed = max(0, min($total, $now->diffInSeconds($startDate)));
+                                    $nowTs = now();
+                                    // Clamp 'now' in [start, end]
+                                    if ($nowTs->lessThan($startDate)) {
+                                        $elapsed = 0;
+                                    } elseif ($nowTs->greaterThanOrEqualTo($endDate)) {
+                                        $elapsed = $total;
+                                    } else {
+                                        $elapsed = $nowTs->diffInSeconds($startDate);
+                                    }
                                     $progress = $total > 0 ? round(($elapsed / $total) * 100) : 0;
                                     $progress = max(0, min(100, $progress));
+                                    // Ensure at least 1% visible while in window and progress between 0 and 100
+                                    $displayWidth = ($elapsed > 0 && $elapsed < $total) ? max(1, $progress) : $progress;
                                 }
                             @endphp
 
-                            @if(isset($endDate))
+                            @if($startDate && $endDate)
                                 <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">{{ $progress }}%</div>
+                                    <div class="progress-bar" role="progressbar" style="width: {{ $displayWidth }}%" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">{{ $progress }}%</div>
                                 </div>
                             @endif
 

@@ -231,4 +231,81 @@ class FamilyController extends Controller
         });
         return redirect()->route('cms.family.index')->with('success', 'Family deleted successfully!');
     }
+    
+    /**
+     * Return family with members as JSON for AJAX auto-fill.
+     */
+    public function json(Family $family)
+    {
+        $family->load('members');
+        return response()->json($family);
+    }
+
+    /**
+     * Create a new family member (AJAX) and update cached count.
+     */
+    public function addMember(Request $request, Family $family)
+    {
+        $data = $request->validate([
+            'name' => ['nullable','string','max:255'],
+            'age' => ['nullable','integer','min:0','max:120'],
+            'relation' => ['nullable','string','max:100'],
+            'education' => ['nullable','string','max:100'],
+            'occupation' => ['nullable','string','max:100'],
+            'cnic' => ['nullable','string','max:15'],
+        ]);
+
+        $member = $family->members()->create($data);
+        // update cached count
+        $family->update(['family_members_count' => $family->members()->count()]);
+
+        return response()->json(['ok' => true, 'member' => $member]);
+    }
+
+    /**
+     * Delete a family member by ID (AJAX) and update cached count.
+     */
+    public function deleteMember(FamilyMember $member)
+    {
+        $family = $member->family;
+        $member->delete();
+        if ($family) {
+            $family->update(['family_members_count' => $family->members()->count()]);
+        }
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Quick create a Family from partial survey fields when none is selected.
+     */
+    public function quickCreate(Request $request)
+    {
+        $data = $request->validate([
+            'head_of_family' => ['required','string','max:255'],
+            'survey_cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
+            'household_size' => ['nullable','integer','min:0'],
+            'zakat_elig' => ['nullable','in:yes,no,unsure'],
+            'monthly_income' => ['nullable','integer','min:0'],
+            'monthly_expenses' => ['nullable','integer','min:0'],
+            'address_full' => ['nullable','string','max:1000'],
+            'province' => ['nullable','string','max:100'],
+            'district' => ['nullable','string','max:100'],
+            'tehsil' => ['nullable','string','max:100'],
+        ]);
+
+        $family = Family::create([
+            'head_of_family_name' => $data['head_of_family'],
+            'cnic' => $data['survey_cnic'] ?? null,
+            'family_members_count' => $data['household_size'] ?? 0,
+            'zakat_eligibility' => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
+            'monthly_income' => $data['monthly_income'] ?? null,
+            'monthly_expense' => $data['monthly_expenses'] ?? null,
+            'address' => $data['address_full'] ?? null,
+            'province' => $data['province'] ?? null,
+            'city' => $data['district'] ?? null,
+            'area' => $data['tehsil'] ?? null,
+        ]);
+
+        return response()->json(['ok'=>true,'family'=>$family]);
+    }
 }

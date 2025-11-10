@@ -39,9 +39,9 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="enumerator_id">Enumerator (Volunteer)</label>
+                  <label for="enumerator_id">Volunteer</label>
                   <select id="enumerator_id" name="enumerator_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select Enumerator</option>
+                    <option disabled selected>Select Volunteer</option>
                     @foreach($volunteers as $vol)
                     <option value="{{ $vol->id }}" {{ (old('vol_id') == $vol->id) ? 'selected' : '' }}>{{ $vol->volunteer_code ?? '' }} - {{ $vol->full_name }}</option>
                     @endforeach
@@ -89,7 +89,7 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                <label for="consent_captured" class="form-label mb-0 mr-2">Consent Captured?</label>
+                <label>Consent Captured?</label>
                   <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="consent_captured" name="consent_captured">
                     <label class="custom-control-label" for="consent_captured">Yes</label>
@@ -125,7 +125,7 @@
                   <div id="revisitBlock" style="display:none; margin-top:8px;">
                     <input type="text" name="revisit_reason" class="form-control rounded-0 bg-light mb-2" placeholder="Reason for revisit">
                     <div class="d-flex gap-2">
-                      <input type="date" name="revisit_from" class="form-control rounded-0 bg-light">
+                      <input type="date" name="revisit_from" class="form-control rounded-0 bg-light mr-2">
                       <input type="date" name="revisit_to" class="form-control rounded-0 bg-light">
                     </div>
                   </div>
@@ -139,9 +139,9 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="family_id">Linked Family</label>
+                  <label for="family_id">Family</label>
                   <select id="family_id" name="family_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option value="new" selected>New family</option>
+                    <option value="new" selected>Select family</option>
                     @foreach($families as $fam)
                     <option value="{{ $fam->id }}" {{ (old('fam_id') == $fam->id) ? 'selected' : '' }}>{{ $fam->family_code ?? '' }} - {{ $fam->head_of_family_name }}</option>
                     @endforeach
@@ -151,6 +151,47 @@
                 <div class="col-md-6 mb-3">
                   <label for="head_of_family">Head of Family (Name)</label>
                   <input type="text" id="head_of_family" name="head_of_family" class="form-control rounded-0 bg-light">
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-6 mb-3">
+                    <label for="gender" class="d-block mb-2">Gender :</label>
+
+                    <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
+                        <input type="radio" id="genderMale" name="gender" class="custom-control-input" value="Male" {{ old('gender', 'Male') == 'Male' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="genderMale">Male</label>
+                    </div>
+
+                    <div class="custom-control custom-radio d-inline-block mr-3 mb-2">
+                        <input type="radio" id="genderFemale" name="gender" class="custom-control-input" value="Female" {{ old('gender') == 'Female' ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="genderFemale">Female</label>
+                    </div>
+
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-6 mb-3">
+                    <label for="age">Age</label>
+                    <input type="number" class="form-control rounded-0 bg-light" id="age" placeholder="Enter Age" name="age" value="{{ old('age') }}" min="0">
+                </div>
+
+                <!-- Marital Status -->
+                <div class="col-md-6 mb-3">
+                    <label for="marital_status">Marital Status</label>
+                    <select class="form-control rounded-0 bg-light select2" id="marital_status" name="marital_status" style="width: 100%;">
+                        <option disabled {{ old('marital_status') ? '' : 'selected' }}>Select Marital Status</option>
+                        <option value="Married" {{ old('marital_status')=='Married'?'selected':'' }}>Married</option>
+                        <option value="Widowed" {{ old('marital_status')=='Widowed'?'selected':'' }}>Widowed</option>
+                        <option value="Divorced" {{ old('marital_status')=='Divorced'?'selected':'' }}>Divorced</option>
+                        <option value="Single" {{ old('marital_status')=='Single'?'selected':'' }}>Single</option>
+                    </select>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="col-md-6 mb-3">
+                    <label for="contact_number">Contact Number</label>
+                    <input type="text" class="form-control rounded-0 bg-light" id="contact_number"
+                        placeholder="+92-300-1234567" name="contact_number" value="{{ old('contact_number') }}">
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -506,41 +547,111 @@
       if ($(this).val() === 'yes') $('#revisitBlock').show(); else $('#revisitBlock').hide();
     });
 
-    // Members repeatable
+    // Members repeatable + Family auto-fill (no immediate DB save)
     let memberIdx = 0;
-    const memberTemplate = (i) => `
-      <div class="member-row">
+    const csrf = $('form#surveyForm input[name="_token"]').val();
+    const endpoints = {
+      familyJson: (id) => "{{ url('family') }}/"+id+"/json",
+      memberDelete: (memberId) => "{{ url('family-members') }}/"+memberId
+    };
+
+    const memberTemplate = (i, data = {}) => {
+      const pid = data.id || '';
+      const name = data.name || '';
+      const age = data.age || '';
+      const relation = data.relation || '';
+      const education = data.education || '';
+      const occupation = data.occupation || '';
+      const cnic = data.cnic || '';
+      return `
+      <div class="member-row" data-person-id="${pid}">
         <div class="d-flex justify-content-between">
           <strong>Member</strong>
         </div>
         <div class="row mt-2">
-          <div class="col-md-3 mb-2"><input name="members[${i}][name]" class="form-control rounded-0 bg-light" placeholder="Name"></div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][name]" class="form-control rounded-0 bg-light" placeholder="Name" value="${name}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][age]" type="number" class="form-control rounded-0 bg-light" placeholder="Age" value="${age}"></div>
           <div class="col-md-3 mb-2">
             <select name="members[${i}][gender]" class="form-control select2 rounded-0 bg-light" style="width:100%;">
               <option>Male</option><option>Female</option><option>Other</option>
             </select>
           </div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][relation]" class="form-control rounded-0 bg-light" placeholder="Relation"></div>
-          <div class="col-md-3 mb-2"><input name="members[${i}][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][relation]" class="form-control rounded-0 bg-light" placeholder="Relation" value="${relation}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][education]" class="form-control rounded-0 bg-light" placeholder="Education" value="${education}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][occupation]" class="form-control rounded-0 bg-light" placeholder="Occupation" value="${occupation}"></div>
+          <div class="col-md-3 mb-2"><input name="members[${i}][cnic]" class="form-control rounded-0 bg-light" placeholder="CNIC (if 18+)" value="${cnic}"></div>
           <div class="col-md-3 mb-2">
             <input name="members[${i}][disability]" class="form-control rounded-0 bg-light" placeholder="Disability?">
           </div>
           <div class="col-md-3 mb-2"><input name="members[${i}][school_work]" class="form-control rounded-0 bg-light" placeholder="School/Work status"></div>
-      
           <div class="col-md-3 mb-2 text-end">
             <button type="button" class="btn btn-outline-danger btn-sm removeMemberBtn"><i class="mdi mdi-delete"></i> Remove</button>
-            </div>
+          </div>
         </div>
       </div>`;
+    }
+    function mapZakatToSelect(val){
+      if (val === true || val === 'Yes' || val === 'yes') return 'yes';
+      if (val === false || val === 'No' || val === 'no') return 'no';
+      return 'unsure';
+    }
+
+    function renderMembers(list){
+      $('#membersList').empty();
+      memberIdx = 0;
+      (list || []).forEach(function(m){
+        const $row = $(memberTemplate(memberIdx++, m));
+        $('#membersList').append($row);
+        $row.find('.select2').select2({ width: '100%' });
+      });
+    }
+
+    function fillFromFamily(f){
+      $('#head_of_family').val(f.head_of_family_name || '');
+      $('#survey_cnic').val(f.cnic || '');
+      $('#household_size').val((f.family_members_count!=null? f.family_members_count : ''));
+      $('#zakat_elig').val(mapZakatToSelect(f.zakat_eligibility)).trigger('change');
+      // Extra profile fields
+      if (f.gender === 'Male' || f.gender === 'Female') {
+        $("input[name='gender'][value='"+f.gender+"']").prop('checked', true);
+      }
+      if (typeof f.age !== 'undefined' && f.age !== null) { $('#age').val(f.age); }
+      if (f.marital_status) { $('#marital_status').val(f.marital_status).trigger('change'); }
+      $('#contact_number').val(f.contact_number || '');
+      if (typeof f.monthly_income !== 'undefined' && f.monthly_income !== null) $('#monthly_income').val(f.monthly_income);
+      if (typeof f.monthly_expense !== 'undefined' && f.monthly_expense !== null) $('#monthly_expenses').val(f.monthly_expense);
+      const addr = [f.address, f.area, f.city, f.province].filter(Boolean).join(', ');
+      $('#address_full').val(addr);
+      if (f.province) { $('#province').val(f.province).trigger('change'); }
+      const members = (f.members || []).map(function(m){ return { id:m.id, name:m.name, age:m.age, relation:m.relation, education:m.education, occupation:m.occupation, cnic:m.cnic }; });
+      renderMembers(members);
+    }
+
+    $('#family_id').on('change', function(){
+      const famId = $(this).val();
+      if (!famId || famId === 'new') { $('#head_of_family, #survey_cnic, #household_size, #address_full, #monthly_income, #monthly_expenses').val(''); $('#membersList').empty(); return; }
+      $.get(endpoints.familyJson(famId))
+        .done(function(f){ fillFromFamily(f); })
+        .fail(function(){ if (window.toastr) toastr.error('Failed to load family'); });
+    });
 
     $('#addMemberBtn').click(function(){
-      const idx = memberIdx++;
-      const $row = $(memberTemplate(idx));
+      const $row = $(memberTemplate(memberIdx++));
       $('#membersList').append($row);
       $row.find('.select2').select2({ width: '100%' });
     });
-    $(document).on('click','.removeMemberBtn', function(){ $(this).closest('.member-row').remove(); });
+
+    $(document).on('click','.removeMemberBtn', function(){
+      const $row = $(this).closest('.member-row');
+      const pid = $row.data('person-id');
+      if (!confirm('Are you sure to delete this record?')) return;
+      if (!pid) { $row.remove(); return; }
+      $.ajax({ url: endpoints.memberDelete(pid), method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf } })
+        .done(function(){
+          $row.remove();
+        })
+        .fail(function(){ if (window.toastr) toastr.error('Failed to delete'); });
+    });
 
     // Geo capture
     $('#btnCaptureGeo').click(function(){

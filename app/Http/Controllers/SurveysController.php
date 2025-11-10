@@ -81,9 +81,14 @@ class SurveysController extends Controller
             'program_pref' => ['nullable','array'],
 
             'family_id' => ['nullable'],
+            'zakat_elig' => ['nullable','in:yes,no,unsure'],
             'head_of_family' => ['nullable','string','max:255'],
             'survey_cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
             'household_size' => ['nullable','integer','min:1'],
+            'gender' => ['nullable','in:Male,Female'],
+            'age' => ['nullable','integer','min:0','max:120'],
+            'marital_status' => ['nullable','in:Married,Widowed,Divorced,Single'],
+            'contact_number' => ['nullable','string','max:20'],
 
             'members' => ['nullable','array'],
             'members.*.person_id' => ['nullable','integer','exists:family_members,id'],
@@ -91,6 +96,8 @@ class SurveysController extends Controller
             'members.*.age' => ['nullable','integer','min:0','max:120'],
             'members.*.gender' => ['nullable','in:Male,Female,Other'],
             'members.*.relation' => ['nullable','string','max:100'],
+            'members.*.education' => ['nullable','string','max:100'],
+            'members.*.occupation' => ['nullable','string','max:100'],
             'members.*.cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
             'members.*.disability' => ['nullable','string','max:100'],
             'members.*.school_work' => ['nullable','string','max:100'],
@@ -295,6 +302,87 @@ class SurveysController extends Controller
                 }
             }
 
+            // If linked to an existing family, sync selected fields and members
+            if ($survey->family_id) {
+                $family = Family::find($survey->family_id);
+                if ($family) {
+                    if ($request->filled('head_of_family')) { $family->head_of_family_name = $request->input('head_of_family'); }
+                    if ($request->filled('survey_cnic')) { $family->cnic = $request->input('survey_cnic'); }
+                    if ($request->filled('gender')) { $family->gender = $request->input('gender'); }
+                    if ($request->filled('age')) { $family->age = (int)$request->input('age'); }
+                    if ($request->filled('marital_status')) { $family->marital_status = $request->input('marital_status'); }
+                    if ($request->filled('contact_number')) { $family->contact_number = $request->input('contact_number'); }
+                    $family->zakat_eligibility = ($request->input('zakat_elig') === 'yes');
+                    if ($request->filled('monthly_income')) { $family->monthly_income = (int)$request->input('monthly_income'); }
+                    if ($request->filled('monthly_expenses')) { $family->monthly_expense = (int)$request->input('monthly_expenses'); }
+                    if ($request->filled('address_full')) { $family->address = $request->input('address_full'); }
+                    if ($request->filled('province')) { $family->province = $request->input('province'); }
+                    if ($request->filled('district')) { $family->city = $request->input('district'); }
+                    if ($request->filled('tehsil')) { $family->area = $request->input('tehsil'); }
+                    $family->save();
+
+                    // Sync family members from survey members
+                    $family->members()->delete();
+                    $fmToCreate = [];
+                    foreach ($request->input('members', []) as $m) {
+                        if (!is_array($m)) continue;
+                        $nameVal = isset($m['name']) ? trim($m['name']) : '';
+                        if ($nameVal === '') continue;
+                        $fmToCreate[] = [
+                            'name' => $nameVal,
+                            'age' => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
+                            'relation' => $m['relation'] ?? null,
+                            'education' => $m['education'] ?? null,
+                            'occupation' => $m['occupation'] ?? null,
+                            'cnic' => $m['cnic'] ?? null,
+                        ];
+                    }
+                    if (!empty($fmToCreate)) { $family->members()->createMany($fmToCreate); }
+                    $family->update(['family_members_count' => count($fmToCreate)]);
+                }
+            }
+            // If no family linked, create a new family with members and attach to survey
+            else {
+                $nextCode = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+                $family = Family::create([
+                    'family_code' => $nextCode,
+                    'head_of_family_name' => $request->input('head_of_family','New Family'),
+                    'cnic' => $request->input('survey_cnic'),
+                    'family_members_count' => (int)($request->input('household_size') ?? 0),
+                    'gender' => $request->input('gender'),
+                    'age' => $request->input('age') ? (int)$request->input('age') : null,
+                    'marital_status' => $request->input('marital_status'),
+                    'contact_number' => $request->input('contact_number'),
+                    'zakat_eligibility' => ($request->input('zakat_elig') === 'yes'),
+                    'monthly_income' => $request->input('monthly_income'),
+                    'monthly_expense' => $request->input('monthly_expenses'),
+                    'address' => $request->input('address_full'),
+                    'province' => $request->input('province'),
+                    'city' => $request->input('district'),
+                    'area' => $request->input('tehsil'),
+                    'volunteer_id' => $validated['enumerator_id'] ?? null,
+                ]);
+
+                $fmToCreate = [];
+                foreach ($request->input('members', []) as $m) {
+                    if (!is_array($m)) continue;
+                    $nameVal = isset($m['name']) ? trim($m['name']) : '';
+                    if ($nameVal === '') continue;
+                    $fmToCreate[] = [
+                        'name' => $nameVal,
+                        'age' => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
+                        'relation' => $m['relation'] ?? null,
+                        'education' => $m['education'] ?? null,
+                        'occupation' => $m['occupation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
+                    ];
+                }
+                if (!empty($fmToCreate)) { $family->members()->createMany($fmToCreate); }
+                $family->update(['family_members_count' => count($fmToCreate)]);
+                $survey->family_id = $family->id;
+                $survey->save();
+            }
+
             return redirect()->route('cms.survey.index')->with('success', 'Survey saved successfully.');
         });
     }
@@ -354,6 +442,10 @@ class SurveysController extends Controller
             'photos' => ['nullable','array'],
             'photos.*' => ['file','mimes:jpg,jpeg,png','max:5120'],
             'audio_note' => ['nullable','file','mimetypes:audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg','max:20480'],
+
+            // Preferences
+            'pref_assistance' => ['nullable','array'],
+            'program_pref' => ['nullable','array'],
 
             'family_id' => ['nullable'],
             'head_of_family' => ['nullable','string','max:255'],
@@ -455,9 +547,13 @@ class SurveysController extends Controller
             $f['received_aid_6m'] = $validated['received_aid_6m'] ?? data_get($f,'received_aid_6m','no');
             $f['aid_details'] = $validated['aid_details'] ?? data_get($f,'aid_details');
 
-            // Preferences
-            $f['pref_assistance'] = $validated['pref_assistance'] ?? data_get($f,'pref_assistance', []);
-            $f['program_pref'] = $validated['program_pref'] ?? data_get($f,'program_pref', []);
+            // Preferences (only overwrite if field present, so multi-select updates work)
+            if ($request->has('pref_assistance')) {
+                $f['pref_assistance'] = (array) $request->input('pref_assistance', []);
+            }
+            if ($request->has('program_pref')) {
+                $f['program_pref'] = (array) $request->input('program_pref', []);
+            }
             $f['purpose_explained'] = $request->boolean('purpose_explained');
             $f['consent_statement'] = $request->boolean('consent_statement');
             $survey->flags_json = $f;
@@ -514,6 +610,40 @@ class SurveysController extends Controller
             foreach ($request->input('assets', []) as $asset) {
                 if (!$asset) continue;
                 SurveyAsset::create(['survey_id'=>$survey->id,'asset'=>$asset,'present'=>true]);
+            }
+
+            // If linked to a family, sync family core fields and members
+            if ($survey->family_id) {
+                $family = Family::find($survey->family_id);
+                if ($family) {
+                    $family->zakat_eligibility = ($request->input('zakat_elig') === 'yes');
+                    if ($request->filled('monthly_income')) { $family->monthly_income = (int)$request->input('monthly_income'); }
+                    if ($request->filled('monthly_expenses')) { $family->monthly_expense = (int)$request->input('monthly_expenses'); }
+                    if ($request->filled('address_full')) { $family->address = $request->input('address_full'); }
+                    if ($request->filled('province')) { $family->province = $request->input('province'); }
+                    if ($request->filled('district')) { $family->city = $request->input('district'); }
+                    if ($request->filled('tehsil')) { $family->area = $request->input('tehsil'); }
+                    $family->save();
+
+                    // Sync family members from survey members
+                    $family->members()->delete();
+                    $fmToCreate = [];
+                    foreach ($request->input('members', []) as $m) {
+                        if (!is_array($m)) continue;
+                        $nameVal = isset($m['name']) ? trim($m['name']) : '';
+                        if ($nameVal === '') continue;
+                        $fmToCreate[] = [
+                            'name' => $nameVal,
+                            'age' => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
+                            'relation' => $m['relation'] ?? null,
+                            'education' => $m['education'] ?? null,
+                            'occupation' => $m['occupation'] ?? null,
+                            'cnic' => $m['cnic'] ?? null,
+                        ];
+                    }
+                    if (!empty($fmToCreate)) { $family->members()->createMany($fmToCreate); }
+                    $family->update(['family_members_count' => count($fmToCreate)]);
+                }
             }
 
             return redirect()->route('cms.survey.show', $survey->id)->with('success','Survey updated successfully.');

@@ -68,13 +68,21 @@
               <div class="col-6 mt-2">
                 <div class="d-flex justify-content-between">
                   <div class="text-muted">Enumerator</div>
-                  <div>{{ optional($survey->enumerator)->full_name ?? optional($survey->enumerator)->name ?? '-' }}</div>
+                  @php
+                    $enumName = optional($survey->enumerator)->full_name ?? optional($survey->enumerator)->name;
+                    $enumId = optional($survey->enumerator)->id;
+                  @endphp
+                  <div>Volunteer Name & Id : {{ $enumName ?? '-' }} | {{ $enumId ? '#'.$enumId : '-' }}</div>
                 </div>
               </div>
               <div class="col-6 mt-2">
                 <div class="d-flex justify-content-between">
                   <div class="text-muted">Family</div>
-                  <div>{{ optional($survey->family)->family_name ?? optional($survey->family)->head_of_family_name ?? (optional($survey->family)->id ? '#'.optional($survey->family)->id : '-') }}</div>
+                  @php
+                    $familyName = optional($survey->family)->family_name ?? optional($survey->family)->head_of_family_name;
+                    $familyId = optional($survey->family)->id;
+                  @endphp
+                  <div>Family name & Id : {{ $familyName ?? '-' }} | {{ $familyId ? '#'.$familyId : '-' }}</div>
                 </div>
               </div>
               <div class="col-6 mt-2">
