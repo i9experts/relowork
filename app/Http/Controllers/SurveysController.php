@@ -21,7 +21,23 @@ class SurveysController extends Controller
      */
     public function index()
     {
-        return view('survey.survey-list');
+        $total = Surveys::count();
+        $pending = Surveys::where('revisit_flag', true)->count();
+        $completedRate = $total > 0 ? round((($total - $pending) / $total) * 100, 1) : 0;
+
+        $data['stats'] = [
+            'active_surveys' => $pending,
+            'total_responses' => $total,
+            'completion_rate' => $completedRate,
+            'pending_review' => $pending,
+        ];
+
+        $data['surveys'] = Surveys::with(['enumerator', 'family'])
+            ->withCount(['members', 'uploads'])
+            ->latest()
+            ->paginate(10);
+
+        return view('survey.survey-list')->with($data);
     }
 
     /**
@@ -43,7 +59,7 @@ class SurveysController extends Controller
         $validated = $request->validate([
             'enumerator_id' => ['nullable','integer'],
             'survey_mode' => ['nullable','in:In-person,Phone,WhatsApp,Web'],
-            'datetime' => ['nullable','date'],
+            'datetime' => ['nullable','date_format:Y-m-d\\TH:i'],
             'gps_lat' => ['nullable','numeric'],
             'gps_long' => ['nullable','numeric'],
 
@@ -59,6 +75,10 @@ class SurveysController extends Controller
             'photos' => ['required','array'],
             'photos.*' => ['file','mimes:jpg,jpeg,png','max:5120'],
             'audio_note' => ['nullable','file','mimetypes:audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg','max:20480'],
+
+            // Preferences
+            'pref_assistance' => ['nullable','array'],
+            'program_pref' => ['nullable','array'],
 
             'family_id' => ['nullable'],
             'head_of_family' => ['nullable','string','max:255'],
@@ -126,7 +146,10 @@ class SurveysController extends Controller
             }
             $survey->enumerator_id = $validated['enumerator_id'] ?? null;
             $survey->survey_mode = $validated['survey_mode'] ?? null;
-            $survey->ts = $validated['datetime'] ?? null;
+            $survey->date_time = null;
+            if ($request->filled('datetime')) {
+                try { $survey->date_time = \Carbon\Carbon::createFromFormat('Y-m-d\\TH:i', $request->input('datetime')); } catch (\Exception $e) { $survey->date_time = null; }
+            }
             $survey->lat = $validated['gps_lat'] ?? null;
             $survey->lon = $validated['gps_long'] ?? null;
             $survey->consent_type = ($request->boolean('consent_captured') ? ($validated['consent_type'] ?? 'Text') : null);
@@ -168,6 +191,10 @@ class SurveysController extends Controller
                 'water_quality' => $validated['water_quality'] ?? 'no',
                 'received_aid_6m' => $validated['received_aid_6m'] ?? 'no',
                 'aid_details' => $validated['aid_details'] ?? null,
+
+                // Preferences
+                'pref_assistance' => $validated['pref_assistance'] ?? [],
+                'program_pref' => $validated['program_pref'] ?? [],
                 'purpose_explained' => $request->boolean('purpose_explained'),
                 'consent_statement' => $request->boolean('consent_statement'),
             ];
@@ -275,25 +302,222 @@ class SurveysController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Surveys $surveys)
+    public function show(Surveys $survey)
     {
-        //
+        $survey->load([
+            'family',
+            'enumerator',
+            'members',
+            'assets',
+            'uploads',
+            'needs',
+            'outcomes',
+        ])->loadCount(['members as members_count','uploads as uploads_count']);
+
+        return view('survey.view-detail', compact('survey'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Surveys $surveys)
+    public function edit(Surveys $survey)
     {
-        //
+        $survey->load(['family','enumerator','members','assets','uploads']);
+        $data['survey'] = $survey;
+        $data['volunteers'] = Volunteer::get();
+        $data['families'] = Family::get();
+
+        return view('survey.survey-assessment-edit-form')->with($data);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Surveys $surveys)
+    public function update(Request $request, Surveys $survey)
     {
-        //
+        $validated = $request->validate([
+            'enumerator_id' => ['nullable','integer'],
+            'survey_mode' => ['nullable','in:In-person,Phone,WhatsApp,Web'],
+            'datetime' => ['nullable','date'],
+            'gps_lat' => ['nullable','numeric'],
+            'gps_long' => ['nullable','numeric'],
+
+            'consent_captured' => ['nullable'],
+            'consent_type' => ['required_if:consent_captured,1,on,true','in:Text,Voice,Signature Photo'],
+            'consent_attachment' => ['nullable','file','max:5120'],
+
+            'revisit_needed' => ['nullable','in:yes,no'],
+            'revisit_reason' => ['nullable','string','max:255'],
+            'revisit_from' => ['nullable','date'],
+            'revisit_to' => ['nullable','date','after_or_equal:revisit_from'],
+
+            'photos' => ['nullable','array'],
+            'photos.*' => ['file','mimes:jpg,jpeg,png','max:5120'],
+            'audio_note' => ['nullable','file','mimetypes:audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg','max:20480'],
+
+            'family_id' => ['nullable'],
+            'head_of_family' => ['nullable','string','max:255'],
+            'survey_cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
+            'household_size' => ['nullable','integer','min:1'],
+
+            'members' => ['nullable','array'],
+            'members.*.name' => ['nullable','string','max:255'],
+            'members.*.age' => ['nullable','integer','min:0','max:120'],
+            'members.*.gender' => ['nullable','in:Male,Female,Other'],
+            'members.*.relation' => ['nullable','string','max:100'],
+            'members.*.cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
+            'members.*.disability' => ['nullable','string','max:100'],
+            'members.*.school_work' => ['nullable','string','max:100'],
+
+            'address_full' => ['nullable','string'],
+            'province' => ['nullable','string','max:100'],
+            'district' => ['nullable','string','max:100'],
+            'tehsil' => ['nullable','string','max:100'],
+            'uc' => ['nullable','string','max:100'],
+            'settlement_type' => ['nullable','string','max:50'],
+            'tenure_type' => ['nullable','string','max:50'],
+            'displacement_status' => ['nullable','string','max:50'],
+            'primary_languages' => ['nullable','array'],
+            'primary_income' => ['nullable','string','max:100'],
+            'monthly_income' => ['nullable','integer','min:0'],
+            'monthly_expenses' => ['nullable','integer','min:0'],
+            'debt_outstanding' => ['nullable','integer','min:0'],
+            'debt_source' => ['nullable','string','max:50'],
+            'assets' => ['nullable','array'],
+            'banking_access' => ['nullable','string','max:50'],
+            'digital_literacy' => ['nullable','string','max:50'],
+            'female_led' => ['nullable','in:yes,no'],
+            'pwd_count' => ['nullable','integer','min:0'],
+
+            'meals_per_day' => ['nullable','integer','min:0'],
+            'food_stocks' => ['nullable','integer','min:0'],
+            'child_maln' => ['nullable','in:unknown,yes,no'],
+            'food_needs' => ['nullable','array'],
+            'water_source' => ['nullable','string','max:50'],
+            'water_distance' => ['nullable','integer','min:0'],
+            'water_quality' => ['nullable','in:yes,no'],
+
+            'received_aid_6m' => ['nullable','in:yes,no'],
+            'aid_details' => ['nullable','string','max:255'],
+
+            'purpose_explained' => ['nullable'],
+            'consent_statement' => ['nullable'],
+        ]);
+
+        return DB::transaction(function () use ($request, $validated, $survey) {
+            // Update base survey fields
+            $familyId = $request->input('family_id');
+            $survey->family_id = ($familyId && $familyId !== 'new') ? (int)$familyId : null;
+            $survey->enumerator_id = $validated['enumerator_id'] ?? null;
+            $survey->survey_mode = $validated['survey_mode'] ?? null;
+            if ($request->filled('datetime')) {
+                try { $survey->date_time = \Carbon\Carbon::createFromFormat('Y-m-d\\TH:i', $request->input('datetime')); } catch (\Exception $e) {}
+            }
+            $survey->lat = $validated['gps_lat'] ?? $survey->lat;
+            $survey->lon = $validated['gps_long'] ?? $survey->lon;
+            $survey->consent_type = ($request->boolean('consent_captured') ? ($validated['consent_type'] ?? 'Text') : null);
+            $survey->revisit_flag = ($validated['revisit_needed'] ?? ($survey->revisit_flag ? 'yes' : 'no')) === 'yes';
+            $survey->revisit_from = $validated['revisit_from'] ?? $survey->revisit_from;
+            $survey->revisit_to = $validated['revisit_to'] ?? $survey->revisit_to;
+
+            // Update flags
+            $f = $survey->flags_json ?? [];
+            $f['revisit_reason'] = $validated['revisit_reason'] ?? data_get($f,'revisit_reason');
+            $f['family_id'] = $survey->family_id;
+            $f['head_of_family'] = $validated['head_of_family'] ?? data_get($f,'head_of_family');
+            $f['survey_cnic'] = $validated['survey_cnic'] ?? data_get($f,'survey_cnic');
+            $f['household_size'] = $validated['household_size'] ?? data_get($f,'household_size');
+            $f['address_full'] = $validated['address_full'] ?? data_get($f,'address_full');
+            $f['province'] = $validated['province'] ?? data_get($f,'province');
+            $f['district'] = $validated['district'] ?? data_get($f,'district');
+            $f['tehsil'] = $validated['tehsil'] ?? data_get($f,'tehsil');
+            $f['uc'] = $validated['uc'] ?? data_get($f,'uc');
+            $f['settlement_type'] = $validated['settlement_type'] ?? data_get($f,'settlement_type');
+            $f['tenure_type'] = $validated['tenure_type'] ?? data_get($f,'tenure_type');
+            $f['displacement_status'] = $validated['displacement_status'] ?? data_get($f,'displacement_status');
+            $f['primary_languages'] = $validated['primary_languages'] ?? data_get($f,'primary_languages', []);
+            $f['primary_income'] = $validated['primary_income'] ?? data_get($f,'primary_income');
+            $f['monthly_income'] = $validated['monthly_income'] ?? data_get($f,'monthly_income');
+            $f['monthly_expenses'] = $validated['monthly_expenses'] ?? data_get($f,'monthly_expenses');
+            $f['debt_outstanding'] = $validated['debt_outstanding'] ?? data_get($f,'debt_outstanding');
+            $f['debt_source'] = $validated['debt_source'] ?? data_get($f,'debt_source');
+            $f['banking_access'] = $validated['banking_access'] ?? data_get($f,'banking_access');
+            $f['digital_literacy'] = $validated['digital_literacy'] ?? data_get($f,'digital_literacy');
+            $f['female_led'] = $validated['female_led'] ?? data_get($f,'female_led','no');
+            $f['pwd_count'] = $validated['pwd_count'] ?? data_get($f,'pwd_count',0);
+            $f['meals_per_day'] = $validated['meals_per_day'] ?? data_get($f,'meals_per_day');
+            $f['food_stocks'] = $validated['food_stocks'] ?? data_get($f,'food_stocks');
+            $f['child_maln'] = $validated['child_maln'] ?? data_get($f,'child_maln','unknown');
+            $f['food_needs'] = $validated['food_needs'] ?? data_get($f,'food_needs', []);
+            $f['water_source'] = $validated['water_source'] ?? data_get($f,'water_source');
+            $f['water_distance'] = $validated['water_distance'] ?? data_get($f,'water_distance');
+            $f['water_quality'] = $validated['water_quality'] ?? data_get($f,'water_quality','no');
+            $f['received_aid_6m'] = $validated['received_aid_6m'] ?? data_get($f,'received_aid_6m','no');
+            $f['aid_details'] = $validated['aid_details'] ?? data_get($f,'aid_details');
+
+            // Preferences
+            $f['pref_assistance'] = $validated['pref_assistance'] ?? data_get($f,'pref_assistance', []);
+            $f['program_pref'] = $validated['program_pref'] ?? data_get($f,'program_pref', []);
+            $f['purpose_explained'] = $request->boolean('purpose_explained');
+            $f['consent_statement'] = $request->boolean('consent_statement');
+            $survey->flags_json = $f;
+            $survey->save();
+
+            // Optional uploads
+            if ($request->hasFile('consent_attachment')) {
+                $file = $request->file('consent_attachment');
+                if ($file->isValid()) {
+                    $path = $file->store('survey/consent', 'public');
+                    SurveyUpload::create(['survey_id'=>$survey->id,'type'=>'consent','url'=>$path]);
+                }
+            }
+            foreach ($request->file('photos', []) as $p) {
+                if ($p && $p->isValid()) {
+                    $path = $p->store('survey/photos', 'public');
+                    SurveyUpload::create(['survey_id'=>$survey->id,'type'=>'photo','url'=>$path]);
+                }
+            }
+            if ($request->hasFile('audio_note')) {
+                $a = $request->file('audio_note');
+                if ($a->isValid()) {
+                    $path = $a->store('survey/audio', 'public');
+                    SurveyUpload::create(['survey_id'=>$survey->id,'type'=>'audio','url'=>$path]);
+                }
+            }
+
+            // Resync members: simple strategy - delete and recreate from form
+            $survey->members()->delete();
+            $members = $request->input('members', []);
+            if (is_array($members)) {
+                foreach ($members as $m) {
+                    if (!is_array($m)) continue;
+                    $nameVal = isset($m['name']) ? trim($m['name']) : '';
+                    if ($nameVal === '') continue;
+                    $ageVal = isset($m['age']) ? (int)$m['age'] : null;
+                    if ($ageVal !== null && ($ageVal < 0 || $ageVal > 120)) { $ageVal = null; }
+                    SurveyMember::create([
+                        'survey_id' => $survey->id,
+                        'person_id' => null,
+                        'name' => $nameVal,
+                        'age' => $ageVal,
+                        'gender' => $m['gender'] ?? null,
+                        'relation' => $m['relation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
+                        'school_work' => $m['school_work'] ?? null,
+                        'disability' => $m['disability'] ?? null,
+                    ]);
+                }
+            }
+
+            // Resync assets
+            $survey->assets()->delete();
+            foreach ($request->input('assets', []) as $asset) {
+                if (!$asset) continue;
+                SurveyAsset::create(['survey_id'=>$survey->id,'asset'=>$asset,'present'=>true]);
+            }
+
+            return redirect()->route('cms.survey.show', $survey->id)->with('success','Survey updated successfully.');
+        });
     }
 
     /**

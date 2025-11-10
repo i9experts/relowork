@@ -398,7 +398,7 @@
 
                   <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="sp_w" name="special_categories[]" value="Widow">
-                    <label class="custom-control-label" for="sp_w">Widow</label>
+                    <label class="custom-control-label" for=  "sp_w">Widow</label>
                   </div>
 
                   <div class="custom-control custom-checkbox">

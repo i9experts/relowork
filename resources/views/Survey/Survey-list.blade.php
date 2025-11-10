@@ -49,7 +49,7 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                         <span class="h5 d-block mb-0">Active Surveys</span>
-                        <p class="mb-1 fw-semibold">2</p>
+                        <p class="mb-1 fw-semibold">{{ $stats['active_surveys'] ?? 0 }}</p>
                         <small class="text-muted">Currently running</small>
                     </div>
                     <div class="icon-md bg-info rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -65,7 +65,7 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                         <span class="h5 d-block mb-0">Total Responses</span>
-                        <p class="mb-1 fw-semibold">629</p>
+                        <p class="mb-1 fw-semibold">{{ $stats['total_responses'] ?? 0 }}</p>
                         <small class="text-muted">Target: 800</small>
                     </div>
                     <div class="icon-md bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -81,7 +81,7 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                         <span class="h5 d-block mb-0">Completion Rate</span>
-                        <p class="mb-1 fw-semibold">78.6%</p>
+                        <p class="mb-1 fw-semibold">{{ $stats['completion_rate'] ?? 0 }}%</p>
                         <small class="text-muted">Overall progress</small>
                     </div>
                     <div class="icon-md bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -97,7 +97,7 @@
                 <div class="d-flex justify-content-between align-items-center p-4">
                     <div class="text-left">
                         <span class="h5 d-block mb-0">Pending Review</span>
-                        <p class="mb-1 fw-semibold">45</p>
+                        <p class="mb-1 fw-semibold">{{ $stats['pending_review'] ?? 0 }}</p>
                         <small class="text-muted">Awaiting verification</small>
                     </div>
                     <div class="icon-md bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -108,102 +108,94 @@
         </div>
     </div>
 
-    <div class="row mb-5">
-        <!-- Frist box -->
-        <div class="col-lg-12 col-xl-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                
-                <!-- Title + Status -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                        <h5 class="fw-bold mb-1 text-dark">Ramadan Program Feedback</h5>
-                        <p class="text-muted mb-0 small">Feedback collection for Ramadan food distribution program</p>
+    @if(isset($surveys) && $surveys->count())
+        @foreach($surveys as $survey)
+            <div class="row mb-4">
+                <div class="col-lg-12 col-xl-12">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+
+                            <!-- Title + Status -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">{{ $survey->survey_code ?? 'Survey #'.$survey->id }}</h5>
+                                    <p class="text-muted mb-0 small">
+                                        @if($survey->family)
+                                            Family : {{ $survey->family->family_name ?? ('#'.$survey->family->id) }}
+                                        @endif
+                                        @if($survey->enumerator)
+                                            {{ $survey->family ? ' • ' : '' }}Volunteer : {{ $survey->enumerator->name ?? ('#'.$survey->enumerator->id) }}
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($survey->revisit_flag)
+                                    <span class="badge badge-pill badge-success">Active</span>
+                                @else
+                                    <span class="badge badge-pill badge-light">Completed</span>
+                                @endif
+                            </div>
+
+                            <!-- Dates -->
+                            <div class="d-flex justify-content-between mb-3">
+                                <div>
+                                    <span class="text-muted d-block">Created: {{ $survey->revisit_from ? \Illuminate\Support\Carbon::parse($survey->revisit_from)->format('Y-m-d') : optional($survey->created_at)->format('Y-m-d') }}</span>
+                                </div>
+                                <div class="text-end">
+                                    @php 
+                                        $deadline = $survey->revisit_to ?: data_get($survey->flags_json, 'revisit_to');
+                                    @endphp
+                                    @if($deadline)
+                                        <span class="text-muted d-block">Deadline: {{ \Illuminate\Support\Carbon::parse($deadline)->format('Y-m-d') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @php
+                                $startDate = !empty($survey->revisit_from) ? \Illuminate\Support\Carbon::parse($survey->revisit_from) : optional($survey->created_at);
+                                $endDate = $deadline ? \Illuminate\Support\Carbon::parse($deadline) : null;
+                                $now = now();
+                                $progress = 0;
+                                if($startDate && $endDate && $endDate->greaterThan($startDate)){
+                                    $total = $endDate->diffInSeconds($startDate);
+                                    $elapsed = max(0, min($total, $now->diffInSeconds($startDate)));
+                                    $progress = $total > 0 ? round(($elapsed / $total) * 100) : 0;
+                                    $progress = max(0, min(100, $progress));
+                                }
+                            @endphp
+
+                            @if(isset($endDate))
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">{{ $progress }}%</div>
+                                </div>
+                            @endif
+
+                            <!-- Counts -->
+                            <div class="d-flex justify-content-between border-top pt-3 mb-3">
+                                <div>
+                                    <span class="text-muted d-block">Members: {{ $survey->members_count ?? 0 }}</span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted d-block">Uploads: {{ $survey->uploads_count ?? 0 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-3">
+                                <a href="{{ route('cms.survey.show', $survey->id) }}" class="btn btn-outline-primary w-50 mr-2">View Details</a>
+                                <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary w-50">Edit</a>
+                            </div>
+
+                        </div>
                     </div>
-                    <span class="badge badge-pill badge-success">Active</span>
-                </div>
-
-                <!-- Budget and Distributed -->
-                <div class="d-flex justify-content-between mb-3">
-                    <div>
-                    <span class="text-muted d-block">Created: 2024-04-15</span>
-                    </div>
-                    <div class="text-end">
-                    <span class="text-muted d-block">Deadline: 2024-09-15</span>
-                    </div>
-                </div>
-
-                <!-- Beneficiaries and Remaining -->
-                <div class="d-flex justify-content-between border-top pt-3 mb-3">
-                    <div>
-                    <span class="text-muted d-block">Responses: 287 / 300</span>
-                    </div>
-                </div>
-                
-                <div class="progress mb-3">
-                    <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55" aria-valuemin="0"
-                    aria-valuemax="100">55%</div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-3">
-                    <button type="button" class="btn btn-outline-primary w-50 mr-2">View Details</button>
-                    <button type="button" class="btn btn-outline-primary w-50">Edit</button>
-                </div>
-
-
                 </div>
             </div>
+        @endforeach
+
+        <div class="d-flex justify-content-center mt-2">
+            {{ $surveys->links() }}
         </div>
-
-    </div>
-
-    <div class="row mb-5">
-        <!-- Second box -->
-        <div class="col-lg-12 col-xl-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                
-                <!-- Title + Status -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                        <h5 class="fw-bold mb-1 text-dark">Educational Support Survey</h5>
-                        <p class="text-muted mb-0 small">Survey to identify families needing educational support</p>
-                    </div>
-                    <span class="badge badge-pill badge-light">Completed</span>
-                </div>
-
-                <!-- Budget and Distributed -->
-                <div class="d-flex justify-content-between mb-3">
-                    <div>
-                    <span class="text-muted d-block">Created: 2024-08-01</span>
-                    </div>
-                    <div class="text-end">
-                    <span class="text-muted d-block">Deadline: 2024-09-15</span>
-                    </div>
-                </div>
-
-                <!-- Beneficiaries and Remaining -->
-                <div class="d-flex justify-content-between border-top pt-3 mb-3">
-                    <div>
-                    <span class="text-muted d-block">Responses: 450 / 450</span>
-                    </div>
-                </div>
-                
-                <div class="progress mb-3">
-                    <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0"
-                    aria-valuemax="100">100%</div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-3">
-                    <button type="button" class="btn btn-outline-primary w-50 mr-2">View Details</button>
-                    <button type="button" class="btn btn-outline-primary w-50">Edit</button>
-                </div>
-
-
-                </div>
-            </div>
-        </div>
-    </div>
+    @else
+        <div class="alert alert-light border">No surveys found.</div>
+    @endif
 
 
   </div>

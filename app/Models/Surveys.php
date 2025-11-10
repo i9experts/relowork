@@ -18,6 +18,10 @@ class Surveys extends Model
     protected $casts = [
         'flags_json' => 'array',
         'recommendations_json' => 'array',
+        'revisit_flag' => 'boolean',
+        'revisit_from' => 'datetime',
+        'revisit_to' => 'datetime',
+        'date_time' => 'datetime',
     ];
 
     public function family()
