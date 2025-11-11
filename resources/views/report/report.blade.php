@@ -35,14 +35,9 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <button type="button"
-                    class="btn btn-outline-primary btn-pill mb-0 d-flex align-items-center mr-2 shadow-sm px-3">
+                <a href="{{ url('report/download-all') }}" class="btn btn-outline-primary btn-pill mb-0 d-flex align-items-center mr-2 shadow-sm px-3">
                     <i class="mdi mdi-download me-1"></i> Download All
-                </button>
-
-                <button type="button" class="btn btn-primary btn-pill mb-0 d-flex align-items-center shadow-sm px-3">
-                    <i class="mdi mdi-download me-1"></i> Export Report
-                </button>
+                </a>
             </div>
 
         </div>
@@ -123,32 +118,36 @@
                     <div class="card-body">
                         <h4 class="card-title fw-bold mb-1">Generate Custom Report</h4>
                         <p class="text-muted mb-4">Select report type and period to generate</p>
+                        <div class="w-100 mb-3">
+                            @include('partials.errors')
+                        </div>
 
-                        <form action="">
+                        <form action="{{ url('reports/generate') }}" method="POST">
+                            @csrf
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <!-- <label for="reportType" class="form-label fw-semibold mb-1">Report Type</label> -->
-                                    <select class="form-control rounded-0 bg-light select2" id="reportType"
+                                    <select class="form-control rounded-0 bg-light select2" id="reportType" name="type"
                                         style="width: 100%;">
-                                        <option>Select Report Type</option>
-                                        <option>Financial Report</option>
-                                        <option>Attendance Report</option>
-                                        <option>Performance Report</option>
-                                        <option>Survey Summary</option>
-                                        <option>Custom Report</option>
+                                        <option value="">Select Report Type</option>
+                                        <option value="Financial" {{ (data_get($filters,'type')=='Financial')?'selected':'' }}>Financial Report</option>
+                                        <option value="Attendance" {{ (data_get($filters,'type')=='Attendance')?'selected':'' }}>Attendance Report</option>
+                                        <option value="Performance" {{ (data_get($filters,'type')=='Performance')?'selected':'' }}>Performance Report</option>
+                                        <option value="Survey" {{ (data_get($filters,'type')=='Survey')?'selected':'' }}>Survey Summary</option>
+                                        <option value="Custom" {{ (data_get($filters,'type')=='Custom')?'selected':'' }}>Custom Report</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <!-- <label for="period" class="form-label fw-semibold mb-1">Period</label> -->
-                                    <select class="form-control rounded-0 bg-light select2" id="period"
+                                    <select class="form-control rounded-0 bg-light select2" id="period" name="period"
                                         style="width: 100%;">
-                                        <option>Select Period</option>
-                                        <option>This Month</option>
-                                        <option>Last Month</option>
-                                        <option>This Quarter</option>
-                                        <option>This Year</option>
-                                        <option>Custom Range</option>
+                                        <option value="">Select Period</option>
+                                        <option value="This Month" {{ (data_get($filters,'period')=='This Month')?'selected':'' }}>This Month</option>
+                                        <option value="Last Month" {{ (data_get($filters,'period')=='Last Month')?'selected':'' }}>Last Month</option>
+                                        <option value="This Quarter" {{ (data_get($filters,'period')=='This Quarter')?'selected':'' }}>This Quarter</option>
+                                        <option value="This Year" {{ (data_get($filters,'period')=='This Year')?'selected':'' }}>This Year</option>
+                                        <option value="Custom Range" {{ (data_get($filters,'period')=='Custom Range')?'selected':'' }}>Custom Range</option>
                                     </select>
                                 </div>
                             </div>
@@ -165,6 +164,7 @@
             </div>
         </div>
 
+        @if(!empty($should_load_report_list1))
         <div class="row">
           <div class="col-12">
               <div class="card">
@@ -183,13 +183,12 @@
                                         </div>
                                       </td>
                                       <td>
-                                        <h5 class="fw-semibold">October 2024 Financial Summary</h5>
-                                        <small class="text-muted d-block">Financial • 2024-10-13 • 2.4 MB</small>
+                                        <h5 class="fw-semibold">{{ data_get($filters,'type') ? data_get($filters,'type').' Report' : 'All Reports' }}</h5>
+                                        <small class="text-muted d-block">{{ data_get($filters,'type') ?: 'All' }} • {{ data_get($filters,'period') ?: 'All' }} • {{ now()->toDateTimeString() }}</small>
                                       </td>
-                                      <td>
-                                        <button type="button" class="btn btn-sm btn-primary me-2">Ready</button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary me-2">View</button>
-                                        <button type="button" class="btn btn-sm btn-primary"><i class="mdi mdi-download"></i></button>
+                                      <td class="text-end">
+                                        <a href="{{ url('report/view').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-outline-primary me-2">View Report</a>
+                                        <a href="{{ url('report/export').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-primary me-2"><i class="mdi mdi-download"></i> Download</a>
                                       </td>
                                   </tr>
                               </tbody>
@@ -199,7 +198,7 @@
               </div>
           </div>
         </div>
-
+        @endif
     </div>
 </div>
 @endsection
@@ -212,5 +211,14 @@
             width: '100%'
         });
     });
+
+    function exportWithFilters() {
+        var type = $('#reportType').val() || '';
+        var period = $('#period').val() || '';
+        var url = new URL("{{ url('report/export') }}", window.location.origin);
+        if (type) url.searchParams.set('type', type);
+        if (period) url.searchParams.set('period', period);
+        window.location.href = url.toString();
+    }
 </script>
 @endpush

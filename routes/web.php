@@ -89,6 +89,14 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'cms.survey.destroy',
     ]);
 
+    // Reports: define specific routes before resource to avoid conflicts
+    Route::get('report/export', [ReportController::class, 'export'])->name('cms.report.export');
+    Route::get('report/download-all', [ReportController::class, 'downloadAll'])->name('cms.report.downloadAll');
+    Route::post('reports/generate', [ReportController::class, 'generate'])->name('cms.report.generate');
+    // Backward-compat alias in case old cached views still post to report/generate
+    Route::post('report/generate', [ReportController::class, 'generate']);
+    Route::get('report/view', [ReportController::class, 'view'])->name('cms.report.view');
+
     Route::resource('report', ReportController::class)->names([
         'index' => 'cms.report.index',
         'create' => 'cms.report.create',
