@@ -646,7 +646,7 @@ class SurveysController extends Controller
                 }
             }
 
-            return redirect()->route('cms.survey.show', $survey->id)->with('success','Survey updated successfully.');
+            return redirect()->route('cms.survey.index', $survey->id)->with('success','Survey updated successfully.');
         });
     }
 
