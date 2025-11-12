@@ -129,4 +129,3 @@ Route::middleware('auth')->group(function () {
     Route::post('setting/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
 });
 
-
