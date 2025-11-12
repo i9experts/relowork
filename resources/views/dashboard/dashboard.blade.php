@@ -42,8 +42,8 @@
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Total Families</p>
-              <span class="h3 d-block text-white mb-0">476</span>
-              <small class="text-light opacity-75">+12.5% from last month</small>
+              <span class="h3 d-block text-white mb-0">{{ $families }}</span>
+              <!-- <small class="text-light opacity-75">+12.5% from last month</small> -->
             </div>
           </div>
         </div>
@@ -58,8 +58,8 @@
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Active Aid Recipients</p>
-              <span class="h3 d-block text-white mb-0">342</span>
-              <small class="text-light opacity-75">+8.2% from last month</small>
+              <span class="h3 d-block text-white mb-0">{{ $aidPrograms }}</span>
+              <!-- <small class="text-light opacity-75">+8.2% from last month</small> -->
             </div>
           </div>
         </div>
@@ -74,8 +74,8 @@
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Total Distributed</p>
-              <span class="h3 d-block text-white mb-0">$67,500</span>
-              <small class="text-light opacity-75">+15.3% from last month</small>
+              <span class="h3 d-block text-white mb-0">{{ $disbursements }}</span>
+              <!-- <small class="text-light opacity-75">+15.3% from last month</small> -->
             </div>
           </div>
         </div>
@@ -90,8 +90,8 @@
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Active Volunteers</p>
-              <span class="h3 d-block text-white mb-0">28</span>
-              <small class="text-light opacity-75">+2 new volunteers</small>
+              <span class="h3 d-block text-white mb-0">{{ $volunteers }}</span>
+              <!-- <small class="text-light opacity-75">+2 new volunteers</small> -->
             </div>
           </div>
         </div>

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('families', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->constrained('organizations')->cascadeOnDelete();
             $table->string('family_code')->unique()->nullable();
             $table->string('head_of_family_name');
             $table->string('cnic', 15)->nullable()->index();
@@ -33,6 +34,7 @@ return new class extends Migration
             $table->boolean('zakat_eligibility')->default(false);
             $table->text('comment_note')->nullable();
             $table->unsignedBigInteger('volunteer_id')->nullable()->index();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Family;
+use App\Models\AidProgram;
+use App\Models\FinancialManagement;
+use App\Models\Volunteer;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -11,7 +15,13 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('dashboard.dashboard');
+        $data['families'] = Family::count();
+        $data['aidPrograms'] = AidProgram::where('status', 'Active')->count();
+        $data['volunteers'] = Volunteer::where('status', 'Active')->count();
+        $data['disbursements'] = FinancialManagement::where('transaction_type', 'Disbursement')->sum('amount');
+
+        // dd($data);
+        return view('dashboard.dashboard')->with($data);
     }
 
     /**

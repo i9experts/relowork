@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('family_members', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->foreignId('family_id')->constrained('families')->cascadeOnDelete();
             $table->string('name');
             $table->unsignedTinyInteger('age')->nullable();
@@ -17,6 +18,7 @@ return new class extends Migration
             $table->string('education')->nullable();
             $table->string('occupation')->nullable();
             $table->string('cnic', 15)->nullable();
+            $table->softDeletes();
             $table->timestamps();
             $table->index(['family_id','relation']);
         });

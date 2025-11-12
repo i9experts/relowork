@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('survey_code')->unique()->nullable();
             $table->foreignId('family_id')->nullable()->constrained('families')->nullOnDelete();
             $table->unsignedBigInteger('enumerator_id')->nullable()->index();
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->json('flags_json')->nullable();
             $table->unsignedInteger('score')->nullable();
             $table->json('recommendations_json')->nullable();
+            $table->softDeletes();            
             $table->timestamps();
             $table->index(['family_id','enumerator_id']);
         });

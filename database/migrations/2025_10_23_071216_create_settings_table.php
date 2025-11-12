@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             // Organization Information
             $table->string('organization_name')->nullable();
             $table->string('email_address')->nullable();
@@ -31,7 +32,7 @@ return new class extends Migration
             // Appearance
             $table->enum('theme', ['Light','Dark'])->default('Light');
             $table->enum('language', ['English','Urdu'])->default('English');
-
+            $table->softDeletes();            
             $table->timestamps();
         });
     }

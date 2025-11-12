@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('financial_management', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('transaction_code')->unique()->nullable();
             $table->date('date');
             $table->enum('transaction_type', ['Donation','Expense','Disbursement','Transfer']);
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->foreignId('recorded_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('remarks')->nullable();
+            $table->softDeletes();            
             $table->timestamps();
             $table->index(['aid_program_id','family_id']);
         });

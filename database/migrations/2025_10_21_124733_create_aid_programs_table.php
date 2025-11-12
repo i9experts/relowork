@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('aid_programs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('program_code')->unique()->nullable();
             $table->string('program_title');
             $table->enum('program_type', ['Food','Education','Water','Medical','Housing','Emergency'])->nullable();
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->unsignedBigInteger('volunteer_id')->nullable()->index();
             $table->enum('monitoring_frequency', ['Weekly','Monthly','Quarterly'])->nullable();
             $table->text('progress_notes')->nullable();
+            $table->softDeletes();            
             $table->timestamps();
         });
     }

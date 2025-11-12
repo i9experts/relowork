@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('title');
             $table->enum('report_type', ['financial','aid_distribution','family_assessment','volunteer_activity','survey_summary','custom'])->default('custom');
             $table->date('period_start')->nullable();
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->enum('status', ['queued','processing','ready','failed'])->default('queued');
             $table->unsignedBigInteger('size_bytes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->softDeletes();            
             $table->timestamps();
             $table->index(['report_type','status']);
         });

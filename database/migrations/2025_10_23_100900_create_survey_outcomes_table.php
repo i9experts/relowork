@@ -10,11 +10,13 @@ return new class extends Migration
     {
         Schema::create('survey_outcomes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->foreignId('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->string('indicator');
             $table->string('baseline')->nullable();
             $table->string('target_3m')->nullable();
             $table->string('target_6m')->nullable();
+            $table->softDeletes();            
             $table->timestamps();
         });
     }
