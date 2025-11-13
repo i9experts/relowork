@@ -10,9 +10,12 @@ return new class extends Migration
     {
         Schema::create('aid_program_family', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->foreignId('aid_program_id')->constrained('aid_programs')->cascadeOnDelete();
             $table->foreignId('family_id')->constrained('families')->cascadeOnDelete();
+            $table->softDeletes();
             $table->timestamps();
+
             $table->unique(['aid_program_id','family_id']);
         });
     }

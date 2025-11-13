@@ -10,8 +10,10 @@ return new class extends Migration
     {
         Schema::create('aid_program_volunteer', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->foreignId('aid_program_id')->constrained('aid_programs')->cascadeOnDelete();
             $table->foreignId('volunteer_id')->constrained('volunteers')->cascadeOnDelete();
+            $table->softDeletes();
             $table->timestamps();
             $table->unique(['aid_program_id','volunteer_id']);
         });
