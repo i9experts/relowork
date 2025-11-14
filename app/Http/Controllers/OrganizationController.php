@@ -12,7 +12,8 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        //
+        $data['organizations'] = Organization::get();
+        return view('organization.organization-form')->with($data);
     }
 
     /**
@@ -28,7 +29,51 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'registration_number' => 'required|unique:organizations,registration_number',
+            'organization_name'   => 'required',
+            'email'               => 'required|email|unique:organizations,email',
+            'phone'               => 'nullable',
+            'address'             => 'nullable',
+            'website'             => 'nullable|url',
+            'password'            => 'nullable|min:6',
+            'logo'                => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+        ],[
+            'registration_number.required' => 'The registration number field is required.',
+            'registration_number.unique'   => 'The registration number has already been taken.',
+            'organization_name.required'   => 'The organization name field is required.',
+            'email.required'               => 'The email field is required.',
+            'email.email'                  => 'The email must be a valid email address.',
+            'email.unique'                 => 'The email has already been taken.',
+            'password.min'                 => 'The password must be at least 6 characters.',
+            'logo.image'                   => 'The logo must be an image.',
+            'logo.mimes'                   => 'The logo must be a file of type: jpg, png, jpeg.',
+            'logo.max'                     => 'The logo may not be greater than 2048 kilobytes.',
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('logos', 'public');
+            $validatedData['logo'] = $logoPath;
+        }
+
+        if (!empty($validatedData['password'])) {
+            $validatedData['password'] = bcrypt($validatedData['password']);
+        } else {
+            unset($validatedData['password']);
+        }
+
+        Organization::create([
+            'registration_number' => $validatedData['registration_number'],
+            'organization_name'   => $validatedData['organization_name'],
+            'email'               => $validatedData['email'],
+            'phone'               => $validatedData['phone'] ?? null,
+            'address'             => $validatedData['address'] ?? null,
+            'website'             => $validatedData['website'] ?? null,
+            'password'            => $validatedData['password'] ?? null,
+            'logo'                => $validatedData['logo'] ?? null,
+        ]);
+
+        return redirect()->route('cms.organization-form.index')->with('success', 'Organization created successfully.');
     }
 
     /**

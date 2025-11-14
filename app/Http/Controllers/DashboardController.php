@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         $data['families'] = Family::count();
         $data['aidPrograms'] = AidProgram::where('status', 'Active')->count();
-        $data['volunteers'] = Volunteer::where('status', 'Active')->count();
+        $data['volunteers'] = Volunteer::count();
         $data['disbursements'] = FinancialManagement::where('transaction_type', 'Disbursement')->sum('amount');
 
         // dd($data);
