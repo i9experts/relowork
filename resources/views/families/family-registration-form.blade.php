@@ -32,7 +32,10 @@
                     <div class="w-100 mb-3">
                         @include('partials.errors')
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
+                    <!-- <div class="alert alert-warning mb-3" role="alert">
+                        ⚠️ Please ensure a Volunteer is created first. You cannot save this Family Registration Form without selecting or creating a Volunteer.
+                    </div> -->
+                    <div class="d-flex justi  fy-content-between align-items-center">
                       <div>
                         <h4 class="card-title fw-bold mb-1">Family Registration Form</h4>
                         <p class="text-muted mb-4">Purpose: To collect detailed beneficiary family data for eligibility and tracking.</p>

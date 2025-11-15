@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>Charity Management - @yield('title')</title>
+  <title>ReloWork - @yield('title')</title>
   <meta name="theme-name" content="mono" />
 
   @stack('page-styles')
@@ -31,7 +31,7 @@
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
   @else
-    <link href="{{ url('assets/images/favicon.png') }}" rel="shortcut icon" />
+    <link href="{{ url('assets/images/logo/relowork-dark-logo.png') }}" rel="shortcut icon" />
   @endif
 
   <style>

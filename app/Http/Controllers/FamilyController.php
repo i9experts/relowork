@@ -90,6 +90,7 @@ class FamilyController extends Controller
                 'zakat_eligibility'     => ($validated['zakat_eligibility'] === 'Yes'),
                 'comment_note'          => $validated['comment_note'] ?? null,
                 'volunteer_id'          => $validated['volunteer_id'],
+                // 'organization_id'       => auth()->user()->organization_id,
             ]);
 
             $members = request('members', []);

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('volunteers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('volunteer_code')->unique()->nullable();
             $table->string('full_name');
             $table->string('cnic', 15)->nullable()->index();
@@ -31,7 +32,8 @@ return new class extends Migration
             $table->enum('role', ['Field Volunteer','Data Verifier','Supervisor'])->nullable();
             $table->date('joining_date')->nullable();
             $table->string('picture_path')->nullable();
-            $table->text('remarks')->nullable();    
+            $table->text('remarks')->nullable();  
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');  
             $table->softDeletes();
             $table->timestamps();
         });
