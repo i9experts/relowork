@@ -37,15 +37,10 @@
 
             @include('partials.errors')
 
-            <form action="{{ route('cms.organization-form.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('organization.register.store') }}" method="POST" enctype="multipart/form-data" id="organization-form">
               @csrf
 
               <div class="form-row">
-
-                <div class="form-group col-md-6 mb-3">
-                  <label class="form-label">Registration Number <span class="text-danger">*</span></label>
-                  <input type="text" name="registration_number" class="form-control" value="{{ old('registration_number') }}">
-                </div>
 
                 <div class="form-group col-md-6 mb-3">
                   <label class="form-label">Organization Name <span class="text-danger">*</span></label>
@@ -55,6 +50,13 @@
                 <div class="form-group col-md-6 mb-3">
                   <label class="form-label">Email <span class="text-danger">*</span></label>
                   <input type="email" name="email" class="form-control" value="{{ old('email') }}">
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                  <label class="form-label">Organization Domain <span class="text-danger">*</span></label>
+                  <input type="text" name="domain" id="domain" class="form-control" value="{{ old('domain') }}" placeholder="e.g. myorg">
+                  <small class="text-muted">Ye subdomain ke liye use hoga: <span id="domain-preview">example</span>.relowork</small>
+                  <small class="text-danger d-none" id="domain-error">Ye domain already use ho raha hai.</small>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
@@ -78,8 +80,15 @@
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
-                  <label class="form-label">Password</label>
-                  <input type="password" name="password" class="form-control">
+                  <label class="form-label">Password <span class="text-danger">*</span></label>
+                  <input type="password" name="password" id="password" class="form-control" autocomplete="new-password">
+                  <small class="text-muted">Kam az kam 8 characters, uppercase, lowercase, number aur special character.</small>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                  <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                  <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" autocomplete="new-password">
+                  <small class="text-danger d-none" id="password-mismatch">Password aur confirm password match nahi kar rahe.</small>
                 </div>
 
               </div>
@@ -96,6 +105,72 @@
       </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      const password = document.getElementById('password');
+      const passwordConfirmation = document.getElementById('password_confirmation');
+      const mismatchText = document.getElementById('password-mismatch');
+      const domainInput = document.getElementById('domain');
+      const domainPreview = document.getElementById('domain-preview');
+      const domainError = document.getElementById('domain-error');
+
+      function checkPasswordMatch() {
+        if (!password || !passwordConfirmation || !mismatchText) return;
+        if (passwordConfirmation.value === '') {
+          mismatchText.classList.add('d-none');
+          return;
+        }
+        if (password.value !== passwordConfirmation.value) {
+          mismatchText.classList.remove('d-none');
+        } else {
+          mismatchText.classList.add('d-none');
+        }
+      }
+
+      if (password && passwordConfirmation) {
+        password.addEventListener('input', checkPasswordMatch);
+        passwordConfirmation.addEventListener('input', checkPasswordMatch);
+      }
+
+      if (domainInput && domainPreview) {
+        const base = '.relowork';
+        const updatePreview = () => {
+          const value = domainInput.value || 'example';
+          domainPreview.textContent = value;
+        };
+        domainInput.addEventListener('input', updatePreview);
+        updatePreview();
+      }
+
+      // Minimal domain duplicate check via fetch if API route configured
+      if (window.fetch && domainInput && domainError) {
+        let timeoutId;
+        domainInput.addEventListener('input', function () {
+          domainError.classList.add('d-none');
+          const value = this.value.trim();
+          if (!value) return;
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            fetch("{{ url('/api/organizations/check-domain') }}?domain=" + encodeURIComponent(value), {
+              headers: { 'Accept': 'application/json' }
+            })
+              .then(r => r.ok ? r.json() : null)
+              .then(data => {
+                if (data && data.exists) {
+                  domainError.classList.remove('d-none');
+                } else {
+                  domainError.classList.add('d-none');
+                }
+              })
+              .catch(() => {
+                // fail silently
+              });
+          }, 400);
+        });
+      }
+    })();
+  </script>
 
 </body>
 </html>

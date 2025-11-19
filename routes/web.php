@@ -12,17 +12,35 @@
     use App\Http\Controllers\AidProgramController;
     use App\Http\Controllers\OrganizationController;
     use App\Http\Controllers\FinancialManagementController;
+    use App\Models\Organization;
 
     // Route::get('/', function () {
     //     return view('welcome');
     // });
 
     Route::get('/', function () {
+        // Agar koi organization hi nahi bani hui to pehle organization setup form dikhayein
+        if (Organization::count() === 0) {
+            return redirect()->route('organization.register');
+        }
+
+        // Agar user logged in hai to dashboard par bhej dein
         if (auth()->check()) {
             return redirect()->route('cms.dashboard.index');
         }
+
+        // Warna login page dikhayein
         return redirect()->route('login');
     })->name('root');
+
+    // Public organization registration (pehla step) - bina login ke accessible
+    Route::get('/organization/register', [OrganizationController::class, 'index'])->name('organization.register');
+    Route::post('/organization/register', [OrganizationController::class, 'store'])->name('organization.register.store');
+
+    // Organization email OTP verification routes
+    Route::get('/organization/{organization}/otp', [\App\Http\Controllers\OrganizationOtpController::class, 'show'])->name('organization.otp.show');
+    Route::post('/organization/{organization}/otp', [\App\Http\Controllers\OrganizationOtpController::class, 'verify'])->name('organization.otp.verify');
+    Route::post('/organization/{organization}/otp/resend', [\App\Http\Controllers\OrganizationOtpController::class, 'resend'])->name('organization.otp.resend');
 
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
