@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('aid_programs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->string('program_code')->unique()->nullable();
             $table->string('program_title');
             $table->enum('program_type', ['Food','Education','Water','Medical','Housing','Emergency'])->nullable();

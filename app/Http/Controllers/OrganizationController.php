@@ -62,7 +62,7 @@ class OrganizationController extends Controller
             unset($validatedData['password']);
         }
 
-        Organization::create([
+        $organization = Organization::create([
             'registration_number' => $validatedData['registration_number'],
             'organization_name'   => $validatedData['organization_name'],
             'email'               => $validatedData['email'],
@@ -71,6 +71,24 @@ class OrganizationController extends Controller
             'website'             => $validatedData['website'] ?? null,
             'password'            => $validatedData['password'] ?? null,
             'logo'                => $validatedData['logo'] ?? null,
+        ]);
+
+        // Create admin user for the organization
+        \App\Models\User::create([
+            'name' => 'Admin',
+            'email' => $validatedData['email'],
+            'password' => bcrypt($validatedData['password'] ?? 'password'),
+            'organization_id' => $organization->id,
+            'email_verified_at' => now(),
+        ]);
+
+        // Create default settings for the organization
+        Setting::create([
+            'organization_name' => $validatedData['organization_name'],
+            'email_address' => $validatedData['email'],
+            'phone_number' => $validatedData['phone'] ?? null,
+            'address' => $validatedData['address'] ?? null,
+            'organization_id' => $organization->id,
         ]);
 
         return redirect()->route('cms.organization-form.index')->with('success', 'Organization created successfully.');

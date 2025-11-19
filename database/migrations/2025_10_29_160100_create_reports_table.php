@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->string('title');
             $table->enum('report_type', ['financial','aid_distribution','family_assessment','volunteer_activity','survey_summary','custom'])->default('custom');
             $table->date('period_start')->nullable();

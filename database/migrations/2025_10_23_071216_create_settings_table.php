@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             // Organization Information
+            $table->string('logo_path')->nullable();
+            $table->string('favicon_path')->nullable();
             $table->string('organization_name')->nullable();
             $table->string('email_address')->nullable();
             $table->string('phone_number', 20)->nullable();

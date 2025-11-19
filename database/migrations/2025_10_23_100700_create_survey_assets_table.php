@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('survey_assets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->foreignId('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->string('asset');
             $table->boolean('present')->default(false);

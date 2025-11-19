@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('family_members', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->foreignId('family_id')->constrained('families')->cascadeOnDelete();
             $table->string('name');
             $table->unsignedTinyInteger('age')->nullable();

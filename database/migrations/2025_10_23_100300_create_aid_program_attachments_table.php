@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('aid_program_attachments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->foreignId('aid_program_id')->constrained('aid_programs')->cascadeOnDelete();
             $table->string('type')->nullable();
             $table->string('path');

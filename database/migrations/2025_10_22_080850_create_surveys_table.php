@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->string('survey_code')->unique()->nullable();
             $table->foreignId('family_id')->nullable()->constrained('families')->nullOnDelete();
             $table->unsignedBigInteger('enumerator_id')->nullable()->index();

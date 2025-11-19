@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('financial_management', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->string('transaction_code')->unique()->nullable();
             $table->date('date');
             $table->enum('transaction_type', ['Donation','Expense','Disbursement','Transfer']);

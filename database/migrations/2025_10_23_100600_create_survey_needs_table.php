@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('survey_needs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->foreignId('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->string('sector');
             $table->unsignedTinyInteger('severity')->default(0); // 0-3
