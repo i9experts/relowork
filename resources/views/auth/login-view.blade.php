@@ -66,7 +66,14 @@
                             placeholder="Enter email" value="{{ old('email') }}" required>
                         </div>
                         <div class="form-group col-md-12 ">
-                          <input type="password" class="form-control input-lg" id="password" name="password" placeholder="Enter Password" required>
+                          <div class="input-group">
+                            <input type="password" class="form-control input-lg" id="password" name="password" placeholder="Enter Password" required>
+                            <div class="input-group-append">
+                              <button class="btn btn-outline-secondary" type="button" id="toggle-login-password" tabindex="-1">
+                                <i class="mdi mdi-eye-off"></i>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                         <div class="col-md-12">
 
@@ -92,6 +99,31 @@
             </div>
           </div>
         </div>
+
+    <script>
+      (function () {
+        var input = document.getElementById('password');
+        var btn = document.getElementById('toggle-login-password');
+        if (!input || !btn) return;
+
+        btn.addEventListener('click', function () {
+          var icon = this.querySelector('i');
+          if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) {
+              icon.classList.remove('mdi-eye-off');
+              icon.classList.add('mdi-eye');
+            }
+          } else {
+            input.type = 'password';
+            if (icon) {
+              icon.classList.remove('mdi-eye');
+              icon.classList.add('mdi-eye-off');
+            }
+          }
+        });
+      })();
+    </script>
 
 </body>
 </html>

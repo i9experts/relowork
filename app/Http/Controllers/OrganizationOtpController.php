@@ -10,7 +10,10 @@ class OrganizationOtpController extends Controller
     public function show(Organization $organization)
     {
         if ($organization->email_verified_at) {
-            return redirect()->route('login')->with('success', 'Your organization is already verified. Please log in.');
+            $orgLoginUrl = $this->organizationLoginUrl($organization);
+
+            return redirect()->away($orgLoginUrl)
+                ->with('success', 'Your organization is already verified. Please log in.');
         }
 
         return view('organization.otp-verify', [
@@ -39,14 +42,7 @@ class OrganizationOtpController extends Controller
             'otp_expires_at'    => null,
         ])->save();
 
-        // Local environment me: localhost login par hi bhejein
-        if (app()->environment('local')) {
-            return redirect()->route('login')
-                ->with('success', 'Email verified successfully. Please log in to continue.');
-        }
-
-        // Live / production: organization ke subdomain login par redirect karein
-        $orgLoginUrl = 'https://' . $organization->domain . '.relowork.com/login';
+        $orgLoginUrl = $this->organizationLoginUrl($organization);
 
         return redirect()->away($orgLoginUrl)
             ->with('success', 'Email verified successfully. Please log in to continue.');
@@ -59,7 +55,7 @@ class OrganizationOtpController extends Controller
         }
 
         $organization->otp_code = (string) random_int(100000, 999999);
-        $organization->otp_expires_at = now()->addMinutes(10);
+        $organization->otp_expires_at = now()->addMinutes(5);
         $organization->save();
 
         try {
@@ -69,5 +65,21 @@ class OrganizationOtpController extends Controller
         }
 
         return back()->with('success', 'A new verification code has been sent to your email.');
+    }
+
+    /**
+     * Build the login URL for an organization based on environment.
+     */
+    protected function organizationLoginUrl(Organization $organization): string
+    {
+        $domain = $organization->domain;
+
+        if (app()->environment('local')) {
+            // Example: http://orgname.localhost:8000/login
+            return 'http://' . $domain . '.localhost:8000/login';
+        }
+
+        // Production: https://orgname.relowork.com/login
+        return 'https://' . $domain . '.relowork.com/login';
     }
 }

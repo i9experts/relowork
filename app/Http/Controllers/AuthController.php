@@ -34,6 +34,42 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
+        // Enforce login only from the correct organization domain
+        $host = $request->getHost();
+        $parts = explode('.', $host);
+
+        if (app()->environment('local')) {
+            // Expect: {subdomain}.localhost
+            if (count($parts) !== 2 || $parts[1] !== 'localhost') {
+                return back()->withErrors([
+                    'email' => 'Please use your organization URL (e.g. {domain}.localhost:8000) to log in.',
+                ])->onlyInput('email');
+            }
+
+            $subdomain = $parts[0];
+
+            if (!$organization->domain || $organization->domain !== $subdomain) {
+                return back()->withErrors([
+                    'email' => 'You cannot log in from this URL. Please use your own organization URL.',
+                ])->onlyInput('email');
+            }
+        } else {
+            // Expect: {subdomain}.relowork.com (or similar 3-part host)
+            if (count($parts) < 3) {
+                return back()->withErrors([
+                    'email' => 'Invalid login host.',
+                ])->onlyInput('email');
+            }
+
+            $subdomain = $parts[0];
+
+            if (!$organization->domain || $organization->domain !== $subdomain) {
+                return back()->withErrors([
+                    'email' => 'You cannot log in from this URL. Please use your own organization URL.',
+                ])->onlyInput('email');
+            }
+        }
+
         $remember = (bool) $request->boolean('remember');
 
         // First authenticate user by email/password
