@@ -10,6 +10,10 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
+        if (Auth::check()) {
+            return redirect()->route('cms.dashboard.index');
+        }
+
         $organization = null;
 
         $host = request()->getHost();

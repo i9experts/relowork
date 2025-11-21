@@ -86,31 +86,41 @@ class VolunteerController extends Controller
             $picturePath = 'storage/'.$path;
         }
 
-        DB::transaction(function () use ($validated, $picturePath) {
+        // Determine organization context for the new volunteer user
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
+        DB::transaction(function () use ($validated, $picturePath, $organizationId) {
             // Create linked user
             $password = Str::random(12);
             $user = User::create([
                 'name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'password' => $password,
+                'organization_id' => $organizationId,
             ]);
 
             // Ensure volunteer role exists and assign
             $roleId = DB::table('roles')->where('slug', 'volunteer')->value('id');
             if (!$roleId) {
                 $roleId = DB::table('roles')->insertGetId([
-                    'name' => 'Volunteer',
-                    'slug' => 'volunteer',
-                    'description' => 'Volunteer User',
-                    'is_system' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'name'            => 'Volunteer',
+                    'slug'            => 'volunteer',
+                    'description'     => 'Volunteer User',
+                    'is_system'       => true,
+                    'organization_id' => $organizationId,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
                 ]);
             }
             DB::table('role_user')->updateOrInsert(
                 ['user_id' => $user->id, 'role_id' => $roleId],
-                ['created_at' => now(), 'updated_at' => now()]
+                [
+                    'organization_id' => $organizationId, // add this if table has this column
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
             );
+
 
             // Generate unique volunteer code
             $volunteerCode = 'VOL-' . strtoupper(Str::random(6));
@@ -122,6 +132,7 @@ class VolunteerController extends Controller
             Volunteer::create([
                 'volunteer_code' => $volunteerCode,
                 'user_id' => $user->id,
+                'organization_id' => $organizationId,
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'contact_number' => $validated['contact_number'] ?? null,
