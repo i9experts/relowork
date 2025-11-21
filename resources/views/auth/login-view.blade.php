@@ -9,6 +9,13 @@
 
   <title>Login page</title>
 
+  @php($__settings = isset($organization) && $organization ? \App\Models\Setting::where('organization_id', $organization->id)->first() : null)
+  @if($__settings && $__settings->favicon_path)
+    <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
+  @else
+    <link href="-" rel="shortcut icon" />
+  @endif
+
   <!-- GOOGLE FONTS -->
   <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
   <link href="{{ url('assets/plugins/material/css/materialdesignicons.min.css') }}" rel="stylesheet" />
@@ -23,9 +30,6 @@
   
 
 
-  <!-- FAVICON -->
-  <!-- <link href="images/favicon.png" rel="shortcut icon" /> -->
-
   <!--
     HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries
   -->
@@ -35,6 +39,16 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
   <script src="{{ url('assets/plugins/nprogress/nprogress.js') }}"></script>
+
+  <style>
+    .gradient-header {
+      /* background: linear-gradient(135deg, var(--primary), var(--secondary)); */
+      background-color: var(--secondary);
+      height: 6px;
+      width: 100%;
+      border-radius: 10px 10px 0 0;
+    }
+  </style>
 </head>
 
 </head>
@@ -43,18 +57,28 @@
           <div class="d-flex flex-column justify-content-between">
             <div class="row justify-content-center">
               <div class="col-lg-6 col-md-10">
-                <div class="card card-default mb-0">
-                  <div class="card-header pb-0">
-                    <!-- <div class="app-brand w-100 d-flex justify-content-center border-bottom-0">
-                      <a class="w-auto pl-0" href="">
-                        <img src="images/logo.png" alt="Mono">
-                        <span class="brand-name text-dark">MONO</span>
-                      </a>
-                    </div> -->
-                  </div>
-                  <div class="card-body px-5 pb-5 pt-0">
+                <div class="card card-default mb-0" style="border-radius:16px;">
+                  <div class="gradient-header"></div>
+                  <div class="card-body px-5 pb-5 pt-4">
 
-                    <h4 class="text-dark mb-6 text-center">Sign in for free</h4>
+                    <div class="text-center mb-4">
+                      <div class="app-brand w-100 d-flex justify-content-center border-bottom-0">
+                        <a class="w-auto pl-0 d-flex flex-column align-items-center" href="#">
+                          @if(isset($organization) && $organization && $organization->logo)
+                            <img src="{{ asset('storage/' . $organization->logo) }}" alt="{{ $organization->organization_name }} Logo" style="max-width:180px; height:auto; display:block; margin-bottom:8px;">
+                          @elseif(isset($organization) && $organization)
+                            <span class="brand-name text-dark" style="font-size:22px; font-weight:700;">
+                              {{ $organization->organization_name }}
+                            </span>
+                            <small class="text-muted">Logo</small>
+                          @else
+                            <span class="brand-name text-dark" style="font-size:22px; font-weight:700;">ReloWork</span>
+                          @endif
+                        </a>
+                      </div>
+                    </div>
+
+                    <h4 class="text-dark text-center mb-3">Sign in to your account</h4>
 
                     @include('partials.errors')
 
@@ -84,7 +108,7 @@
                               <label class="custom-control-label" for="customCheck2">Remember me</label>
                             </div>
 
-                            <a class="text-color" href="#"> Forgot password? </a>
+                            <a class="text-color" href="{{ route('password.request') }}"> Forgot password? </a>
 
                           </div>
 

@@ -10,7 +10,28 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login-view');
+        $organization = null;
+
+        $host = request()->getHost();
+        $parts = explode('.', $host);
+
+        if (app()->environment('local')) {
+            // Expect {subdomain}.localhost in local dev
+            if (count($parts) === 2 && $parts[1] === 'localhost') {
+                $subdomain = $parts[0];
+                $organization = Organization::where('domain', $subdomain)->first();
+            }
+        } else {
+            // Expect {subdomain}.relowork.com or similar 3-part host
+            if (count($parts) >= 3) {
+                $subdomain = $parts[0];
+                $organization = Organization::where('domain', $subdomain)->first();
+            }
+        }
+
+        return view('auth.login-view', [
+            'organization' => $organization,
+        ]);
     }
 
     public function login(Request $request)
