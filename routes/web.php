@@ -9,6 +9,7 @@
     use App\Http\Controllers\SurveysController;
     use App\Http\Controllers\DashboardController;
     use App\Http\Controllers\VolunteerController;
+    use App\Http\Controllers\VolunteerSettingsController;
     use App\Http\Controllers\AidProgramController;
     use App\Http\Controllers\OrganizationController;
     use App\Http\Controllers\FinancialManagementController;
@@ -140,15 +141,24 @@
             'destroy' => 'cms.report.destroy',
         ]);
 
-        Route::resource('volunteer', VolunteerController::class)->names([
-            'index' => 'cms.volunteer.index',
-            'create' => 'cms.volunteer.create',
-            'store' => 'cms.volunteer.store',
-            'show' => 'cms.volunteer.show',
-            'edit' => 'cms.volunteer.edit',
-            'update' => 'cms.volunteer.update',
-            'destroy' => 'cms.volunteer.destroy',
-        ]);
+        Route::get('volunteer-settings', [VolunteerSettingsController::class, 'index'])->name('cms.volunteer-settings.index');
+        Route::post('volunteer-settings/education-level', [VolunteerSettingsController::class, 'storeEducationLevel'])->name('cms.volunteer-settings.education-level.store');
+        Route::post('volunteer-settings/availability', [VolunteerSettingsController::class, 'storeAvailability'])->name('cms.volunteer-settings.availability.store');
+        Route::post('volunteer-settings/project-type', [VolunteerSettingsController::class, 'storeProjectType'])->name('cms.volunteer-settings.project-type.store');
+        Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
+        Route::post('volunteer-settings/language', [VolunteerSettingsController::class, 'storeLanguage'])->name('cms.volunteer-settings.language.store');
+
+        Route::middleware('permission:volunteers')->group(function () {
+            Route::resource('volunteer', VolunteerController::class)->names([
+                'index' => 'cms.volunteer.index',
+                'create' => 'cms.volunteer.create',
+                'store' => 'cms.volunteer.store',
+                'show' => 'cms.volunteer.show',
+                'edit' => 'cms.volunteer.edit',
+                'update' => 'cms.volunteer.update',
+                'destroy' => 'cms.volunteer.destroy',
+            ]);
+        });
 
         Route::resource('setting', SettingController::class)->names([
             'index' => 'cms.setting.index',

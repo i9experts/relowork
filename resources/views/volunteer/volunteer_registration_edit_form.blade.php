@@ -97,14 +97,13 @@
 
                 <!-- Education Level -->
                 <div class="col-md-6 mb-3">
-                  <label for="education_level">Education Level</label>
-                  @php $edu = old('education_level', $volunteer->education_level); @endphp
-                  <select class="form-control rounded-0 bg-light select2" id="education_level" name="education_level" style="width: 100%;">
+                  <label for="education_level_id">Education Level</label>
+                  @php $edu = old('education_level_id', $volunteer->education_level_id); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="education_level_id" name="education_level_id" style="width: 100%;">
                     <option disabled {{ $edu ? '' : 'selected' }}>Select Education Level</option>
-                    <option value="Matric" {{ $edu=='Matric' ? 'selected' : '' }}>Matric</option>
-                    <option value="Intermediate" {{ $edu=='Intermediate' ? 'selected' : '' }}>Intermediate</option>
-                    <option value="Graduate" {{ $edu=='Graduate' ? 'selected' : '' }}>Graduate</option>
-                    <option value="Post-Graduate" {{ $edu=='Post-Graduate' ? 'selected' : '' }}>Post-Graduate</option>
+                    @foreach($educationLevels as $level)
+                      <option value="{{ $level->id }}" {{ (string)$edu === (string)$level->id ? 'selected' : '' }}>{{ $level->name }}</option>
+                    @endforeach
                   </select>
                 </div>
 
@@ -117,31 +116,35 @@
 
                 <!-- Languages -->
                 <div class="col-md-6 mb-3">
-                  <label for="languages">Languages</label>
-                  <input type="text" class="form-control rounded-0 bg-light" id="languages"
-                         name="languages" value="{{ old('languages', $volunteer->languages) }}" placeholder="e.g., Urdu, Sindhi, English">
+                  <label for="language_ids">Languages</label>
+                  @php $lng = collect(old('language_ids', $volunteer->language_ids ?? [])); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="language_ids" name="language_ids[]" multiple style="width: 100%;">
+                    @foreach($languages as $lang)
+                      <option value="{{ $lang->id }}" {{ $lng->contains($lang->id) ? 'selected' : '' }}>{{ $lang->name }}</option>
+                    @endforeach
+                  </select>
                 </div>
 
                 <!-- Availability -->
                 <div class="col-md-6 mb-3">
-                  <label for="availability">Availability</label>
-                  @php $av = old('availability', $volunteer->availability); @endphp
-                  <select class="form-control rounded-0 bg-light select2" id="availability" name="availability" style="width: 100%;">
+                  <label for="availability_id">Availability</label>
+                  @php $av = old('availability_id', $volunteer->availability_id); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="availability_id" name="availability_id" style="width: 100%;">
                     <option disabled {{ $av ? '' : 'selected' }}>Select Availability</option>
-                    <option value="Full-time" {{ $av=='Full-time' ? 'selected' : '' }}>Full-time</option>
-                    <option value="Part-time" {{ $av=='Part-time' ? 'selected' : '' }}>Part-time</option>
-                    <option value="Event-based" {{ $av=='Event-based' ? 'selected' : '' }}>Event-based</option>
+                    @foreach($availabilities as $a)
+                      <option value="{{ $a->id }}" {{ (string)$av === (string)$a->id ? 'selected' : '' }}>{{ $a->name }}</option>
+                    @endforeach
                   </select>
                 </div>
 
                 <!-- Preferred Project Type -->
                 <div class="col-md-6 mb-3">
-                  <label for="preferred_projects">Preferred Project Type</label>
-                  @php $pp = collect(old('preferred_projects', $volunteer->preferred_projects ?? [])); @endphp
-                  <select class="form-control rounded-0 bg-light select2" id="preferred_projects" name="preferred_projects[]" multiple style="width: 100%;">
-                    <option value="Education" {{ $pp->contains('Education') ? 'selected' : '' }}>Education</option>
-                    <option value="Food" {{ $pp->contains('Food') ? 'selected' : '' }}>Food</option>
-                    <option value="Medical" {{ $pp->contains('Medical') ? 'selected' : '' }}>Medical</option>
+                  <label for="preferred_project_type_ids">Preferred Project Type</label>
+                  @php $pp = collect(old('preferred_project_type_ids', $volunteer->preferred_project_type_ids ?? [])); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="preferred_project_type_ids" name="preferred_project_type_ids[]" multiple style="width: 100%;">
+                    @foreach($projectTypes as $p)
+                      <option value="{{ $p->id }}" {{ $pp->contains($p->id) ? 'selected' : '' }}>{{ $p->name }}</option>
+                    @endforeach
                   </select>
                 </div>
 
@@ -152,24 +155,26 @@
                          name="emergency_contact" value="{{ old('emergency_contact', $volunteer->emergency_contact) }}" placeholder="0333-9876543">
                 </div>
 
-                <!-- Assigned Projects (placeholder same as create) -->
+                <!-- Assigned Projects -->
                 <div class="col-md-6 mb-3">
-                  <label for="assigned_projects">Assigned Projects</label>
-                    <select class="form-control rounded-0 bg-light select2" id="assigned_projects" name="assigned_projects[]" multiple style="width: 100%;">
-                        <option value="Aid">Aid Program</option>
-                        <option value="Cid">Cid Program</option>
-                    </select>
+                  <label for="assigned_project_type_ids">Assigned Projects</label>
+                  @php $ap = collect(old('assigned_project_type_ids', $volunteer->assigned_project_type_ids ?? [])); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="assigned_project_type_ids" name="assigned_project_type_ids[]" multiple style="width: 100%;">
+                    @foreach($projectTypes as $p)
+                      <option value="{{ $p->id }}" {{ $ap->contains($p->id) ? 'selected' : '' }}>{{ $p->name }}</option>
+                    @endforeach
+                  </select>
                 </div>
 
                 <!-- Role / Designation -->
                 <div class="col-md-6 mb-3">
-                  <label for="role">Role / Designation</label>
-                  @php $role = old('role', $volunteer->role); @endphp
-                  <select class="form-control rounded-0 bg-light select2" id="role" name="role" style="width: 100%;">
-                    <option disabled {{ $role ? '' : 'selected' }}>Select Role</option>
-                    <option value="Field Volunteer" {{ $role=='Field Volunteer' ? 'selected' : '' }}>Field Volunteer</option>
-                    <option value="Data Verifier" {{ $role=='Data Verifier' ? 'selected' : '' }}>Data Verifier</option>
-                    <option value="Supervisor" {{ $role=='Supervisor' ? 'selected' : '' }}>Supervisor</option>
+                  <label for="volunteer_role_id">Role / Designation</label>
+                  @php $roleId = old('volunteer_role_id', $volunteer->volunteer_role_id); @endphp
+                  <select class="form-control rounded-0 bg-light select2" id="volunteer_role_id" name="volunteer_role_id" style="width: 100%;">
+                    <option disabled {{ $roleId ? '' : 'selected' }}>Select Role</option>
+                    @foreach($volunteerRoles as $r)
+                      <option value="{{ $r->id }}" {{ (string)$roleId === (string)$r->id ? 'selected' : '' }}>{{ $r->name }}</option>
+                    @endforeach
                   </select>
                 </div>
 
@@ -191,6 +196,72 @@
                   <label for="remarks">Remarks</label>
                   <textarea class="form-control rounded-0 bg-light" id="remarks" name="remarks" rows="3"
                             placeholder="Enter any remarks or notes">{{ old('remarks', $volunteer->remarks) }}</textarea>
+                </div>
+
+                <!-- Access & Permissions -->
+                <div class="col-md-6 mb-3">
+                  <label class="d-block mb-1">Access Control</label>
+                  @php
+                    $linkedUser = $volunteer->user;
+                    $isAdminOld = old('is_admin', optional($linkedUser)->is_admin);
+                    $basePerms = optional($linkedUser)->permissions ?? [];
+                    $oldPerms = old('permissions', $basePerms);
+                    $checked = function($key) use ($oldPerms) {
+                      return !empty($oldPerms[$key]);
+                    };
+                  @endphp
+
+                  <div class="form-check mb-2">
+                    <input type="hidden" name="is_admin" value="0">
+                    <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" value="1"
+                           {{ $isAdminOld ? 'checked' : '' }}>
+                    <label class="form-check-label" for="is_admin">Full Admin Access (all pages)</label>
+                  </div>
+
+                  <small class="text-muted d-block mb-1">If not admin, select which modules this volunteer can access:</small>
+
+                  <div class="border rounded p-2" id="permissions-list">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_dashboard" name="permissions[dashboard]" value="1"
+                             {{ $checked('dashboard') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_dashboard">Dashboard</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_families" name="permissions[families]" value="1"
+                             {{ $checked('families') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_families">Families</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_aid_programs" name="permissions[aid_programs]" value="1"
+                             {{ $checked('aid_programs') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_aid_programs">Aid Programs</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_financial" name="permissions[financial]" value="1"
+                             {{ $checked('financial') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_financial">Financial Management</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_surveys" name="permissions[surveys]" value="1"
+                             {{ $checked('surveys') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_surveys">Surveys</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_reports" name="permissions[reports]" value="1"
+                             {{ $checked('reports') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_reports">Reports</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_volunteers" name="permissions[volunteers]" value="1"
+                             {{ $checked('volunteers') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_volunteers">Volunteers</label>
+                    </div>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="perm_settings" name="permissions[settings]" value="1"
+                             {{ $checked('settings') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="perm_settings">Settings</label>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Status -->

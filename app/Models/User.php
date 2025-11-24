@@ -44,7 +44,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'permissions' => 'array',
         ];
+    }
+
+    public function hasPermission(string $key): bool
+    {
+        if ($this->is_admin) {
+            return true;
+        }
+
+        $perms = $this->permissions ?? [];
+        return is_array($perms) && ($perms[$key] ?? false);
     }
 
     public function roles()

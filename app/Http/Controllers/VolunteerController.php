@@ -4,7 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Volunteer;
 use App\Models\User;
+use App\Models\EducationLevel;
+use App\Models\Availability;
+use App\Models\ProjectType;
+use App\Models\VolunteerRole;
+use App\Models\Language;
+use App\Models\Organization;
+use App\Mail\VolunteerWelcomeMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
@@ -58,7 +66,19 @@ class VolunteerController extends Controller
      */
     public function create()
     {
-        return view('volunteer.volunteer_registration_form');
+        $educationLevels = EducationLevel::orderBy('name')->get();
+        $availabilities = Availability::orderBy('name')->get();
+        $projectTypes = ProjectType::orderBy('name')->get();
+        $volunteerRoles = VolunteerRole::orderBy('name')->get();
+        $languages = Language::orderBy('name')->get();
+
+        return view('volunteer.volunteer_registration_form', compact(
+            'educationLevels',
+            'availabilities',
+            'projectTypes',
+            'volunteerRoles',
+            'languages'
+        ));
     }
 
     /**
@@ -69,22 +89,28 @@ class VolunteerController extends Controller
         $validated = $request->validate([
             'full_name' => ['required','string','max:255'],
             'email' => ['required','email','max:255','unique:users,email'],
+            'password' => ['required','string','min:8','confirmed'],
             'contact_number' => ['nullable','string','max:20'],
             'cnic' => ['nullable','string','max:15'],
             'gender' => ['nullable','in:Male,Female,Other'],
             'dob' => ['nullable','date'],
             'address' => ['nullable','string','max:255'],
-            'education_level' => ['nullable','in:Matric,Intermediate,Graduate,Post-Graduate'],
+            'education_level_id' => ['nullable','exists:education_levels,id'],
             'skills' => ['nullable','string'],
-            'languages' => ['nullable','string','max:255'],
-            'availability' => ['nullable','in:Full-time,Part-time,Event-based'],
-            'preferred_projects' => ['nullable','array'],
-            'preferred_projects.*' => ['string'],
+            'language_ids' => ['nullable','array'],
+            'language_ids.*' => ['integer','exists:languages,id'],
+            'availability_id' => ['nullable','exists:availabilities,id'],
+            'preferred_project_type_ids' => ['nullable','array'],
+            'preferred_project_type_ids.*' => ['integer','exists:project_types,id'],
+            'assigned_project_type_ids' => ['nullable','array'],
+            'assigned_project_type_ids.*' => ['integer','exists:project_types,id'],
             'emergency_contact' => ['nullable','string','max:20'],
-            'role' => ['nullable','in:Field Volunteer,Data Verifier,Supervisor'],
+            'volunteer_role_id' => ['nullable','exists:volunteer_roles,id'],
             'joining_date' => ['nullable','date'],
             'picture' => ['nullable','image','max:2048'],
             'remarks' => ['nullable','string'],
+            'is_admin' => ['sometimes','boolean'],
+            'permissions' => ['sometimes','array'],
         ]);
 
         $picturePath = null;
@@ -96,14 +122,28 @@ class VolunteerController extends Controller
         // Determine organization context for the new volunteer user
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        DB::transaction(function () use ($validated, $picturePath, $organizationId) {
-            // Create linked user
-            $password = Str::random(12);
+        // Capture plain password before transaction for email purposes
+        $plainPassword = $validated['password'];
+
+        $user = null;
+
+        DB::transaction(function () use ($request, $validated, $picturePath, $organizationId, $plainPassword, &$user) {
+            // Create linked user using provided password
+            $permissionsPayload = [];
+            $rawPerms = $request->input('permissions', []);
+            if (is_array($rawPerms)) {
+                foreach ($rawPerms as $key => $value) {
+                    $permissionsPayload[$key] = (bool) $value;
+                }
+            }
+
             $user = User::create([
                 'name' => $validated['full_name'],
                 'email' => $validated['email'],
-                'password' => $password,
+                'password' => $plainPassword,
                 'organization_id' => $organizationId,
+                'is_admin' => $request->boolean('is_admin'),
+                'permissions' => $permissionsPayload,
             ]);
 
             // Ensure volunteer role exists and assign
@@ -147,19 +187,44 @@ class VolunteerController extends Controller
                 'gender' => $validated['gender'] ?? null,
                 'dob' => $validated['dob'] ?? null,
                 'address' => $validated['address'] ?? null,
-                'education_level' => $validated['education_level'] ?? null,
+                'education_level_id' => $validated['education_level_id'] ?? null,
                 'skills' => $validated['skills'] ?? null,
-                'languages' => $validated['languages'] ?? null,
-                'availability' => $validated['availability'] ?? null,
-                'preferred_projects' => $validated['preferred_projects'] ?? null,
+                'language_ids' => $validated['language_ids'] ?? null,
+                'availability_id' => $validated['availability_id'] ?? null,
+                'preferred_project_type_ids' => $validated['preferred_project_type_ids'] ?? null,
+                'assigned_project_type_ids' => $validated['assigned_project_type_ids'] ?? null,
                 'emergency_contact' => $validated['emergency_contact'] ?? null,
-                'role' => $validated['role'] ?? null,
+                'volunteer_role_id' => $validated['volunteer_role_id'] ?? null,
                 'joining_date' => $validated['joining_date'] ?? null,
                 'picture_path' => $picturePath,
                 'remarks' => $validated['remarks'] ?? null,
                 'status' => 'Active',
             ]);
         });
+
+        // Send welcome email with login credentials if user and organization context are available
+        if ($user && $organizationId) {
+            $organization = Organization::find($organizationId);
+
+            // Build login URL similar to OrganizationOtpController
+            if ($organization && $organization->domain) {
+                $domain = $organization->domain;
+                if (app()->environment('local')) {
+                    $loginUrl = 'http://' . $domain . '.localhost:8000/login';
+                } else {
+                    $loginUrl = 'https://' . $domain . '.relowork.com/login';
+                }
+            } else {
+                // Fallback to current app login route
+                $loginUrl = route('login');
+            }
+
+            try {
+                Mail::to($user->email)->send(new VolunteerWelcomeMail($user, $plainPassword, $loginUrl));
+            } catch (\Throwable $e) {
+                // Fail silently; volunteer can still use forgot password flow
+            }
+        }
 
         return redirect()->route('cms.volunteer.index')->with('success', 'Record has been saved successfully.');
     }
@@ -177,7 +242,20 @@ class VolunteerController extends Controller
      */
     public function edit(Volunteer $volunteer)
     {
-        return view('volunteer.volunteer_registration_edit_form', compact('volunteer'));
+        $educationLevels = EducationLevel::orderBy('name')->get();
+        $availabilities = Availability::orderBy('name')->get();
+        $projectTypes = ProjectType::orderBy('name')->get();
+        $volunteerRoles = VolunteerRole::orderBy('name')->get();
+        $languages = Language::orderBy('name')->get();
+
+        return view('volunteer.volunteer_registration_edit_form', compact(
+            'volunteer',
+            'educationLevels',
+            'availabilities',
+            'projectTypes',
+            'volunteerRoles',
+            'languages'
+        ));
     }
 
     /**
@@ -193,17 +271,22 @@ class VolunteerController extends Controller
             'gender' => ['nullable','in:Male,Female,Other'],
             'dob' => ['nullable','date'],
             'address' => ['nullable','string','max:255'],
-            'education_level' => ['nullable','in:Matric,Intermediate,Graduate,Post-Graduate'],
+            'education_level_id' => ['nullable','exists:education_levels,id'],
             'skills' => ['nullable','string'],
-            'languages' => ['nullable','string','max:255'],
-            'availability' => ['nullable','in:Full-time,Part-time,Event-based'],
-            'preferred_projects' => ['nullable','array'],
-            'preferred_projects.*' => ['string'],
+            'language_ids' => ['nullable','array'],
+            'language_ids.*' => ['integer','exists:languages,id'],
+            'availability_id' => ['nullable','exists:availabilities,id'],
+            'preferred_project_type_ids' => ['nullable','array'],
+            'preferred_project_type_ids.*' => ['integer','exists:project_types,id'],
+            'assigned_project_type_ids' => ['nullable','array'],
+            'assigned_project_type_ids.*' => ['integer','exists:project_types,id'],
             'emergency_contact' => ['nullable','string','max:20'],
-            'role' => ['nullable','in:Field Volunteer,Data Verifier,Supervisor'],
+            'volunteer_role_id' => ['nullable','exists:volunteer_roles,id'],
             'joining_date' => ['nullable','date'],
             'picture' => ['nullable','image','max:2048'],
             'remarks' => ['nullable','string'],
+            'is_admin' => ['sometimes','boolean'],
+            'permissions' => ['sometimes','array'],
             'status' => ['required','in:Active,Inactive'],
         ]);
 
@@ -213,8 +296,8 @@ class VolunteerController extends Controller
             $picturePath = 'storage/'.$path;
         }
 
-        DB::transaction(function () use ($validated, $volunteer, $picturePath) {
-            // Update linked user name/email if provided
+        DB::transaction(function () use ($request, $validated, $volunteer, $picturePath) {
+            // Update linked user name/email and access if provided
             if ($volunteer->user) {
                 $userUpdates = [];
                 if (!empty($validated['full_name'])) {
@@ -223,6 +306,18 @@ class VolunteerController extends Controller
                 if (!empty($validated['email'])) {
                     $userUpdates['email'] = $validated['email'];
                 }
+
+                $permissionsPayload = [];
+                $rawPerms = $request->input('permissions', []);
+                if (is_array($rawPerms)) {
+                    foreach ($rawPerms as $key => $value) {
+                        $permissionsPayload[$key] = (bool) $value;
+                    }
+                }
+
+                $userUpdates['is_admin'] = $request->boolean('is_admin');
+                $userUpdates['permissions'] = $permissionsPayload;
+
                 if (!empty($userUpdates)) {
                     $volunteer->user->update($userUpdates);
                 }
@@ -236,13 +331,14 @@ class VolunteerController extends Controller
                 'gender' => $validated['gender'] ?? $volunteer->gender,
                 'dob' => $validated['dob'] ?? $volunteer->dob,
                 'address' => $validated['address'] ?? $volunteer->address,
-                'education_level' => $validated['education_level'] ?? $volunteer->education_level,
+                'education_level_id' => $validated['education_level_id'] ?? $volunteer->education_level_id,
                 'skills' => $validated['skills'] ?? $volunteer->skills,
-                'languages' => $validated['languages'] ?? $volunteer->languages,
-                'availability' => $validated['availability'] ?? $volunteer->availability,
-                'preferred_projects' => $validated['preferred_projects'] ?? $volunteer->preferred_projects,
+                'language_ids' => $validated['language_ids'] ?? $volunteer->language_ids,
+                'availability_id' => $validated['availability_id'] ?? $volunteer->availability_id,
+                'preferred_project_type_ids' => $validated['preferred_project_type_ids'] ?? $volunteer->preferred_project_type_ids,
+                'assigned_project_type_ids' => $validated['assigned_project_type_ids'] ?? $volunteer->assigned_project_type_ids,
                 'emergency_contact' => $validated['emergency_contact'] ?? $volunteer->emergency_contact,
-                'role' => $validated['role'] ?? $volunteer->role,
+                'volunteer_role_id' => $validated['volunteer_role_id'] ?? $volunteer->volunteer_role_id,
                 'joining_date' => $validated['joining_date'] ?? $volunteer->joining_date,
                 'picture_path' => $picturePath,
                 'remarks' => $validated['remarks'] ?? $volunteer->remarks,

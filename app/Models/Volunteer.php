@@ -10,7 +10,9 @@ class Volunteer extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'preferred_projects' => 'array',
+        'preferred_project_type_ids' => 'array',
+        'assigned_project_type_ids' => 'array',
+        'language_ids' => 'array',
         'dob' => 'date',
         'joining_date' => 'date',
     ];
@@ -20,6 +22,21 @@ class Volunteer extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function educationLevel()
+    {
+        return $this->belongsTo(EducationLevel::class);
+    }
+
+    public function availability()
+    {
+        return $this->belongsTo(Availability::class);
+    }
+
+    public function volunteerRole()
+    {
+        return $this->belongsTo(VolunteerRole::class);
     }
 
     public function families()

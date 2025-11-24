@@ -24,6 +24,11 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+    @php
+        $user = auth()->user();
+        $isAdmin = $user && property_exists($user, 'is_admin') ? (bool)$user->is_admin : false;
+    @endphp
+
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1">
         <div>
@@ -31,11 +36,13 @@
             <p class="text-muted fs-5">Manage volunteers and track their contributions</p>
         </div>
 
+        @if($isAdmin)
         <div>
             <a href="{{ route('cms.volunteer.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Add New Volunteer
             </a>
         </div>
+        @endif
     </div>
 
     <hr class="mt-2 mb-2">
@@ -215,12 +222,14 @@
                                       </button>
                                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $vol->id }}">
                                         <a class="dropdown-item" href="{{ route('cms.volunteer.show', $vol->id) }}">View</a>
-                                        <a class="dropdown-item" href="{{ route('cms.volunteer.edit', $vol->id) }}">Edit</a>
-                                        <form action="{{ route('cms.volunteer.destroy', $vol->id) }}" method="POST" onsubmit="return confirm('Delete this volunteer?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item text-danger">Delete</button>
-                                        </form>
+                                        @if($isAdmin)
+                                          <a class="dropdown-item" href="{{ route('cms.volunteer.edit', $vol->id) }}">Edit</a>
+                                          <form action="{{ route('cms.volunteer.destroy', $vol->id) }}" method="POST" onsubmit="return confirm('Delete this volunteer?');">
+                                              @csrf
+                                              @method('DELETE')
+                                              <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                          </form>
+                                        @endif
                                       </div>
                                     </div>
                                 </td>

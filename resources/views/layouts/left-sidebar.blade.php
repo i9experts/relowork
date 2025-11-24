@@ -12,6 +12,7 @@
           <span class="brand-name mb-0">Logo</span>
         @endif
       </a>
+
     </div>
 
       <!-- Sidebar scrollable area -->
@@ -60,20 +61,21 @@
             <span class="nav-text">Reports</span>
           </a>
         </li>
-        
+
         <li class="{{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}" href="{{ route('cms.volunteer.index') }}">
             <i class="mdi mdi-account-heart"></i>
             <span class="nav-text">Volunteers</span>
           </a>
         </li>
-        
+
         <li class="{{ request()->routeIs('cms.setting.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.setting.*') ? 'active' : '' }}" href="{{ route('cms.setting.index') }}">
             <i class="mdi mdi-settings"></i>
             <span class="nav-text">Settings</span>
           </a>
         </li>
+
 
       </ul>
     </div>
