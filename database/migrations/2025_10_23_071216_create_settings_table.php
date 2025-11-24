@@ -30,7 +30,8 @@ return new class extends Migration
             // Security Settings
             $table->boolean('two_factor_enabled')->default(false);
             $table->boolean('session_timeout_enabled')->default(false);
-
+            $table->integer('session_timeout_minutes')->default(30); // <-- Added field
+            
             // Appearance
             $table->enum('theme', ['Light','Dark'])->default('Light');
             $table->enum('language', ['English','Urdu'])->default('English');

@@ -66,11 +66,15 @@ class FamilyController extends Controller
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
 
+        // Determine organization context for the new volunteer user
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
         $familyCode = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $familyCode) {
             $family = Family::create([
                 'family_code'           => $familyCode,
+                'organization_id' => $organizationId,
                 'head_of_family_name'   => $validated['head_of_family_name'],
                 'cnic'                  => $validated['cnic'],
                 'gender'                => $validated['gender'],

@@ -13,7 +13,9 @@ class SettingController extends Controller
      */
     public function index()
     {
-        $data['settings'] = Setting::get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $data['settings'] = Setting::where('organization_id', $organizationId)->get();
         return view('setting.setting-form')->with($data);
     }
     /**
@@ -35,17 +37,22 @@ class SettingController extends Controller
             'email_address' => ['nullable','string','max:255'],
             'phone_number' => ['nullable','string','max:50'],
             'address' => ['nullable','string','max:500'],
+            'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
             // 'theme' => ['nullable','in:Light,Dark'],
             // 'language' => ['nullable','in:English,Urdu'],
             'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
             'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
         ]);
 
-        $validated['email_notifications'] = $request->boolean('email_notifications');
-        $validated['push_notifications'] = $request->boolean('push_notifications');
-        $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
-        $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
+        $validated['organization_id']        = $organizationId;
+        $validated['email_notifications']    = $request->boolean('email_notifications');
+        $validated['push_notifications']     = $request->boolean('push_notifications');
+        $validated['aid_approval_alerts']    = $request->boolean('aid_approval_alerts');
+        $validated['two_factor_enabled']     = $request->boolean('two_factor_enabled');
         $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+        $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
@@ -59,7 +66,7 @@ class SettingController extends Controller
         // Remove non-persisted input key
         unset($validated['logo'], $validated['favicon']);
 
-        $settings = Setting::first();
+        $settings = Setting::where('organization_id', $organizationId)->first();
         if ($settings) {
             $settings->update($validated);
         } else {
@@ -96,6 +103,7 @@ class SettingController extends Controller
             'email_address' => ['nullable','string','max:255'],
             'phone_number' => ['nullable','string','max:50'],
             'address' => ['nullable','string','max:500'],
+            'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
             // 'theme' => ['nullable','in:Light,Dark'],
             // 'language' => ['nullable','in:English,Urdu'],
             'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
@@ -107,6 +115,7 @@ class SettingController extends Controller
         $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
         $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
         $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+        $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
@@ -124,7 +133,7 @@ class SettingController extends Controller
         if ($setting && $setting->exists) {
             $setting->update($validated);
         } else {
-            $existing = Setting::first();
+            $existing = Setting::where('organization_id', $organizationId)->first();
             if ($existing) { $existing->update($validated); }
             else { Setting::create($validated); }
         }

@@ -170,7 +170,7 @@
                                     <hr>
                                 </div>  
                                 
-                                <div class="col-md-12 mb-3">
+                                <!-- <div class="col-md-12 mb-3">
                                     <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                                         <div>
                                             <h6 class="mb-1">Two-Factor Authentication</h6>
@@ -182,19 +182,33 @@
                                             <span class="switch-handle"></span>
                                         </label>
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <div class="col-md-12 mb-3">
-                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                        <div>
+                                    <div class="d-flex align-items-center justify-content-between border-bottom py-3">
+                                        <div class="d-flex flex-column">
                                             <h6 class="mb-1">Session Timeout</h6>
-                                            <small class="text-muted">Automatically log out after inactivity</small>
+                                            <small class="text-muted">Automatically log out after inactivity (minutes)</small>
                                         </div>
-                                        <label class="switch switch-icon switch-outline-alt-secondary switch-pill mb-0">
-                                            <input type="checkbox" class="switch-input form-check-input" checked>
-                                            <span class="switch-label"></span>
-                                            <span class="switch-handle"></span>
-                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @php($sessionTimeoutEnabled = old('session_timeout_enabled', optional($current)->session_timeout_enabled))
+                                            <div id="session-timeout-minutes-container" class="{{ $sessionTimeoutEnabled ? '' : 'd-none' }}  mr-2">
+                                                <input type="number" 
+                                                    name="session_timeout_minutes" 
+                                                    class="form-control" 
+                                                    style="width:100px;" 
+                                                    min="1"
+                                                    value="{{ old('session_timeout_minutes', optional($current)->session_timeout_minutes ?? 10) }}">
+                                            </div>
+                                            <label class="switch switch-icon switch-outline-alt-secondary switch-pill mb-0">
+                                                <input type="hidden" name="session_timeout_enabled" value="0">
+                                                <input type="checkbox" class="switch-input form-check-input" 
+                                                    name="session_timeout_enabled" value="1" 
+                                                    {{ old('session_timeout_enabled', optional($current)->session_timeout_enabled) ? 'checked' : '' }}>
+                                                <span class="switch-label"></span>
+                                                <span class="switch-handle"></span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -336,6 +350,21 @@ $(document).ready(function() {
         $('.language-btn-group button').removeClass('active btn-secondary').addClass('btn-outline-secondary');
         $(this).addClass('active btn-secondary').removeClass('btn-outline-secondary');
     });
+
+    // Toggle Session Timeout minutes input based on switch state
+    var $timeoutCheckbox = $('input[name="session_timeout_enabled"]');
+    var $timeoutMinutesContainer = $('#session-timeout-minutes-container');
+
+    function toggleTimeoutMinutes() {
+        if ($timeoutCheckbox.is(':checked')) {
+            $timeoutMinutesContainer.removeClass('d-none');
+        } else {
+            $timeoutMinutesContainer.addClass('d-none');
+        }
+    }
+
+    toggleTimeoutMinutes();
+    $timeoutCheckbox.on('change', toggleTimeoutMinutes);
 });
 </script>
 @endpush
