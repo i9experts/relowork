@@ -15,21 +15,28 @@ class VolunteerController extends Controller
      */
     public function index()
     {
-        $totalVolunteers = Volunteer::count();
-        $activeThisMonth = Volunteer::where('status', 'Active')
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $totalVolunteers = Volunteer::where('organization_id', $organizationId)->count();
+        $activeThisMonth = Volunteer::where('organization_id', $organizationId)
+            ->where('status', 'Active')
             ->whereMonth('updated_at', now()->month)
             ->whereYear('updated_at', now()->year)
             ->count();
 
-        $topVolunteers = Volunteer::orderByDesc('joining_date')
+        $topVolunteers = Volunteer::where('organization_id', $organizationId)
+            ->orderByDesc('joining_date')
             ->take(5)
             ->get(['id','full_name','joining_date']);
 
-        $recentActivity = Volunteer::orderByDesc('updated_at')
+        $recentActivity = Volunteer::where('organization_id', $organizationId)
+            ->orderByDesc('updated_at')
             ->take(5)
             ->get(['id','full_name','updated_at']);
 
-        $volunteers = Volunteer::latest()->paginate(10);
+        $volunteers = Volunteer::where('organization_id', $organizationId)
+            ->latest()
+            ->paginate(10);
 
         // Hours/points not tracked yet; set placeholders
         $totalHours = 0;

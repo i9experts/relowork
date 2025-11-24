@@ -19,7 +19,10 @@ class FinancialManagementController extends Controller
      */
     public function index()
     {
-        $data['volunteers'] = Volunteer::latest()->paginate(10);
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $data['volunteers'] = Volunteer::where('organization_id', $organizationId)
+            ->latest()->paginate(10);
 
         // Range filter (optional; defaults to this_month)
         $range = request('range', 'this_month');
@@ -92,10 +95,12 @@ class FinancialManagementController extends Controller
                 $mStart = $m->copy()->startOfMonth();
                 $mEnd = $m->copy()->endOfMonth();
                 $labels[] = $m->format('M Y');
-                $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                    ->whereIn('transaction_type', $incomeTypes)
                     ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
                     ->sum('amount');
-                $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                $expenseSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                    ->whereIn('transaction_type', $expenseTypes)
                     ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
                     ->sum('amount');
             }
@@ -107,10 +112,12 @@ class FinancialManagementController extends Controller
                     $dStart = $d->copy()->startOfDay();
                     $dEnd = $d->copy()->endOfDay();
                     $labels[] = $d->format('d M');
-                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                        ->whereIn('transaction_type', $incomeTypes)
                         ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
                         ->sum('amount');
-                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                    $expenseSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                        ->whereIn('transaction_type', $expenseTypes)
                         ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
                         ->sum('amount');
                 }
@@ -122,7 +129,8 @@ class FinancialManagementController extends Controller
                     $mmStart = $m->copy()->startOfMonth();
                     $mmEnd = $m->copy()->endOfMonth();
                     $labels[] = $m->format('M Y');
-                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                        ->whereIn('transaction_type', $incomeTypes)
                         ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
                         ->sum('amount');
                     $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
@@ -137,7 +145,9 @@ class FinancialManagementController extends Controller
         $data['chartExpenses'] = $expenseSeries;
 
         // Transactions list (respect range if provided)
-        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->latest();
+        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])
+            ->where('organization_id', $organizationId)
+            ->latest();
         if (isset($from, $to) && $from && $to) {
             $tx->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         }
@@ -147,8 +157,10 @@ class FinancialManagementController extends Controller
         $incomeTypes = ['Donation','Transfer'];
         $expenseTypes = ['Expense','Disbursement'];
 
-        $incomeQ = FinancialManagement::whereIn('transaction_type', $incomeTypes);
-        $expenseQ = FinancialManagement::whereIn('transaction_type', $expenseTypes);
+        $incomeQ = FinancialManagement::where('organization_id', $organizationId)
+            ->whereIn('transaction_type', $incomeTypes);
+        $expenseQ = FinancialManagement::where('organization_id', $organizationId)
+            ->whereIn('transaction_type', $expenseTypes);
         if (isset($from, $to) && $from && $to) {
             $incomeQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
             $expenseQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
@@ -157,7 +169,8 @@ class FinancialManagementController extends Controller
         $data['totalExpenses'] = (int) $expenseQ->sum('amount');
         $data['netBalance'] = $data['totalIncome'] - $data['totalExpenses'];
 
-        $pendingQ = FinancialManagement::whereNull('approved_by');
+        $pendingQ = FinancialManagement::where('organization_id', $organizationId)
+            ->whereNull('approved_by');
         if (isset($from, $to) && $from && $to) {
             $pendingQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         }
@@ -199,7 +212,9 @@ class FinancialManagementController extends Controller
             'remarks' => ['nullable','string'],
         ]);
 
-        DB::transaction(function () use ($request, $validated) {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
+        DB::transaction(function () use ($request, $validated, $organizationId) {
             $trxCode = 'TRX-' . now()->format('Y') . '-' . str_pad((string)((FinancialManagement::max('id') ?? 0) + 1), 3, '0', STR_PAD_LEFT);
 
             $proofPath = null;
@@ -213,6 +228,7 @@ class FinancialManagementController extends Controller
 
             FinancialManagement::create([
                 'transaction_code' => $trxCode,
+                'organization_id' => $organizationId,
                 'date' => $validated['date'],
                 'transaction_type' => $validated['transaction_type'],
                 'category' => $validated['category'] ?? null,

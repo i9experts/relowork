@@ -16,8 +16,11 @@ class AidProgramController extends Controller
      */
     public function index()
     {
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
         $status = request('status');
-        $query = AidProgram::withCount(['families','volunteers','attachments'])
+        $query = AidProgram::where('organization_id', $organizationId)
+            ->withCount(['families','volunteers','attachments'])
             ->withSum(['transactions as disbursed_amount' => function ($q) {
                 $q->where('transaction_type', 'Disbursement');
             }], 'amount');
@@ -27,9 +30,12 @@ class AidProgramController extends Controller
         }
 
         $data['programs'] = $query->orderBy('id','desc')->get();
-        $data['active_programs'] = AidProgram::where('status','Active')->count();
-        $data['total_budget_active'] = AidProgram::where('status','Active')->sum('total_budget');
-        $data['beneficiaries_total'] = AidProgram::sum('target_beneficiaries');
+        $data['active_programs'] = AidProgram::where('organization_id', $organizationId)
+            ->where('status','Active')->count();
+        $data['total_budget_active'] = AidProgram::where('organization_id', $organizationId)
+            ->where('status','Active')->sum('total_budget');
+        $data['beneficiaries_total'] = AidProgram::where('organization_id', $organizationId)
+            ->sum('target_beneficiaries');
         $data['current_status'] = $status;
         return view('aid-program.aid-program-list')->with($data);
     }
@@ -69,10 +75,12 @@ class AidProgramController extends Controller
         ]);
 
         $programCode = 'PRG-' . str_pad((string)((AidProgram::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        DB::transaction(function () use ($validated, $request, $programCode) {
+        DB::transaction(function () use ($validated, $request, $programCode, $organizationId) {
             $program = AidProgram::create([
                 'program_code' => $programCode,
+                'organization_id' => $organizationId,
                 'program_title' => $validated['program_title'],
                 'program_type' => $validated['program_type'] ?? null,
                 'description' => $validated['description'] ?? null,

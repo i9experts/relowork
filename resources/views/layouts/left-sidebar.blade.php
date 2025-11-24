@@ -3,7 +3,8 @@
   <div id="sidebar" class="sidebar sidebar-with-footer">
     <!-- Application Brand -->
     <div class="app-brand">
-      @php($settings = optional(\App\Models\Setting::first()))
+      @php($orgId = optional(request()->user())->organization_id ?? session('organization_id'))
+      @php($settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null)
       <a href="{{ route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
         @if($settings && $settings->logo_path)
           <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" class="brand-logo" />

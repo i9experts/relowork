@@ -15,9 +15,17 @@ class FamilyController extends Controller
      */
     public function index()
     {
-        $data['families'] = Family::with('volunteer')->withCount('members')->get();
-        $data['total_families'] = Family::count();
-        $data['active_recipients'] = Family::where('zakat_eligibility', true)->count();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $data['families'] = Family::with('volunteer')
+            ->where('organization_id', $organizationId)
+            ->withCount('members')
+            ->get();
+
+        $data['total_families'] = Family::where('organization_id', $organizationId)->count();
+        $data['active_recipients'] = Family::where('organization_id', $organizationId)
+            ->where('zakat_eligibility', true)
+            ->count();
         $data['pending_reviews'] = 0; // adjust when a review workflow exists
         return view('families.family-list')->with($data);
     }
@@ -66,15 +74,15 @@ class FamilyController extends Controller
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
 
-        // Determine organization context for the new volunteer user
+        // Determine organization context for the new family
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
         $familyCode = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
 
-        DB::transaction(function () use ($validated, $familyCode) {
+        DB::transaction(function () use ($validated, $familyCode, $organizationId) {
             $family = Family::create([
                 'family_code'           => $familyCode,
-                'organization_id' => $organizationId,
+                'organization_id'       => $organizationId,
                 'head_of_family_name'   => $validated['head_of_family_name'],
                 'cnic'                  => $validated['cnic'],
                 'gender'                => $validated['gender'],
@@ -104,12 +112,13 @@ class FamilyController extends Controller
                     $name = isset($m['name']) ? trim($m['name']) : '';
                     if ($name === '') { continue; }
                     $toCreate[] = [
-                        'name' => $name,
-                        'age' => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
-                        'relation' => $m['relation'] ?? null,
-                        'education' => $m['education'] ?? null,
-                        'occupation' => $m['occupation'] ?? null,
-                        'cnic' => $m['cnic'] ?? null,
+                        'organization_id' => $family->organization_id,
+                        'name'            => $name,
+                        'age'             => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
+                        'relation'        => $m['relation'] ?? null,
+                        'education'       => $m['education'] ?? null,
+                        'occupation'      => $m['occupation'] ?? null,
+                        'cnic'            => $m['cnic'] ?? null,
                     ];
                 }
                 if (!empty($toCreate)) {
@@ -204,12 +213,13 @@ class FamilyController extends Controller
                     $name = isset($m['name']) ? trim($m['name']) : '';
                     if ($name === '') { continue; }
                     $toCreate[] = [
-                        'name' => $name,
-                        'age' => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
-                        'relation' => $m['relation'] ?? null,
-                        'education' => $m['education'] ?? null,
-                        'occupation' => $m['occupation'] ?? null,
-                        'cnic' => $m['cnic'] ?? null,
+                        'organization_id' => $family->organization_id,
+                        'name'            => $name,
+                        'age'             => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
+                        'relation'        => $m['relation'] ?? null,
+                        'education'       => $m['education'] ?? null,
+                        'occupation'      => $m['occupation'] ?? null,
+                        'cnic'            => $m['cnic'] ?? null,
                     ];
                 }
             }
@@ -260,7 +270,10 @@ class FamilyController extends Controller
             'cnic' => ['nullable','string','max:15'],
         ]);
 
-        $member = $family->members()->create($data);
+        $member = $family->members()->create(array_merge(
+            ['organization_id' => $family->organization_id],
+            $data
+        ));
         // update cached count
         $family->update(['family_members_count' => $family->members()->count()]);
 
@@ -298,17 +311,21 @@ class FamilyController extends Controller
             'tehsil' => ['nullable','string','max:100'],
         ]);
 
+        // Determine organization for quick-created family
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
         $family = Family::create([
-            'head_of_family_name' => $data['head_of_family'],
-            'cnic' => $data['survey_cnic'] ?? null,
+            'organization_id'      => $organizationId,
+            'head_of_family_name'  => $data['head_of_family'],
+            'cnic'                 => $data['survey_cnic'] ?? null,
             'family_members_count' => $data['household_size'] ?? 0,
-            'zakat_eligibility' => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
-            'monthly_income' => $data['monthly_income'] ?? null,
-            'monthly_expense' => $data['monthly_expenses'] ?? null,
-            'address' => $data['address_full'] ?? null,
-            'province' => $data['province'] ?? null,
-            'city' => $data['district'] ?? null,
-            'area' => $data['tehsil'] ?? null,
+            'zakat_eligibility'    => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
+            'monthly_income'       => $data['monthly_income'] ?? null,
+            'monthly_expense'      => $data['monthly_expenses'] ?? null,
+            'address'              => $data['address_full'] ?? null,
+            'province'             => $data['province'] ?? null,
+            'city'                 => $data['district'] ?? null,
+            'area'                 => $data['tehsil'] ?? null,
         ]);
 
         return response()->json(['ok'=>true,'family'=>$family]);

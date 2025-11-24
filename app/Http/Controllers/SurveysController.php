@@ -21,8 +21,11 @@ class SurveysController extends Controller
      */
     public function index()
     {
-        $total = Surveys::count();
-        $pending = Surveys::where('revisit_flag', true)->count();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $total = Surveys::where('organization_id', $organizationId)->count();
+        $pending = Surveys::where('organization_id', $organizationId)
+            ->where('revisit_flag', true)->count();
         $completedRate = $total > 0 ? round((($total - $pending) / $total) * 100, 1) : 0;
 
         $data['stats'] = [
@@ -33,6 +36,7 @@ class SurveysController extends Controller
         ];
 
         $data['surveys'] = Surveys::with(['enumerator', 'family'])
+            ->where('organization_id', $organizationId)
             ->withCount(['members', 'uploads'])
             ->latest()
             ->paginate(10);
@@ -344,8 +348,13 @@ class SurveysController extends Controller
             // If no family linked, create a new family with members and attach to survey
             else {
                 $nextCode = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+
+                // Determine organization for survey-created family
+                $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
                 $family = Family::create([
                     'family_code' => $nextCode,
+                    'organization_id' => $organizationId,
                     'head_of_family_name' => $request->input('head_of_family','New Family'),
                     'cnic' => $request->input('survey_cnic'),
                     'family_members_count' => (int)($request->input('household_size') ?? 0),

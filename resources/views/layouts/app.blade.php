@@ -27,7 +27,8 @@
   <!-- MONO CSS -->
   <link id="main-css-href" rel="stylesheet" href="{{ url('assets/css/style.css') }}" />
   <!-- FAVICON -->
-  @php($__settings = optional(\App\Models\Setting::first()))
+  @php($orgId = optional(request()->user())->organization_id ?? session('organization_id'))
+  @php($__settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null)
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
   @else
@@ -107,7 +108,7 @@
             <span class="sr-only">Toggle navigation</span>
           </button>
 
-          <span class="page-title">{{ optional(\App\Models\Setting::first())->organization_name ?: 'Your Name' }}</span>
+          <span class="page-title">{{ optional($__settings)->organization_name ?: 'Your Name' }}</span>
 
           <div class="navbar-right">
 
@@ -620,7 +621,7 @@
           if (!onDashboard) return;
 
           if (window.toastr) {
-            var orgName = @json(optional(\App\Models\Setting::first())->organization_name ?: 'Organization');
+            var orgName = @json(optional($__settings)->organization_name ?: 'Organization');
             var userName = @json(optional(auth()->user())->name ?: 'User');
             toastr.options = {
               closeButton: true,

@@ -15,10 +15,16 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $data['families'] = Family::count();
-        $data['aidPrograms'] = AidProgram::where('status', 'Active')->count();
-        $data['volunteers'] = Volunteer::count();
-        $data['disbursements'] = FinancialManagement::where('transaction_type', 'Disbursement')->sum('amount');
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+
+        $data['families'] = Family::where('organization_id', $organizationId)->count();
+        $data['aidPrograms'] = AidProgram::where('organization_id', $organizationId)
+            ->where('status', 'Active')
+            ->count();
+        $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->count();
+        $data['disbursements'] = FinancialManagement::where('organization_id', $organizationId)
+            ->where('transaction_type', 'Disbursement')
+            ->sum('amount');
 
         // dd($data);
         return view('dashboard.dashboard')->with($data);
