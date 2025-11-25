@@ -177,6 +177,7 @@
                               cellspacing="0" width="100%">
                               <tbody id="tbl_data">
                                   <tr>
+                                      @php($user = auth()->user())
                                       <td>
                                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary" style="width:40px; height:40px;">
                                           <i class="mdi mdi-file-chart text-white" style="font-size:20px;"></i>
@@ -187,8 +188,10 @@
                                         <small class="text-muted d-block">{{ data_get($filters,'type') ?: 'All' }} • {{ data_get($filters,'period') ?: 'All' }} • {{ now()->toDateTimeString() }}</small>
                                       </td>
                                       <td class="text-end">
+                                        @if($user && $user->hasPermission('reports'))
                                         <a href="{{ url('report/view').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-outline-primary me-2">View Report</a>
                                         <a href="{{ url('report/export').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-primary me-2"><i class="mdi mdi-download"></i> Download</a>
+                                        @endif
                                       </td>
                                   </tr>
                               </tbody>

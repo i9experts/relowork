@@ -22,7 +22,14 @@ class PasswordResetMail extends Mailable
 
     public function build()
     {
+        // Build password reset URL that matches PasswordResetController@showResetForm
+        $resetUrl = url('/password/reset/'.$this->token.'?email='.urlencode($this->user->email));
+
         return $this->subject('Reset Your Password')
-            ->view('emails.password-reset');
+            ->view('emails.password-reset')
+            ->with([
+                'user'      => $this->user,
+                'loginUrl'  => $resetUrl,
+            ]);
     }
 }

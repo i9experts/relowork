@@ -390,39 +390,51 @@
                   </footer>
                 </div>
               </li>
+
               <!-- User Account -->
               <li class="dropdown user-menu">
                 <button class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  <img src="{{ url('assets/images/user/user-xs-01.jpg')}}" class="user-image rounded-circle"
-                    alt="User Image" />
-                  <span class="d-none d-lg-inline-block">Admin</span>
+                  <img src="{{ Auth::user()->image ? asset('storage/' . Auth::user()->image) : url('assets/images/user/user-defult-profile.png') }}"
+                      class="user-image rounded-circle" alt="User Image">
+                  <span class="d-none d-lg-inline-block">{{ Auth::user()->name }}</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-right">
-                  <li>
-                    <a class="dropdown-link-item" href="#">
-                      <i class="mdi mdi-account-outline"></i>
-                      <span class="nav-text">Profile</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-link-item" href="{{ route('cms.setting.index') }}">
-                      <i class="mdi mdi-settings"></i>
-                      <span class="nav-text">Setting</span>
-                    </a>
-                  </li>
 
-                  <li class="dropdown-footer">
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
-                      @csrf
-                      <button type="submit" class="dropdown-item d-flex align-items-center">
-                        <i class="mdi mdi-logout mr-2"></i>
-                        <span>Log Out</span>
-                      </button>
-                    </form>
-                  </li>
-                  
-                </ul>
+                  <ul class="dropdown-menu dropdown-menu-right">
+
+                      <li class="px-3 py-2 border-bottom text-center"> 
+                        <strong>{{ Auth::user()->full_name ?? Auth::user()->name }}</strong><br>
+                        <small>{{ Auth::user()->email }}</small>
+                      </li>
+
+
+                      <li>
+                          <a class="dropdown-link-item" href="#">
+                              <i class="mdi mdi-account-outline"></i>
+                              <span class="nav-text">Profile</span>
+                          </a>
+                      </li>
+
+                      <li>
+                          <a class="dropdown-link-item" href="{{ route('cms.setting.index') }}">
+                              <i class="mdi mdi-settings"></i>
+                              <span class="nav-text">Setting</span>
+                          </a>
+                      </li>
+
+                      <li class="dropdown-footer">
+                          <form method="POST" action="{{ route('logout') }}" class="m-0">
+                              @csrf
+                              <button type="submit" class="dropdown-item d-flex align-items-center">
+                                  <i class="mdi mdi-logout mr-2"></i>
+                                  <span>Log Out</span>
+                              </button>
+                          </form>
+                      </li>
+
+                  </ul>
               </li>
+
+
             </ul>
           </div>
         </nav>

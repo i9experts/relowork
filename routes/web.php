@@ -74,6 +74,7 @@
             'destroy' => 'cms.organization-form.destroy',
         ]);
 
+        Route::middleware('permission:families')->group(function () {
         Route::resource('family', FamilyController::class)->names([
             'index' => 'cms.family.index',
             'create' => 'cms.family.create',
@@ -89,7 +90,9 @@
         Route::post('family/{family}/members', [FamilyController::class, 'addMember'])->name('cms.family.members.add');
         Route::delete('family-members/{member}', [FamilyController::class, 'deleteMember'])->name('cms.family.members.delete');
         Route::post('family/quick-create', [FamilyController::class, 'quickCreate'])->name('cms.family.quick-create');
+        });
 
+        Route::middleware('permission:aid_programs')->group(function () {
         Route::resource('aid-program', AidProgramController::class)->names([
             'index' => 'cms.aid-program.index',
             'create' => 'cms.aid-program.create',
@@ -99,8 +102,10 @@
             'update' => 'cms.aid-program.update',
             'destroy' => 'cms.aid-program.destroy',
         ]);
+        });
 
         // Place export route BEFORE resource to avoid conflict with the 'show' route
+        Route::middleware('permission:financial')->group(function () {
         Route::get('financial-management/export', [FinancialManagementController::class, 'export'])
             ->name('cms.financial-management.export');
         Route::resource('financial-management', FinancialManagementController::class)->names([
@@ -112,7 +117,9 @@
             'update' => 'cms.financial-management.update',
             'destroy' => 'cms.financial-management.destroy',
         ]);
+        });
 
+        Route::middleware('permission:surveys')->group(function () {
         Route::resource('survey', SurveysController::class)->names([
             'index' => 'cms.survey.index',
             'create' => 'cms.survey.create',
@@ -122,8 +129,10 @@
             'update' => 'cms.survey.update',
             'destroy' => 'cms.survey.destroy',
         ]);
+        });
 
         // Reports: define specific routes before resource to avoid conflicts
+        Route::middleware('permission:reports')->group(function () {
         Route::get('report/export', [ReportController::class, 'export'])->name('cms.report.export');
         Route::get('report/download-all', [ReportController::class, 'downloadAll'])->name('cms.report.downloadAll');
         Route::post('reports/generate', [ReportController::class, 'generate'])->name('cms.report.generate');
@@ -140,6 +149,7 @@
             'update' => 'cms.report.update',
             'destroy' => 'cms.report.destroy',
         ]);
+        });
 
         Route::get('volunteer-settings', [VolunteerSettingsController::class, 'index'])->name('cms.volunteer-settings.index');
         Route::post('volunteer-settings/education-level', [VolunteerSettingsController::class, 'storeEducationLevel'])->name('cms.volunteer-settings.education-level.store');
@@ -160,6 +170,7 @@
             ]);
         });
 
+        Route::middleware('permission:settings')->group(function () {
         Route::resource('setting', SettingController::class)->names([
             'index' => 'cms.setting.index',
             'create' => 'cms.setting.create',
@@ -170,5 +181,6 @@
             'destroy' => 'cms.setting.destroy',
         ]);
         Route::post('setting/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
+        });
     });
 

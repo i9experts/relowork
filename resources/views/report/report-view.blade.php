@@ -6,15 +6,19 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+    @php($user = auth()->user())
+
     <div class="d-flex justify-content-between align-items-center mb-2">
       <div>
         <h4 class="fw-bold text-dark mb-1">{{ $type ? $type.' Report' : 'Report' }}</h4>
         <p class="text-muted mb-0">Period: {{ $period ?: 'All' }}</p>
       </div>
       <div class="d-flex gap-2">
+        @if($user && $user->hasPermission('reports'))
         <a href="{{ url('report/export').'?type='.urlencode($type).'&period='.urlencode($period) }}" class="btn btn-primary btn-pill mr-2">
           <i class="mdi mdi-download me-1"></i> Export CSV
         </a>
+        @endif
         <a href="{{ route('cms.report.index') }}" class="btn btn-outline-secondary btn-pill">Back to Reports</a>
       </div>
     </div>

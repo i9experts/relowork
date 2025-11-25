@@ -176,6 +176,8 @@ class FinancialManagementController extends Controller
         }
         $data['pendingCount'] = $pendingQ->count();
 
+        // dd($data);
+
         return view('financial-management.financial-management-list')->with($data);
     }
 

@@ -28,6 +28,8 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+    @php($user = auth()->user())
+
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap">
         <div>
@@ -35,9 +37,11 @@
             <p class="text-muted fs-5 mb-0">Manage family assessments and survey data</p>
         </div>
 
+        @if($user && $user->hasPermission('surveys'))
         <a href="{{ route('cms.survey.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
             <i class="mdi mdi-plus-circle-outline mr-1"></i> Create New Survey
         </a>
+        @endif
 
     </div>
 
@@ -205,10 +209,12 @@
                                 </div>
                             </div>
 
+                            @if($user && $user->hasPermission('surveys'))
                             <div class="d-flex justify-content-between mt-3">
                                 <a href="{{ route('cms.survey.show', $survey->id) }}" class="btn btn-outline-primary w-50 mr-2">View Details</a>
                                 <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary w-50">Edit</a>
                             </div>
+                            @endif
 
                         </div>
                     </div>

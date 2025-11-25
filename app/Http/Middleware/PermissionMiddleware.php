@@ -22,7 +22,7 @@ class PermissionMiddleware
         }
 
         // Admins have full access
-        if (property_exists($user, 'is_admin') && $user->is_admin) {
+        if ($user->is_admin) {
             return $next($request);
         }
 

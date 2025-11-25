@@ -198,72 +198,6 @@
                             placeholder="Enter any remarks or notes">{{ old('remarks', $volunteer->remarks) }}</textarea>
                 </div>
 
-                <!-- Access & Permissions -->
-                <div class="col-md-6 mb-3">
-                  <label class="d-block mb-1">Access Control</label>
-                  @php
-                    $linkedUser = $volunteer->user;
-                    $isAdminOld = old('is_admin', optional($linkedUser)->is_admin);
-                    $basePerms = optional($linkedUser)->permissions ?? [];
-                    $oldPerms = old('permissions', $basePerms);
-                    $checked = function($key) use ($oldPerms) {
-                      return !empty($oldPerms[$key]);
-                    };
-                  @endphp
-
-                  <div class="form-check mb-2">
-                    <input type="hidden" name="is_admin" value="0">
-                    <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" value="1"
-                           {{ $isAdminOld ? 'checked' : '' }}>
-                    <label class="form-check-label" for="is_admin">Full Admin Access (all pages)</label>
-                  </div>
-
-                  <small class="text-muted d-block mb-1">If not admin, select which modules this volunteer can access:</small>
-
-                  <div class="border rounded p-2" id="permissions-list">
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_dashboard" name="permissions[dashboard]" value="1"
-                             {{ $checked('dashboard') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_dashboard">Dashboard</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_families" name="permissions[families]" value="1"
-                             {{ $checked('families') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_families">Families</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_aid_programs" name="permissions[aid_programs]" value="1"
-                             {{ $checked('aid_programs') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_aid_programs">Aid Programs</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_financial" name="permissions[financial]" value="1"
-                             {{ $checked('financial') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_financial">Financial Management</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_surveys" name="permissions[surveys]" value="1"
-                             {{ $checked('surveys') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_surveys">Surveys</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_reports" name="permissions[reports]" value="1"
-                             {{ $checked('reports') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_reports">Reports</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_volunteers" name="permissions[volunteers]" value="1"
-                             {{ $checked('volunteers') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_volunteers">Volunteers</label>
-                    </div>
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input" id="perm_settings" name="permissions[settings]" value="1"
-                             {{ $checked('settings') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="perm_settings">Settings</label>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Status -->
                 <div class="col-md-6 mb-3">
                   <label for="status">Status</label>
@@ -273,6 +207,136 @@
                     <option value="Inactive" {{ $currentStatus=='Inactive' ? 'selected' : '' }}>Inactive</option>
                   </select>
                 </div>
+
+                @if(auth()->user() && auth()->user()->is_admin)
+                <div class="row">
+                    <div class="col-12">
+                        <label class="d-block mb-1">Access Control</label>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2 border rounded p-2">
+                            <small class="text-muted mb-0">Full Admin Access (all pages)</small>
+                            <div class="custom-control custom-checkbox mb-0">
+                                <input type="hidden" name="is_admin" value="0">
+                                <input type="checkbox" class="custom-control-input" id="is_admin"
+                                      name="is_admin" value="1" {{ old('is_admin', optional($volunteer->user)->is_admin) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="is_admin"></label>
+                            </div>
+                        </div>
+
+                        <small class="text-muted d-block mt-1">
+                            If not admin, select which modules this volunteer can access:
+                        </small>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12 d-flex flex-wrap">
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_dashboard" name="permissions[dashboard]" value="1"
+                                      {{ old('permissions.dashboard', optional($volunteer->user)->permissions['dashboard'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_dashboard">Dashboard</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_families" name="permissions[families]" value="1"
+                                      {{ old('permissions.families', optional($volunteer->user)->permissions['families'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_families">Families</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_aid_programs" name="permissions[aid_programs]" value="1"
+                                      {{ old('permissions.aid_programs', optional($volunteer->user)->permissions['aid_programs'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_aid_programs">Aid Programs</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_financial" name="permissions[financial]" value="1"
+                                      {{ old('permissions.financial', optional($volunteer->user)->permissions['financial'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_financial">Financial Management</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_surveys" name="permissions[surveys]" value="1"
+                                      {{ old('permissions.surveys', optional($volunteer->user)->permissions['surveys'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_surveys">Surveys</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_reports" name="permissions[reports]" value="1"
+                                      {{ old('permissions.reports', optional($volunteer->user)->permissions['reports'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_reports">Reports</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_volunteers" name="permissions[volunteers]" value="1"
+                                      {{ old('permissions.volunteers', optional($volunteer->user)->permissions['volunteers'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_volunteers">Volunteers (access module)</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_volunteers_create" name="permissions[volunteers_create]" value="1"
+                                      {{ old('permissions.volunteers_create', optional($volunteer->user)->permissions['volunteers_create'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_volunteers_create">Volunteers - Create / Add</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_volunteers_edit" name="permissions[volunteers_edit]" value="1"
+                                      {{ old('permissions.volunteers_edit', optional($volunteer->user)->permissions['volunteers_edit'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_volunteers_edit">Volunteers - Edit</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_volunteers_delete" name="permissions[volunteers_delete]" value="1"
+                                      {{ old('permissions.volunteers_delete', optional($volunteer->user)->permissions['volunteers_delete'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_volunteers_delete">Volunteers - Delete</label>
+                            </div>
+                        </div>
+
+                        <div class="col-6 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input"
+                                      id="perm_settings" name="permissions[settings]" value="1"
+                                      {{ old('permissions.settings', optional($volunteer->user)->permissions['settings'] ?? null) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="perm_settings">Settings</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                @endif
+
+
+                
 
               </div>
 

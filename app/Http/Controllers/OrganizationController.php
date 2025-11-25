@@ -58,7 +58,7 @@ class OrganizationController extends Controller
             'email.email'                  => 'The email must be a valid email address.',
             'email.unique'                 => 'The email has already been taken.',
             'domain.required'              => 'The domain field is required.',
-            'domain.unique'                => 'This domain is already in use.',
+            'domain.unique'                => 'This domain is not available because it is already in use.',
             'password.required'            => 'The password field is required.',
             'password.min'                 => 'The password must be at least 8 characters.',
             'password.confirmed'           => 'The password confirmation does not match.',

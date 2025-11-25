@@ -6,6 +6,7 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+    @php($currentUser = auth()->user())
     <div class="d-flex justify-content-between align-items-center mb-1">
       <div>
         <h4 class="fw-bold text-dark mb-1">Volunteer Profile</h4>
@@ -42,18 +43,24 @@
           </div>
         </div>
 
+        @if($currentUser)
         <div class="card card-default mt-3">
           <div class="card-body">
             <div class="d-grid gap-2">
-              <a href="{{ route('cms.volunteer.edit', $volunteer->id) }}" class="btn btn-primary btn-sm w-100 mb-3">Edit</a>
+              @if($currentUser->hasPermission('volunteers_edit'))
+                <a href="{{ route('cms.volunteer.edit', $volunteer->id) }}" class="btn btn-primary btn-sm w-100 mb-3">Edit</a>
+              @endif
+              @if($currentUser->hasPermission('volunteers_delete'))
               <form action="{{ route('cms.volunteer.destroy', $volunteer->id) }}" method="POST" onsubmit="return confirm('Delete this volunteer?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-outline-danger btn-sm w-100">Delete</button>
               </form>
+              @endif
             </div>
           </div>
         </div>
+        @endif
       </div>
 
       <div class="col-md-8 mb-3">

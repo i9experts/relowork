@@ -26,7 +26,10 @@
 
     @php
         $user = auth()->user();
-        $isAdmin = $user && property_exists($user, 'is_admin') ? (bool)$user->is_admin : false;
+        $canViewVolunteers = $user && $user->hasPermission('volunteers');
+        $canCreateVolunteers = $user && $user->hasPermission('volunteers_create');
+        $canEditVolunteers = $user && $user->hasPermission('volunteers_edit');
+        $canDeleteVolunteers = $user && $user->hasPermission('volunteers_delete');
     @endphp
 
     <!-- Dashboard Header -->
@@ -36,7 +39,7 @@
             <p class="text-muted fs-5">Manage volunteers and track their contributions</p>
         </div>
 
-        @if($isAdmin)
+        @if($canCreateVolunteers)
         <div>
             <a href="{{ route('cms.volunteer.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Add New Volunteer
@@ -180,7 +183,7 @@
 
     </div>
 
-    <!-- Total Volunteers List -->
+    <!-- Total Volunteers List --> 
     <div class="row mt-3">
         <div class="col-12">
             <div class="card card-default">
@@ -189,10 +192,13 @@
                         <thead>
                         <tr>
                             <th>S.no</th>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Type</th>
-                            <th>Amount</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact Number</th>
+                            <th>Address</th>
+                            <th>Availability</th>
+                            <th>Role</th>
+                            <th>Language</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -202,43 +208,73 @@
                         @forelse($volunteers as $vol)
                             <tr>
                                 <td>{{ $sn++ }}</td>
-                                <td>{{ optional($vol->joining_date)->format('Y-m-d') }}</td>
+
+                                <!-- Name -->
+                                <td>{{ $vol->full_name }}</td>
+
+                                <!-- Email -->
+                                <td>{{ $vol->email }}</td>
+
+                                <!-- Contact Number -->
+                                <td>{{ $vol->contact_number ?? '—' }}</td>
+
+                                <!-- Address -->
+                                <td>{{ $vol->address ?? '—' }}</td>
+
+                                <!-- Availability -->
+                                <td>{{ optional($vol->availability)->name ?? '—' }}</td>
+
+                                <!-- Role -->
+                                <td>{{ optional($vol->volunteerRole)->name ?? '—' }}</td>
+
+                                <!-- Language (JSON array) -->
                                 <td>
-                                    <div class="fw-semibold text-dark">{{ $vol->full_name }}</div>
-                                    <small class="text-muted">{{ $vol->email }} • {{ $vol->contact_number }}</small>
+                                    @if($vol->language_ids)
+                                        @php
+                                            $languageNames = \App\Models\Language::whereIn('id', $vol->language_ids)->pluck('name')->toArray();
+                                        @endphp
+                                        {{ implode(', ', $languageNames) }}
+                                    @else
+                                        —
+                                    @endif
                                 </td>
-                                <td>{{ $vol->availability ?? '—' }}</td>
-                                <td>—</td>
+
+                                <!-- Status -->
                                 <td>
-                                    @php
-                                        $isActive = ($vol->status ?? 'Active') === 'Active';
-                                    @endphp
-                                    <span class="badge {{ $isActive ? 'badge-success' : 'badge-light' }}">{{ $isActive ? 'Active' : 'Inactive' }}</span>
+                                    @php $isActive = ($vol->status ?? 'Active') === 'Active' @endphp
+                                    <span class="badge {{ $isActive ? 'badge-success' : 'badge-light' }}">
+                                        {{ $isActive ? 'Active' : 'Inactive' }}
+                                    </span>
                                 </td>
+
+                                <!-- Actions -->
                                 <td>
                                     <div class="dropdown">
-                                      <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton{{ $vol->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
+                                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton{{ $vol->id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
                                         Actions
-                                      </button>
-                                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $vol->id }}">
-                                        <a class="dropdown-item" href="{{ route('cms.volunteer.show', $vol->id) }}">View</a>
-                                        @if($isAdmin)
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $vol->id }}">
+                                        @if($canViewVolunteers)
+                                          <a class="dropdown-item" href="{{ route('cms.volunteer.show', $vol->id) }}">View</a>
+                                        @endif
+                                        @if($canEditVolunteers)
                                           <a class="dropdown-item" href="{{ route('cms.volunteer.edit', $vol->id) }}">Edit</a>
+                                        @endif
+                                        @if($canDeleteVolunteers)
                                           <form action="{{ route('cms.volunteer.destroy', $vol->id) }}" method="POST" onsubmit="return confirm('Delete this volunteer?');">
                                               @csrf
                                               @method('DELETE')
                                               <button type="submit" class="dropdown-item text-danger">Delete</button>
                                           </form>
                                         @endif
-                                      </div>
+                                    </div>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-muted">No volunteers found</td>
+                                <td colspan="10" class="text-muted">No volunteers found</td>
                             </tr>
-                        @php $sn++ @endphp
                         @endforelse
                         </tbody>
                     </table>
@@ -248,6 +284,7 @@
             </div>
         </div>
     </div>
+
 
   </div>
 </div>

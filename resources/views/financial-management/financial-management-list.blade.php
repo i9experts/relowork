@@ -25,6 +25,8 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+  @php($user = auth()->user())
+
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap">
         <div>
@@ -42,6 +44,7 @@
                 <option value="all_time"     {{ ($range ?? 'this_month') === 'all_time' ? 'selected' : '' }}>All Time</option>
             </select>
 
+            @if($user && $user->hasPermission('financial'))
             <a href="{{ route('cms.financial-management.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i>  Add New Transaction
             </a>
@@ -49,6 +52,7 @@
             <a href="{{ route('cms.financial-management.export', ['range' => $range ?? 'this_month']) }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-download me-1"></i> Export Report
             </a>
+            @endif
         </div>
 
     </div>

@@ -280,6 +280,7 @@
                                                 placeholder="Enter any remarks or notes"></textarea>
                                         </div>
 
+                                        @if(auth()->user() && auth()->user()->is_admin)
                                         <div class="row mt-3">
                                             <div class="col-12">
                                                 <label class="d-block mb-1">Access Control</label>
@@ -377,7 +378,40 @@
                                                           id="perm_volunteers" name="permissions[volunteers]" value="1"
                                                           {{ old('permissions.volunteers') ? 'checked' : '' }}>
                                                       <label class="custom-control-label" for="perm_volunteers">
-                                                          Volunteers
+                                                          Volunteers (access module)
+                                                      </label>
+                                                  </div>
+                                              </div>
+
+                                              <div class="col-6 mb-1">
+                                                  <div class="custom-control custom-checkbox">
+                                                      <input type="checkbox" class="custom-control-input"
+                                                          id="perm_volunteers_create" name="permissions[volunteers_create]" value="1"
+                                                          {{ old('permissions.volunteers_create') ? 'checked' : '' }}>
+                                                      <label class="custom-control-label" for="perm_volunteers_create">
+                                                          Volunteers - Create / Add
+                                                      </label>
+                                                  </div>
+                                              </div>
+
+                                              <div class="col-6 mb-1">
+                                                  <div class="custom-control custom-checkbox">
+                                                      <input type="checkbox" class="custom-control-input"
+                                                          id="perm_volunteers_edit" name="permissions[volunteers_edit]" value="1"
+                                                          {{ old('permissions.volunteers_edit') ? 'checked' : '' }}>
+                                                      <label class="custom-control-label" for="perm_volunteers_edit">
+                                                          Volunteers - Edit
+                                                      </label>
+                                                  </div>
+                                              </div>
+
+                                              <div class="col-6 mb-1">
+                                                  <div class="custom-control custom-checkbox">
+                                                      <input type="checkbox" class="custom-control-input"
+                                                          id="perm_volunteers_delete" name="permissions[volunteers_delete]" value="1"
+                                                          {{ old('permissions.volunteers_delete') ? 'checked' : '' }}>
+                                                      <label class="custom-control-label" for="perm_volunteers_delete">
+                                                          Volunteers - Delete
                                                       </label>
                                                   </div>
                                               </div>
@@ -395,7 +429,7 @@
 
                                             </div>
                                         </div>
-
+                                        @endif
 
                                     </div>
 

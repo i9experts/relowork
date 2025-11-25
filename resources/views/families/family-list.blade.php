@@ -24,6 +24,10 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
+    @php
+        $user = auth()->user();
+    @endphp
+
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1">
         <div>
@@ -31,11 +35,13 @@
             <p class="text-muted fs-5">Manage and track all registered families</p>
         </div>
 
+        @if($user && $user->hasPermission('families'))
         <div>
             <a href="{{ route('cms.family.create') }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Add New Family
             </a>
         </div>
+        @endif
     </div>
 
     <hr class="mt-2 mb-2">
@@ -91,70 +97,93 @@
         </div>
     </div>
 
-    <!-- Table Product -->
-    <div class="row">
+     <!-- Families Table -->
+     <div class="row">
         <div class="col-12">
-        <div class="card card-default">
-            <div class="card-body">
-            <table id="productsTable" class="table table-hover table-product" style="width:100%">
-                <thead>
-                <tr>
-                    <th>S.no</th>
-                    <th>Family Code</th>
-                    <th>Head of Family	</th>
-                    <th>Members</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                    <th></th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                @php $sn = 1 @endphp
-                @forelse($families as $index => $family)
-                    <tr>
-                        <td>{{ $sn++ }}</td>
-                        <td>{{ $family->family_code ?? '—' }}</td>
-                        <td>{{ $family->head_of_family_name }}</td>
-                        <td>{{ $family->members_count ?? 0 }}</td>
-                        <td>
-                          @php
-                            $loc = array_filter([$family->province, $family->city, $family->area]);
-                          @endphp
-                          {{ implode(' / ', $loc) }}
-                        </td>
-                        <td>{{ $family->zakat_eligibility ? 'Eligible' : 'Not Eligible' }}</td>
-                        <td>—</td>
-                        <td>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
-                            Actions
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <!-- <a class="dropdown-item" href="#">View</a> -->
-                            <a class="dropdown-item" href="{{ route('cms.family.edit', $family->id) }}">Edit</a>
-                            <form action="{{ route('cms.family.destroy', $family->id) }}" method="POST" onsubmit="return confirm('Delete this Family?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="dropdown-item text-danger">Delete</button>
-                            </form>
-                            </div>
-                        </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">No families found.</td>
-                    </tr>
-                @php $sn++ @endphp
-                @endforelse
-                </tbody>
-            </table>
+            <div class="card card-default">
+                <div class="card-body">
+                    <table id="familiesTable" class="table table-hover table-product" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>S.no</th>
+                                <th>Family Code</th>
+                                <th>Head of Family</th>
+                                <th>Members</th>
+                                <th>Location</th>
+                                <th>Zakat Eligibility</th>
+                                <th>Volunteer</th>
+                                <th>Marital Status</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
+                        <tbody>
+                            @foreach($families as $family)
+                                <tr>
+                                    <!-- <td>{{ $loop->iteration }}</td> -->
+                                    <td>{{ $family->family_code ?? '—' }}</td>
+                                    <td>{{ $family->head_of_family_name }}</td>
+                                    <td>{{ $family->members_count ?? 0 }}</td>
+
+                                    <td>
+                                        @php
+                                            $loc = array_filter([$family->province, $family->city, $family->area]);
+                                        @endphp
+                                        {{ implode(' / ', $loc) }}
+                                    </td>
+
+                                    <td>{{ $family->zakat_eligibility ? 'Eligible' : 'Not Eligible' }}</td>
+
+                                    <td>{{ optional($family->volunteer)->name ?? '—' }}</td>
+                                    <td>{{ $family->marital_status ?? '—' }}</td>
+                                    <td>
+                                        @if($family->deleted_at)
+                                            <span class="badge badge-danger">Deleted</span>
+                                        @else
+                                            <span class="badge badge-success">Active</span>
+                                        @endif
+                                    </td>
+
+
+                                    <td>
+                                        @if(auth()->check() && auth()->user()->hasPermission('families'))
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                </button>
+
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('cms.family.edit', $family->id) }}">Edit</a>
+
+                                                    <form action="{{ route('cms.family.destroy', $family->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Delete this Family?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="10" class="text-center text-muted">No families found.</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        </div>
     </div>
+
 
   </div>
 </div>
