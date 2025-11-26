@@ -28,7 +28,9 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
-    @php($user = auth()->user())
+    @php
+        $user = auth()->user();
+    @endphp
 
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap">
@@ -115,8 +117,7 @@
         </div>
     </div>
 
-    @if(isset($surveys) && $surveys->count())
-        @foreach($surveys as $survey)
+    @forelse($surveys as $survey)
             <div class="row mb-4">
                 <div class="col-lg-12 col-xl-12">
                     <div class="card shadow-sm border-0 rounded-4">
@@ -220,13 +221,14 @@
                     </div>
                 </div>
             </div>
-        @endforeach
+    @empty
+        <div class="alert alert-light border">No surveys found.</div>
+    @endforelse
 
+    @if(isset($surveys) && method_exists($surveys, 'links'))
         <div class="d-flex justify-content-center mt-2">
             {{ $surveys->links() }}
         </div>
-    @else
-        <div class="alert alert-light border">No surveys found.</div>
     @endif
 
 

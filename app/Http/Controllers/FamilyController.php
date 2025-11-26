@@ -145,7 +145,8 @@ class FamilyController extends Controller
     public function edit(Family $family)
     {
         $data['family'] = $family->load('members');
-        $data['volunteer'] = Volunteer::get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
         return view('families.family-registration-edit-form')->with($data);
     }
 

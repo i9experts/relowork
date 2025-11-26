@@ -45,8 +45,12 @@ class AidProgramController extends Controller
      */
     public function create()
     {
-        $data['volunteers'] = Volunteer::get();
-        $data['families'] = Family::select('id','family_code','head_of_family_name')->orderBy('id','desc')->get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
+        $data['families'] = Family::select('id','family_code','head_of_family_name')
+            ->where('organization_id', $organizationId)
+            ->orderBy('id','desc')
+            ->get();
         return view('aid-program.aid_program_form')->with($data);
     }
 
@@ -142,8 +146,12 @@ class AidProgramController extends Controller
      */
     public function edit(AidProgram $aidProgram)
     {
-        $volunteers = Volunteer::get();
-        $families = Family::select('id','family_code','head_of_family_name')->orderBy('id','desc')->get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $volunteers = Volunteer::where('organization_id', $organizationId)->get();
+        $families = Family::select('id','family_code','head_of_family_name')
+            ->where('organization_id', $organizationId)
+            ->orderBy('id','desc')
+            ->get();
         // Preload relationships used by the form for defaults
         $aidProgram->load(['families:id', 'volunteers:id']);
         return view('aid-program.aid_program_edit-form', compact('aidProgram','volunteers','families'));

@@ -119,9 +119,9 @@
                         </thead>
 
                         <tbody>
-                            @foreach($families as $family)
+                            @forelse($families as $family)
                                 <tr>
-                                    <!-- <td>{{ $loop->iteration }}</td> -->
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $family->family_code ?? '—' }}</td>
                                     <td>{{ $family->head_of_family_name }}</td>
                                     <td>{{ $family->members_count ?? 0 }}</td>
@@ -176,7 +176,7 @@
                                 <tr>
                                     <td colspan="10" class="text-center text-muted">No families found.</td>
                                 </tr>
-                            @endforeach
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

@@ -7,7 +7,8 @@
     use App\Http\Controllers\SearchController;
     use App\Http\Controllers\SettingController;
     use App\Http\Controllers\SurveysController;
-    use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminDashboardController;
     use App\Http\Controllers\VolunteerController;
     use App\Http\Controllers\VolunteerSettingsController;
     use App\Http\Controllers\AidProgramController;
@@ -25,8 +26,12 @@
             return redirect()->route('organization.register');
         }
 
-        // Agar user logged in hai to dashboard par bhej dein
+        // Agar user logged in hai to unke role ke mutabiq redirect karein
         if (auth()->check()) {
+            $u = auth()->user();
+            if ($u && ($u->is_admin || (method_exists($u, 'isSystemAdmin') && $u->isSystemAdmin()))) {
+                return redirect()->route('cms.admin.dashboard');
+            }
             return redirect()->route('cms.dashboard.index');
         }
 
@@ -63,6 +68,22 @@
             'update' => 'cms.dashboard.update',
             'destroy' => 'cms.dashboard.destroy',
         ]);
+
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('cms.admin.dashboard')
+            ->middleware('permission:admin');
+
+        Route::get('/admin/organizations', [AdminDashboardController::class, 'organizations'])
+            ->name('cms.admin.organizations')
+            ->middleware('permission:admin');
+
+        Route::get('/admin/organizations/{organization}/invoice', [AdminDashboardController::class, 'invoice'])
+            ->name('cms.admin.organizations.invoice')
+            ->middleware('permission:admin');
+
+        Route::get('/admin/users', [AdminDashboardController::class, 'users'])
+            ->name('cms.admin.users')
+            ->middleware('permission:admin');
 
         Route::resource('organization-form', OrganizationController::class)->names([
             'index' => 'cms.organization-form.index',
@@ -183,4 +204,3 @@
         Route::post('setting/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
         });
     });
-

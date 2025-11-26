@@ -186,9 +186,10 @@ class FinancialManagementController extends Controller
      */
     public function create()
     {
-        $data['programs'] = AidProgram::orderByDesc('id')->get(['id','program_title']);
-        $data['families'] = Family::orderByDesc('id')->get(['id','family_code','head_of_family_name']);
-        $data['users'] = User::orderBy('name')->get(['id','name']);
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['programs'] = AidProgram::where('organization_id', $organizationId)->orderByDesc('id')->get(['id','program_title']);
+        $data['families'] = Family::where('organization_id', $organizationId)->orderByDesc('id')->get(['id','family_code','head_of_family_name']);
+        $data['users'] = User::where('organization_id', $organizationId)->orderBy('name')->get(['id','name']);
         $data['categories'] = ['Zakat','Sadaqah','Project Fund','Admin Cost'];
 
         return view('financial-management.financial_transaction_form')->with($data);

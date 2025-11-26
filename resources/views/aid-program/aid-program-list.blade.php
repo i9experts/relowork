@@ -24,7 +24,9 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
-    @php($user = auth()->user())
+    @php
+        $user = auth()->user();
+    @endphp
 
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-1">

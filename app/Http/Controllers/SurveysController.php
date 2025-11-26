@@ -49,8 +49,9 @@ class SurveysController extends Controller
      */
     public function create()
     {
-        $data['volunteers'] = Volunteer::get();
-        $data['families'] = Family::get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
+        $data['families'] = Family::where('organization_id', $organizationId)->get();
 
         return view('survey.survey-assessment-form')->with($data);
     }
@@ -421,8 +422,9 @@ class SurveysController extends Controller
     {
         $survey->load(['family','enumerator','members','assets','uploads']);
         $data['survey'] = $survey;
-        $data['volunteers'] = Volunteer::get();
-        $data['families'] = Family::get();
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
+        $data['families'] = Family::where('organization_id', $organizationId)->get();
 
         return view('survey.survey-assessment-edit-form')->with($data);
     }

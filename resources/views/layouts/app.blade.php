@@ -27,8 +27,10 @@
   <!-- MONO CSS -->
   <link id="main-css-href" rel="stylesheet" href="{{ url('assets/css/style.css') }}" />
   <!-- FAVICON -->
-  @php($orgId = optional(request()->user())->organization_id ?? session('organization_id'))
-  @php($__settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null)
+  @php
+    $orgId = optional(request()->user())->organization_id ?? session('organization_id');
+    $__settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null;
+  @endphp
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
   @else
@@ -445,7 +447,7 @@
 
       <div class="content-wrapper">
         <div class="content">
-          @yield('content')
+            @yield('content')
         </div>
       </div>
 

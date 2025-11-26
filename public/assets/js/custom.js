@@ -376,7 +376,32 @@ $(document).ready(function () {
       columnDefs: [
         {
           orderable: false,
-          targets: [, 0, 6, -1],
+          targets: [0, 6, -1],
+        },
+      ],
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search...",
+      },
+    });
+  }
+
+  // Families list table
+  var familiesTable = $("#familiesTable");
+  if (familiesTable.length != 0) {
+    familiesTable.DataTable({
+      info: false,
+      lengthChange: false,
+      lengthMenu: [
+        [5, 10, 15, -1],
+        [5, 10, 15, "All"],
+      ],
+      scrollX: true,
+      order: [[1, "asc"]], // sort by Family Code
+      columnDefs: [
+        {
+          orderable: false,
+          targets: [0, 8, 9], // S.no, Status, Action
         },
       ],
       language: {
@@ -532,3 +557,20 @@ $(document).ready(function () {
     });
   }
 });
+  var adminOrganizationsTable = $("#adminOrganizationsTable");
+  if (adminOrganizationsTable.length != 0) {
+    adminOrganizationsTable.DataTable({
+      info: false,
+      lengthChange: false,
+      language: { search: "_INPUT_", searchPlaceholder: "Search..." }
+    });
+  }
+
+  var adminUsersTable = $("#adminUsersTable");
+  if (adminUsersTable.length != 0) {
+    adminUsersTable.DataTable({
+      info: false,
+      lengthChange: false,
+      language: { search: "_INPUT_", searchPlaceholder: "Search..." }
+    });
+  }

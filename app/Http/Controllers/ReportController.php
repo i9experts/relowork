@@ -108,15 +108,18 @@ class ReportController extends Controller
             'period' => $period,
         ];
 
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         switch ($type) {
             case 'Financial':
-                $q = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->latest();
+                $q = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])
+                    ->where('organization_id', $organizationId)
+                    ->latest();
                 if ($from && $to) { $q->whereBetween('date', [$from->toDateString(), $to->toDateString()]); }
                 $data['rows'] = $q->paginate(20)->appends(['type'=>$type,'period'=>$period]);
                 $incomeTypes = ['Donation','Transfer'];
                 $expenseTypes = ['Expense','Disbursement'];
-                $incomeQ = FinancialManagement::whereIn('transaction_type',$incomeTypes);
-                $expenseQ = FinancialManagement::whereIn('transaction_type',$expenseTypes);
+                $incomeQ = FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type',$incomeTypes);
+                $expenseQ = FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type',$expenseTypes);
                 if ($from && $to) { $incomeQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]); $expenseQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]); }
                 $totalIncome = (int)$incomeQ->sum('amount');
                 $totalExpenses = (int)$expenseQ->sum('amount');
@@ -124,47 +127,48 @@ class ReportController extends Controller
                     'total_income' => $totalIncome,
                     'total_expenses' => $totalExpenses,
                     'net_balance' => $totalIncome - $totalExpenses,
-                    'pending_transactions' => FinancialManagement::whereNull('approved_by')->count(),
+                    'pending_transactions' => FinancialManagement::where('organization_id', $organizationId)->whereNull('approved_by')->count(),
                 ];
                 break;
             case 'Volunteers':
-                $v = Volunteer::latest();
+                $v = Volunteer::where('organization_id', $organizationId)->latest();
                 $data['rows'] = $v->paginate(20)->appends(['type'=>$type,'period'=>$period]);
                 $data['kpis'] = [
-                    'total_volunteers' => Volunteer::count(),
-                    'active_this_month' => Volunteer::where('status','Active')->whereMonth('updated_at', now()->month)->whereYear('updated_at', now()->year)->count(),
+                    'total_volunteers' => Volunteer::where('organization_id', $organizationId)->count(),
+                    'active_this_month' => Volunteer::where('organization_id', $organizationId)->where('status','Active')->whereMonth('updated_at', now()->month)->whereYear('updated_at', now()->year)->count(),
                 ];
                 break;
             case 'Aid Programs':
-                $p = AidProgram::withCount(['families','volunteers','attachments'])
+                $p = AidProgram::where('organization_id', $organizationId)
+                    ->withCount(['families','volunteers','attachments'])
                     ->withSum(['transactions as disbursed_amount' => function ($q) { $q->where('transaction_type','Disbursement'); }], 'amount')
                     ->latest();
                 $data['rows'] = $p->paginate(20)->appends(['type'=>$type,'period'=>$period]);
                 $data['kpis'] = [
-                    'active_programs' => AidProgram::where('status','Active')->count(),
-                    'total_budget_active' => (int) AidProgram::where('status','Active')->sum('total_budget'),
-                    'beneficiaries_total' => (int) AidProgram::sum('target_beneficiaries'),
+                    'active_programs' => AidProgram::where('organization_id', $organizationId)->where('status','Active')->count(),
+                    'total_budget_active' => (int) AidProgram::where('organization_id', $organizationId)->where('status','Active')->sum('total_budget'),
+                    'beneficiaries_total' => (int) AidProgram::where('organization_id', $organizationId)->sum('target_beneficiaries'),
                 ];
                 break;
             case 'Survey':
-                $q = Surveys::with(['enumerator','family'])->withCount(['members','uploads'])->latest();
+                $q = Surveys::where('organization_id', $organizationId)->with(['enumerator','family'])->withCount(['members','uploads'])->latest();
                 if ($from && $to) { $q->whereBetween('created_at', [$from->toDateTimeString(), $to->toDateTimeString()]); }
                 $data['rows'] = $q->paginate(20)->appends(['type'=>$type,'period'=>$period]);
                 $data['kpis'] = [
-                    'total_surveys' => Surveys::count(),
-                    'active_surveys' => Surveys::where('revisit_flag', true)->count(),
-                    'completed_surveys' => Surveys::where('revisit_flag', false)->count(),
+                    'total_surveys' => Surveys::where('organization_id', $organizationId)->count(),
+                    'active_surveys' => Surveys::where('organization_id', $organizationId)->where('revisit_flag', true)->count(),
+                    'completed_surveys' => Surveys::where('organization_id', $organizationId)->where('revisit_flag', false)->count(),
                 ];
                 break;
             case 'Families':
             default:
-                $f = Family::with(['volunteer'])->withCount(['members','transactions'])->latest();
+                $f = Family::where('organization_id', $organizationId)->with(['volunteer'])->withCount(['members','transactions'])->latest();
                 if ($from && $to) { $f->whereBetween('created_at', [$from->toDateTimeString(), $to->toDateTimeString()]); }
                 $data['rows'] = $f->paginate(20)->appends(['type'=>$type,'period'=>$period]);
                 $data['kpis'] = [
-                    'total_families' => Family::count(),
-                    'zakat_eligible' => Family::where('zakat_eligibility', true)->count(),
-                    'avg_household_size' => round((float) Family::avg('family_members_count'), 1),
+                    'total_families' => Family::where('organization_id', $organizationId)->count(),
+                    'zakat_eligible' => Family::where('organization_id', $organizationId)->where('zakat_eligibility', true)->count(),
+                    'avg_household_size' => round((float) Family::where('organization_id', $organizationId)->avg('family_members_count'), 1),
                 ];
                 break;
         }

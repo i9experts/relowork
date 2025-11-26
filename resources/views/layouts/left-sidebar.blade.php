@@ -3,9 +3,12 @@
   <div id="sidebar" class="sidebar sidebar-with-footer">
     <!-- Application Brand -->
     <div class="app-brand">
-      @php($orgId = optional(request()->user())->organization_id ?? session('organization_id'))
-      @php($settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null)
-      <a href="{{ route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
+      @php
+        $orgId = optional(request()->user())->organization_id ?? session('organization_id');
+        $settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null;
+        $u = auth()->user();
+      @endphp
+      <a href="{{ ($u && ($u->is_admin || (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin()))) ? route('cms.admin.dashboard') : route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
         @if($settings && $settings->logo_path)
           <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" class="brand-logo" />
         @else
@@ -18,9 +21,37 @@
       <!-- Sidebar scrollable area -->
     <div class="sidebar-left" data-simplebar style="height: 100%;">
       <!-- Sidebar menu -->
-      @php($user = auth()->user())
+      @php
+        $user = auth()->user();
+      @endphp
       <ul class="nav sidebar-inner" id="sidebar-menu">
-        
+
+        @if($user && ($user->is_admin || (method_exists($user,'isSystemAdmin') && $user->isSystemAdmin())))
+        <li class="{{ request()->routeIs('cms.admin.dashboard') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.admin.dashboard') ? 'active' : '' }}" href="{{ route('cms.admin.dashboard') }}">
+            <i class="mdi mdi-view-dashboard"></i>
+            <span class="nav-text">Admin Dashboard</span>
+          </a>
+        </li>
+        <li class="{{ request()->routeIs('cms.admin.organizations') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.admin.organizations') ? 'active' : '' }}" href="{{ route('cms.admin.organizations') }}">
+            <i class="mdi mdi-domain"></i>
+            <span class="nav-text">Organizations</span>
+          </a>
+        </li>
+        <li class="{{ request()->routeIs('cms.admin.users') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.admin.users') ? 'active' : '' }}" href="{{ route('cms.admin.users') }}">
+            <i class="mdi mdi-account-multiple"></i>
+            <span class="nav-text">Users</span>
+          </a>
+        </li>
+        <li class="{{ request()->routeIs('organization.register.*') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('organization.register.*') ? 'active' : '' }}" href="{{ route('organization.register') }}">
+            <i class="mdi mdi-plus-box"></i>
+            <span class="nav-text">New Organization</span>
+          </a>
+        </li>
+        @else
         @if(!$user || $user->hasPermission('dashboard'))
         <li class="{{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}" href="{{ route('cms.dashboard.index') }}">
@@ -92,19 +123,23 @@
           </a>
         </li>
         @endif
-
+        @endif
 
       </ul>
     </div>
 
     <!-- Sidebar footer -->
     <div class="sidebar-footer">
-      <div class="sidebar-footer-content">
-        <ul class="d-flex">
-          <li><a href="{{ route('cms.setting.index') }}" data-toggle="tooltip" title="Profile settings"><i class="mdi mdi-settings"></i></a></li>
-          <li><a href="#" data-toggle="tooltip" title="No chat messages"><i class="mdi mdi-chat-processing"></i></a></li>
-        </ul>
-      </div>
+        <div class="sidebar-footer-content">
+            <ul class="d-flex">
+                <li>
+                    <a href="{{ route('cms.setting.index') }}" data-toggle="tooltip" title="Profile settings">
+                        <i class="mdi mdi-settings"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
+
   </div>
 </aside>

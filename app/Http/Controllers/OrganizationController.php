@@ -108,15 +108,46 @@ class OrganizationController extends Controller
             'logo_path'         => $organization->logo,
         ]);
 
-        // Create an admin user for this organization so that provided credentials work on login
-        User::create([
+        // Create an admin user for this organization with full module permissions
+        $orgAdmin = User::create([
             'name'            => $organization->organization_name . ' Admin',
             'email'           => $organization->email,
-            // User model automatically hashes the password via casts
             'password'        => $validatedData['password'],
             'organization_id' => $organization->id,
+            'permissions'     => [
+                'dashboard' => true,
+                'families' => true,
+                'aid_programs' => true,
+                'financial' => true,
+                'surveys' => true,
+                'reports' => true,
+                'volunteers' => true,
+                'settings' => true,
+            ],
             'email_verified_at' => now(),
         ]);
+
+        // Attach org_admin role for RBAC clarity
+        try {
+            $roleId = \DB::table('roles')->where('slug', 'org_admin')->where('organization_id', $organization->id)->value('id');
+            if (!$roleId) {
+                $roleId = \DB::table('roles')->insertGetId([
+                    'name' => 'Organization Admin',
+                    'slug' => 'org_admin',
+                    'description' => 'Tenant Organization Administrator',
+                    'is_system' => false,
+                    'organization_id' => $organization->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            \DB::table('role_user')->updateOrInsert(
+                ['user_id' => $orgAdmin->id, 'role_id' => $roleId],
+                ['organization_id' => $organization->id, 'created_at' => now(), 'updated_at' => now()]
+            );
+        } catch (\Throwable $e) {
+            // ignore if roles table constraints differ
+        }
 
         try {
             Mail::to($organization->email)->send(new \App\Mail\OrganizationOtpMail($organization));

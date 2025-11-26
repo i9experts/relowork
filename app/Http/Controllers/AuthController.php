@@ -11,6 +11,10 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
+            $u = Auth::user();
+            if ($u && ($u->is_admin || method_exists($u, 'isSystemAdmin') && $u->isSystemAdmin())) {
+                return redirect()->route('cms.admin.dashboard');
+            }
             return redirect()->route('cms.dashboard.index');
         }
 
@@ -52,22 +56,18 @@ class AuthController extends Controller
         $subdomain = null;
 
         if (app()->environment('local')) {
-            // Expect: {subdomain}.localhost
             if (count($parts) === 2 && $parts[1] === 'localhost') {
                 $subdomain = $parts[0];
+            } elseif (count($parts) === 1 && $parts[0] === 'localhost') {
+                $subdomain = null;
             } else {
-                return back()->withErrors([
-                    'email' => 'Please use your organization URL (e.g. {domain}.localhost:8000) to log in.',
-                ])->onlyInput('email');
+                $subdomain = null;
             }
         } else {
-            // Expect: {subdomain}.relowork.com (or similar 3-part host)
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
             } else {
-                return back()->withErrors([
-                    'email' => 'Invalid login host.',
-                ])->onlyInput('email');
+                $subdomain = null;
             }
         }
 
@@ -77,12 +77,11 @@ class AuthController extends Controller
                 ->whereNotNull('email_verified_at')
                 ->where('active_status', true)
                 ->first();
-        }
-
-        if (!$organization) {
-            return back()->withErrors([
-                'email' => 'Your organization is not verified or does not exist.',
-            ])->onlyInput('email');
+            if (!$organization) {
+                return back()->withErrors([
+                    'email' => 'Your organization is not verified or does not exist.',
+                ])->onlyInput('email');
+            }
         }
 
         $remember = (bool) $request->boolean('remember');
@@ -100,21 +99,29 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         $user = $request->user();
-        if (!$user || $user->organization_id !== $organization->id) {
+        if ($organization) {
+            if (!$user || $user->organization_id !== $organization->id) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'email' => 'You are not allowed to access this organization.',
+                ])->onlyInput('email');
+            }
+            $request->session()->put('organization_id', $organization->id);
+            return redirect()->route('cms.dashboard.index');
+        }
+
+        if (!$user || !($user->is_admin || (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()))) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-
             return back()->withErrors([
-                'email' => 'You are not allowed to access this organization.',
+                'email' => 'Please use your organization URL to log in.',
             ])->onlyInput('email');
         }
 
-        // Store organization_id in session for multitenant scoping
-        $request->session()->put('organization_id', $organization->id);
-
-        // Hamesha dashboard par redirect karein (organization form par wapas na bheje)
-        return redirect()->route('cms.dashboard.index');
+        return redirect()->route('cms.admin.dashboard');
     }
 
     public function logout(Request $request)

@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Volunteer extends Model
 {
+    use SoftDeletes;
     protected $guarded = [];
 
     protected $casts = [

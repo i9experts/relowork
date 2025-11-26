@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Models\Surveys;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SurveyOutcome extends Model
 {
+    use SoftDeletes;
     protected $guarded = [];
 
     public function survey()
