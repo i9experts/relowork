@@ -96,19 +96,7 @@
               </form>
             </div>
 
-            <!-- Language Form -->
-            <div class="col-md-12 mb-3">
-              <h6 class="mb-1 small text-uppercase text-muted">Languages (PK & others)</h6>
-              <form method="POST" action="{{ route('cms.volunteer-settings.language.store') }}">
-                @csrf
-                <div class="input-group input-group-sm">
-                  <input type="text" name="name" class="form-control rounded-0 bg-light">
-                  <div class="input-group-append">
-                    <button class="btn btn-secondary btn-sm" type="submit">Add</button>
-                  </div>
-                </div>
-              </form>
-            </div>
+            
 
           </div>
         </div>
@@ -289,49 +277,7 @@
                   </table>
                 </div>
               </div>
-
-              {{-- Languages --}}
-              <div class="col-md-12">
-                <div class="table-responsive">
-                  <table class="table table-striped table-bordered table-sm">
-                    <thead>
-                      <tr>
-                        <th style="width: 60px;">S.no</th>
-                        <th>Languages</th>
-                        <th style="width: 100px;">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    @php $sn = 1; @endphp
-                    @forelse($languages as $item)
-                      <tr>
-                        <td>{{ $sn++ }}</td>
-                        <td>{{ $item->name }}</td>
-                        <td>
-                          <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-toggle="dropdown">
-                              Actions
-                            </button>
-                            <div class="dropdown-menu">
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <form action="#" method="POST" onsubmit="return confirm('Delete this?');">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="dropdown-item text-danger">Delete</button>
-                              </form>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    @empty
-                      <tr>
-                        <td colspan="3" class="text-center text-muted">No data found.</td>
-                      </tr>
-                    @endforelse
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
+              
             </div>
           </div>
         </div>

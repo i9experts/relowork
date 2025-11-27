@@ -12,7 +12,7 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             $u = Auth::user();
-            if ($u && ($u->is_admin || method_exists($u, 'isSystemAdmin') && $u->isSystemAdmin())) {
+            if ($u && (method_exists($u, 'isSystemAdmin') && $u->isSystemAdmin())) {
                 return redirect()->route('cms.admin.dashboard');
             }
             return redirect()->route('cms.dashboard.index');
@@ -112,7 +112,7 @@ class AuthController extends Controller
             return redirect()->route('cms.dashboard.index');
         }
 
-        if (!$user || !($user->is_admin || (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()))) {
+        if (!$user || !(method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

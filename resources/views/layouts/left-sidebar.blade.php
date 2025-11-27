@@ -8,7 +8,7 @@
         $settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null;
         $u = auth()->user();
       @endphp
-      <a href="{{ ($u && ($u->is_admin || (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin()))) ? route('cms.admin.dashboard') : route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
+      <a href="{{ ($u && (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin())) ? route('cms.admin.dashboard') : route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">
         @if($settings && $settings->logo_path)
           <img src="{{ asset('storage/'.$settings->logo_path) }}" alt="Logo" class="brand-logo" />
         @else
@@ -26,7 +26,7 @@
       @endphp
       <ul class="nav sidebar-inner" id="sidebar-menu">
 
-        @if($user && ($user->is_admin || (method_exists($user,'isSystemAdmin') && $user->isSystemAdmin())))
+        @if($user && (method_exists($user,'isSystemAdmin') && $user->isSystemAdmin()))
         <li class="{{ request()->routeIs('cms.admin.dashboard') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.admin.dashboard') ? 'active' : '' }}" href="{{ route('cms.admin.dashboard') }}">
             <i class="mdi mdi-view-dashboard"></i>

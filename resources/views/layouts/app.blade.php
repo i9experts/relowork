@@ -410,7 +410,7 @@
 
 
                       <li>
-                          <a class="dropdown-link-item" href="#">
+                          <a class="dropdown-link-item" href="{{ route('cms.profile.index') }}">
                               <i class="mdi mdi-account-outline"></i>
                               <span class="nav-text">Profile</span>
                           </a>

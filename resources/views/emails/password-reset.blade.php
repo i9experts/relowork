@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Password Reset Instructions | ReloWork</title>
 </head>
-<body style="margin:0; padding:0; background:#f0f2f5; font-family: Arial, sans-serif;">
+<body style="margin:0; padding:0; background:#f0f2f5; font-family:'Inter', Arial, sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
     <tr>
         <td align="center">
@@ -32,7 +32,7 @@
                         <p>We received a request to reset the password for your account. You can reset your password using the secure link below:</p>
 
                         <!-- Reset Link Details -->
-                        <div style="margin:25px 0; padding:20px; background:#edf5ff; border:2px dashed #1a73e8; border-radius:12px; text-align:center;">
+                        <div style="margin:25px 0; padding:20px; background:#edf5ff; border:2px dashed #005bea; border-radius:12px; text-align:center;">
                             <p style="margin:5px 0;"><strong>Reset Link:</strong> <a href="{{ $loginUrl }}" target="_blank">{{ $loginUrl }}</a></p>
                             <p style="margin:5px 0;"><strong>Email:</strong> {{ $user->email }}</p>
                         </div>
@@ -50,6 +50,17 @@
                             JazakAllah,<br>
                             <strong>Team ReloWork</strong>
                         </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background:#f9fafc; padding:25px 45px; text-align:center; font-size:15px; color:#555;">
+                        <p style="margin:0;">Need help? Our support team is here for you 🤝<br><strong>support@relowork.com</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background:#eceff3; padding:18px 40px; text-align:center; font-size:12px; color:#777;">
+                        <p style="margin:0;">If you didn’t request this email, please ignore it.</p>
+                        <p style="margin:6px 0 0;">© {{ date('Y') }} ReloWork — All Rights Reserved.</p>
                     </td>
                 </tr>
             </table>

@@ -67,21 +67,21 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="cnic">CNIC / ID</label>
                                             <input type="text" class="form-control rounded-0 bg-light" id="cnic"
-                                                name="cnic" placeholder="42201-1234567-9">
+                                                name="cnic" placeholder="Enter CNIC / ID Number">
                                         </div>
 
                                         <!-- Contact Number -->
                                         <div class="col-md-6 mb-3">
                                             <label for="contact_number">Contact Number</label>
                                             <input type="text" class="form-control rounded-0 bg-light"
-                                                id="contact_number" name="contact_number" placeholder="+92-322-7654321">
+                                                id="contact_number" name="contact_number" placeholder="Enter Contact Number">
                                         </div>
 
                                         <!-- Email -->
                                         <div class="col-md-6 mb-3">
                                             <label for="email">Email</label>
                                             <input type="email" class="form-control rounded-0 bg-light" id="email"
-                                                name="email" placeholder="ahmed@example.com">
+                                                name="email" placeholder="Enter Email Address">
                                         </div>
 
                                         <!-- Password -->
@@ -89,7 +89,7 @@
                                             <label for="password">Password <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <input type="password" class="form-control rounded-0 bg-light" id="password"
-                                                    name="password" autocomplete="new-password" placeholder="Enter Password (min 8 characters)">
+                                                    name="password" autocomplete="new-password" placeholder="Enter Password">
                                                 <div class="input-group-append">
                                                     <button class="btn btn-outline-secondary" type="button" id="toggle-vol-password" tabindex="-1">
                                                         <i class="mdi mdi-eye-off"></i>
@@ -147,15 +147,14 @@
                                         <!-- Date of Birth -->
                                         <div class="col-md-6 mb-3">
                                             <label for="dob">Date of Birth</label>
-                                            <input type="date" class="form-control rounded-0 bg-light" id="dob"
-                                                name="dob">
+                                            <input type="date" class="form-control rounded-0 bg-light" id="dob" name="dob">
                                         </div>
 
                                         <!-- Address -->
                                         <div class="col-md-6 mb-3">
                                             <label for="address">Address</label>
                                             <input type="text" class="form-control rounded-0 bg-light" id="address"
-                                                name="address" placeholder="Enter Address (e.g., Karachi)">
+                                                name="address" placeholder="Enter Address">
                                         </div>
 
                                         <!-- Education Level -->
@@ -176,22 +175,24 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="skills">Skills / Expertise</label>
                                             <textarea class="form-control rounded-0 bg-light" id="skills" name="skills"
-                                                rows="3"
-                                                placeholder="e.g., Management, Data Entry, Field Work"></textarea>
+                                                rows="3" placeholder="Enter Skills / Expertise"></textarea>
                                         </div>
 
                                         <!-- Languages -->
                                         <div class="col-md-6 mb-3">
-                                            <label for="language_ids">Languages</label>
-                                            @php $oldLangs = collect(old('language_ids', [])); @endphp
+                                            <label for="language_ids">Languages</label> 
                                             <select class="form-control rounded-0 bg-light select2" id="language_ids"
                                                 name="language_ids[]" multiple style="width: 100%;">
-                                                @foreach($languages as $lang)
-                                                <option value="{{ $lang->id }}" {{ $oldLangs->contains($lang->id) ?
-                                                    'selected' : '' }}>{{ $lang->name }}</option>
+                                                @foreach($languages as $language)
+                                                    <option value="{{ $language->id }}" {{ old('language_id') == $language->id ? 'selected' : '' }}>
+                                                        {{ $language->name }} ({{ $language->code }})
+                                                    </option>
                                                 @endforeach
+
                                             </select>
                                         </div>
+
+                                        
 
                                         <!-- Availability -->
                                         <div class="col-md-6 mb-3">
@@ -226,7 +227,7 @@
                                             <label for="emergency_contact">Emergency Contact</label>
                                             <input type="text" class="form-control rounded-0 bg-light"
                                                 id="emergency_contact" name="emergency_contact"
-                                                placeholder="0333-9876543">
+                                                placeholder="Enter Emergency Contact Details">
                                         </div>
 
                                         <!-- Assigned Projects -->
@@ -260,8 +261,7 @@
                                         <!-- Joining Date -->
                                         <div class="col-md-6 mb-3">
                                             <label for="joining_date">Joining Date</label>
-                                            <input type="date" class="form-control rounded-0 bg-light" id="joining_date"
-                                                name="joining_date">
+                                            <input type="date" class="form-control rounded-0 bg-light" id="joining_date" name="joining_date">
                                         </div>
 
                                         <!-- ID / Picture -->

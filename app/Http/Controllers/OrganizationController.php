@@ -114,6 +114,7 @@ class OrganizationController extends Controller
             'email'           => $organization->email,
             'password'        => $validatedData['password'],
             'organization_id' => $organization->id,
+            'is_admin'        => true,
             'permissions'     => [
                 'dashboard' => true,
                 'families' => true,
@@ -122,6 +123,9 @@ class OrganizationController extends Controller
                 'surveys' => true,
                 'reports' => true,
                 'volunteers' => true,
+                'volunteers_create' => true,
+                'volunteers_edit' => true,
+                'volunteers_delete' => true,
                 'settings' => true,
             ],
             'email_verified_at' => now(),

@@ -4,21 +4,62 @@
     <meta charset="UTF-8">
     <title>Volunteer Account Details</title>
 </head>
-<body>
-    <p>Assalam-o-Alaikum {{ $user->name }},</p>
+<body style="margin:0; padding:0; background:#f0f2f5; font-family:'Inter', Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
+        <tr>
+            <td align="center">
 
-    <p>Your volunteer account has been created. You can log in using the details below:</p>
+                <table width="620" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 10px 32px rgba(0,0,0,0.12);">
+                    <tr>
+                        <td>
+                            <div style="height:6px; width:100%; background:#005bea;"></div>
+                        </td>
+                    </tr>
 
-    <p>
-        <strong>Login URL:</strong>
-        <a href="{{ $loginUrl }}" target="_blank">{{ $loginUrl }}</a><br>
-        <strong>Email:</strong> {{ $user->email }}<br>
-        <strong>Password:</strong> {{ $plainPassword }}
-    </p>
+                    <tr>
+                        <td style="padding:24px 32px 10px; text-align:center;">
+                            <h1 style="margin:0; color:#222; font-size:24px; font-weight:700;">Welcome to ReloWork</h1>
+                            <p style="margin:8px 0 0; color:#6c757d; font-size:14px;">Your volunteer account is ready</p>
+                        </td>
+                    </tr>
 
-    <p>For security, please log in and change your password after first login.</p>
+                    <tr>
+                        <td style="padding:28px 48px 40px; color:#2b2d31; font-size:15px; line-height:1.7;">
+                            <p style="margin-top:0;">Assalam-o-Alaikum <strong>{{ $user->name }}</strong>,</p>
+                            <p>You can log in using the details below:</p>
 
-    <p>JazakAllah,<br>
-    {{ config('app.name') }}</p>
+                            <div style="margin:25px 0; padding:20px; background:#edf5ff; border:2px dashed #005bea; border-radius:12px; text-align:center;">
+                                <p style="margin:5px 0;"><strong>Login URL:</strong> <a href="{{ $loginUrl }}" target="_blank">{{ $loginUrl }}</a></p>
+                                <p style="margin:5px 0;"><strong>Email:</strong> {{ $user->email }}</p>
+                                <p style="margin:5px 0;"><strong>Password:</strong> {{ $plainPassword }}</p>
+                            </div>
+
+                            <p>For security, please log in and change your password after first login.</p>
+
+                            <div style="text-align:center; margin:30px 0;">
+                                <a href="{{ $loginUrl }}" style="display:inline-block; padding:12px 32px; background:#005bea; color:#ffffff; font-size:15px; font-weight:600; border-radius:999px; text-decoration:none; box-shadow:0 4px 15px rgba(0,91,234,0.35);">Go to Login</a>
+                            </div>
+
+                            <p style="margin-top:30px; font-size:13px; color:#999; text-align:center;">JazakAllah,<br><strong>Team ReloWork</strong></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background:#f9fafc; padding:25px 45px; text-align:center; font-size:15px; color:#555;">
+                            <p style="margin:0;">Need help? Our support team is here for you 🤝<br><strong>support@relowork.com</strong></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background:#eceff3; padding:18px 40px; text-align:center; font-size:12px; color:#777;">
+                            <p style="margin:0;">If you didn’t request this email, please ignore it.</p>
+                            <p style="margin:6px 0 0;">© {{ date('Y') }} ReloWork — All Rights Reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

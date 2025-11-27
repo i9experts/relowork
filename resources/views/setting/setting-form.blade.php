@@ -41,6 +41,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
+                
+
                 <!-- General Section -->
                 <div class="col-md-12 mt-3">
                     <hr>
@@ -212,17 +214,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Tooltip Modal -->
-                                <div class="col-md-12 mb-3">
-                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                        <div>
-                                            <h6 class="mb-1">Change Password</h6>
-                                            <small class="text-muted">Update your account password</small>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-secondary btn-pill px-4" data-toggle="modal" data-target="#exampleModalTooltip"> Change Password
-                                        </button>
-                                    </div>
-                                </div>
+                                
 
                                 <!-- Appearance Section -->
                                 <!-- <div class="col-md-12 mt-3">
@@ -286,37 +278,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="exampleModalTooltip" tabindex="-1" role="dialog" aria-labelledby="exampleModalTooltip"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <form method="POST" action="{{ route('cms.setting.change-password') }}" class="modal-content">
-      @csrf
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle2">Change Password</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        @include('partials.errors')
-        <div class="col-md-12 mb-3">
-            <input type="password" class="form-control rounded-0 bg-light" placeholder="Enter Current Password" name="current_password" required>
-        </div>
-        <div class="col-md-12 mb-3">
-            <input type="password" class="form-control rounded-0 bg-light" placeholder="Enter New Password" name="password" required>
-        </div>
-        <div class="col-md-12">
-            <input type="password" class="form-control rounded-0 bg-light" placeholder="Confirm New Password" name="password_confirmation" required>
-        </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-pill">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>  
+  
 @endsection
 
 @push('page-scripts')

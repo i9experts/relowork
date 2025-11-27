@@ -15,7 +15,10 @@ class SettingController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
 
-        $data['settings'] = Setting::where('organization_id', $organizationId)->get();
+        $q = Setting::query();
+        if ($organizationId) { $q->where('organization_id', $organizationId); }
+        else { $q->whereNull('organization_id'); }
+        $data['settings'] = $q->get();
         return view('setting.setting-form')->with($data);
     }
     /**
@@ -31,49 +34,48 @@ class SettingController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $validated = $request->validate([
-            'organization_name' => ['nullable','string','max:255'],
-            'email_address' => ['nullable','string','max:255'],
-            'phone_number' => ['nullable','string','max:50'],
-            'address' => ['nullable','string','max:500'],
-            'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
-            // 'theme' => ['nullable','in:Light,Dark'],
-            // 'language' => ['nullable','in:English,Urdu'],
-            'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
-            'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'organization_name' => ['nullable','string','max:255'],
+                'email_address' => ['nullable','string','max:255'],
+                'phone_number' => ['nullable','string','max:50'],
+                'address' => ['nullable','string','max:500'],
+                'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
+                'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+                'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
+            ]);
 
-        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+            $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        $validated['organization_id']        = $organizationId;
-        $validated['email_notifications']    = $request->boolean('email_notifications');
-        $validated['push_notifications']     = $request->boolean('push_notifications');
-        $validated['aid_approval_alerts']    = $request->boolean('aid_approval_alerts');
-        $validated['two_factor_enabled']     = $request->boolean('two_factor_enabled');
-        $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
-        $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
+            $validated['organization_id']        = $organizationId;
+            $validated['email_notifications']    = $request->boolean('email_notifications');
+            $validated['push_notifications']     = $request->boolean('push_notifications');
+            $validated['aid_approval_alerts']    = $request->boolean('aid_approval_alerts');
+            $validated['two_factor_enabled']     = $request->boolean('two_factor_enabled');
+            $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+            $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo_path'] = $path;
+            if ($request->hasFile('logo')) {
+                $path = $request->file('logo')->store('logos', 'public');
+                $validated['logo_path'] = $path;
+            }
+            if ($request->hasFile('favicon')) {
+                $fpath = $request->file('favicon')->store('favicons', 'public');
+                $validated['favicon_path'] = $fpath;
+            }
+            unset($validated['logo'], $validated['favicon']);
+
+            $settings = Setting::where('organization_id', $organizationId)->first();
+            if ($settings) {
+                $settings->update($validated);
+            } else {
+                Setting::create($validated);
+            }
+
+            return redirect()->route('cms.setting.index')->with('success', 'Settings saved successfully.');
+        } catch (\Throwable $e) {
+            return back()->withErrors(['error' => 'Failed to save settings: '.$e->getMessage()])->withInput();
         }
-        if ($request->hasFile('favicon')) {
-            $fpath = $request->file('favicon')->store('favicons', 'public');
-            $validated['favicon_path'] = $fpath;
-        }
-        // Remove non-persisted input key
-        unset($validated['logo'], $validated['favicon']);
-
-        $settings = Setting::where('organization_id', $organizationId)->first();
-        if ($settings) {
-            $settings->update($validated);
-        } else {
-            Setting::create($validated);
-        }
-
-        return redirect()->route('cms.setting.index')->with('success', 'Settings saved successfully.');
     }
 
     /**
@@ -97,48 +99,49 @@ class SettingController extends Controller
      */
     public function update(Request $request, Setting $setting)
     {
-        // dd($request->all());
-        $validated = $request->validate([
-            'organization_name' => ['nullable','string','max:255'],
-            'email_address' => ['nullable','string','max:255'],
-            'phone_number' => ['nullable','string','max:50'],
-            'address' => ['nullable','string','max:500'],
-            'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
-            // 'theme' => ['nullable','in:Light,Dark'],
-            // 'language' => ['nullable','in:English,Urdu'],
-            'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
-            'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'organization_name' => ['nullable','string','max:255'],
+                'email_address' => ['nullable','string','max:255'],
+                'phone_number' => ['nullable','string','max:50'],
+                'address' => ['nullable','string','max:500'],
+                'session_timeout_minutes' => ['nullable','integer','min:1','max:720'],
+                'logo' => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048'],
+                'favicon' => ['nullable','image','mimes:png,ico,jpg,jpeg,webp','max:1024'],
+            ]);
 
-        $validated['email_notifications'] = $request->boolean('email_notifications');
-        $validated['push_notifications'] = $request->boolean('push_notifications');
-        $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
-        $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
-        $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
-        $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
+            $validated['email_notifications'] = $request->boolean('email_notifications');
+            $validated['push_notifications'] = $request->boolean('push_notifications');
+            $validated['aid_approval_alerts'] = $request->boolean('aid_approval_alerts');
+            $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
+            $validated['session_timeout_enabled'] = $request->boolean('session_timeout_enabled');
+            $validated['session_timeout_minutes'] = $request->input('session_timeout_minutes', 10);
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo_path'] = $path;
+            if ($request->hasFile('logo')) {
+                $path = $request->file('logo')->store('logos', 'public');
+                $validated['logo_path'] = $path;
+            }
+            if ($request->hasFile('favicon')) {
+                $fpath = $request->file('favicon')->store('favicons', 'public');
+                $validated['favicon_path'] = $fpath;
+            }
+            unset($validated['logo'], $validated['favicon']);
+
+            $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
+            if ($setting && $setting->exists) {
+                $setting->update($validated);
+            } else {
+                $existing = $organizationId ? Setting::where('organization_id', $organizationId)->first()
+                                            : Setting::whereNull('organization_id')->first();
+                if ($existing) { $existing->update($validated); }
+                else { Setting::create($validated); }
+            }
+
+            return redirect()->route('cms.setting.index')->with('success', 'Settings Updated successfully.');
+        } catch (\Throwable $e) {
+            return back()->withErrors(['error' => 'Failed to update settings: '.$e->getMessage()])->withInput();
         }
-        // Handle favicon upload
-        if ($request->hasFile('favicon')) {
-            $fpath = $request->file('favicon')->store('favicons', 'public');
-            $validated['favicon_path'] = $fpath;
-        }
-        // Remove non-persisted input keys
-        unset($validated['logo'], $validated['favicon']);
-
-        if ($setting && $setting->exists) {
-            $setting->update($validated);
-        } else {
-            $existing = Setting::where('organization_id', $organizationId)->first();
-            if ($existing) { $existing->update($validated); }
-            else { Setting::create($validated); }
-        }
-
-        return redirect()->route('cms.setting.index')->with('success', 'Settings Updated successfully.');
     }
 
     /**
@@ -166,5 +169,31 @@ class SettingController extends Controller
         ])->save();
 
         return back()->with('success', 'Password changed successfully.');
+    }
+
+    public function profile()
+    {
+        $user = auth()->user();
+        $volunteer = \App\Models\Volunteer::where('user_id', optional($user)->id)->first();
+        $organization = optional($user)->organization_id ? \App\Models\Organization::find($user->organization_id) : null;
+        return view('setting.profile-form', compact('user','volunteer','organization'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required','string','max:255'],
+            'email' => ['required','string','email','max:255','unique:users,email,'.optional($request->user())->id],
+        ]);
+
+        $user = $request->user();
+        if (!$user) { abort(403); }
+
+        $user->forceFill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ])->save();
+
+        return redirect()->route('cms.setting.index')->with('success', 'Profile updated successfully.');
     }
 }

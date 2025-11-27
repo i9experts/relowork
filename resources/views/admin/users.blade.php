@@ -16,10 +16,10 @@
           <table class="table" id="adminUsersTable">
             <thead>
               <tr>
-                <th>Id</th>
+                <th>S. No</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Admin</th>
+                <th>Role</th>
                 <th>Organization</th>
                 <th>Actions</th>
               </tr>
@@ -27,10 +27,10 @@
             <tbody>
               @foreach($rows as $r)
                 <tr>
-                  <td>{{ $r->id }}</td>
+                  <td>{{ $loop->iteration }}</td>
                   <td>{{ $r->name }}</td>
                   <td>{{ $r->email }}</td>
-                  <td>{{ $r->is_admin ? 'Yes' : 'No' }}</td>
+                  <td>{{ ($r->is_system_admin ?? 0) ? 'Super Admin' : (($r->is_admin ?? 0) ? 'Admin' : 'User') }}</td>
                   <td>{{ $r->org_name ?? '-' }}</td>
                   <td>
                     @if($r->org_id)

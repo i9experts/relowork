@@ -8,6 +8,7 @@ use App\Models\Family;
 use App\Models\Volunteer;
 use App\Models\AidProgram;
 use App\Models\FinancialManagement;
+use App\Models\Surveys;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,8 +17,8 @@ class AdminDashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user || (!$user->is_admin && !$user->isSystemAdmin())) {
-            abort(403);
+        if (!$user || !$user->isSystemAdmin()) {
+            return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
         $data['organizations'] = Organization::count();
@@ -38,8 +39,8 @@ class AdminDashboardController extends Controller
     public function organizations(Request $request)
     {
         $user = $request->user();
-        if (!$user || (!$user->is_admin && !$user->isSystemAdmin())) {
-            abort(403);
+        if (!$user || !$user->isSystemAdmin()) {
+            return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
         $orgs = Organization::orderBy('id','desc')->get();
@@ -65,8 +66,8 @@ class AdminDashboardController extends Controller
     public function invoice(Request $request, Organization $organization)
     {
         $user = $request->user();
-        if (!$user || (!$user->is_admin && !$user->isSystemAdmin())) {
-            abort(403);
+        if (!$user || !$user->isSystemAdmin()) {
+            return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
         $data = [];
@@ -85,15 +86,22 @@ class AdminDashboardController extends Controller
     public function users(Request $request)
     {
         $user = $request->user();
-        if (!$user || (!$user->is_admin && !$user->isSystemAdmin())) {
-            abort(403);
+        if (!$user || !$user->isSystemAdmin()) {
+            return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
         $rows = DB::table('users')
             ->join('organizations','users.organization_id','=','organizations.id')
+            ->leftJoin('role_user','role_user.user_id','=','users.id')
+            ->leftJoin('roles','roles.id','=','role_user.role_id')
             ->whereNotNull('users.organization_id')
             ->whereNull('users.deleted_at')
-            ->select('users.id','users.name','users.email','users.is_admin','organizations.organization_name as org_name','organizations.id as org_id')
+            ->select(
+                'users.id','users.name','users.email','users.is_admin',
+                'organizations.organization_name as org_name','organizations.id as org_id',
+                DB::raw('MAX(CASE WHEN roles.is_system = 1 THEN 1 ELSE 0 END) as is_system_admin')
+            )
+            ->groupBy('users.id','users.name','users.email','users.is_admin','organizations.organization_name','organizations.id')
             ->orderBy('organizations.organization_name')
             ->orderBy('users.name')
             ->get();

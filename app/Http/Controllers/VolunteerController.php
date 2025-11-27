@@ -67,27 +67,26 @@ class VolunteerController extends Controller
     public function create()
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
-        $educationLevels = EducationLevel::where(function($q) use ($organizationId) {
-            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
-        })->orderBy('name')->get();
-        $availabilities = Availability::where(function($q) use ($organizationId) {
-            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
-        })->orderBy('name')->get();
-        $projectTypes = ProjectType::where(function($q) use ($organizationId) {
-            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
-        })->orderBy('name')->get();
-        $volunteerRoles = VolunteerRole::where(function($q) use ($organizationId) {
-            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
-        })->orderBy('name')->get();
-        $languages = Language::orderBy('name')->get();
 
-        return view('volunteer.volunteer_registration_form', compact(
-            'educationLevels',
-            'availabilities',
-            'projectTypes',
-            'volunteerRoles',
-            'languages'
-        ));
+        $data['educationLevels'] = EducationLevel::where(function($q) use ($organizationId) {
+            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
+        })->orderBy('name')->get();
+
+        $data['availabilities'] = Availability::where(function($q) use ($organizationId) {
+            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
+        })->orderBy('name')->get();
+
+        $data['projectTypes'] = ProjectType::where(function($q) use ($organizationId) {
+            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
+        })->orderBy('name')->get();
+
+        $data['volunteerRoles'] = VolunteerRole::where(function($q) use ($organizationId) {
+            $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
+        })->orderBy('name')->get();
+
+        $data['languages'] = Language::orderBy('name')->get();
+
+        return view('volunteer.volunteer_registration_form')->with($data);
     }
 
     /**

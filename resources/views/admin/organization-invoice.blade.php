@@ -3,6 +3,18 @@
 @section('content')
 <div class="wrapper">
   <div class="content-wrapper">
+    @if(request()->query('download'))
+      <script>
+        document.addEventListener('DOMContentLoaded', function(){ window.print(); });
+      </script>
+      <style>
+        @page { size: A4; margin: 16mm; }
+        @media print {
+          header, footer, nav, .btn, .no-print { display: none !important; }
+          .card { box-shadow: none !important; border: 1px solid #ddd; }
+        }
+      </style>
+    @endif
     <div class="row mb-3">
       <div class="col-12">
         <h4 class="mb-2">Organization Invoice</h4>
@@ -55,7 +67,7 @@
         </div>
 
         <div class="mt-3">
-          <a href="#" class="btn btn-primary">Download PDF</a>
+          <a href="{{ route('cms.admin.organizations.invoice', $organization->id) }}?download=1" target="_blank" class="btn btn-primary">Download PDF</a>
         </div>
       </div>
     </div>

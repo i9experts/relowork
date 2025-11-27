@@ -76,12 +76,5 @@ class VolunteerSettingsController extends Controller
         return back()->with('success', 'Volunteer role added.');
     }
 
-    public function storeLanguage(Request $request)
-    {
-        $data = $request->validate([
-            'name' => ['required','string','max:255'],
-        ]);
-        Language::firstOrCreate(['name' => $data['name']], $data);
-        return back()->with('success', 'Language added.');
-    }
+    
 }

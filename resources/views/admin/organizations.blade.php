@@ -16,7 +16,7 @@
           <table class="table" id="adminOrganizationsTable">
             <thead>
               <tr>
-                <th>Id</th>
+                <th>S. No</th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Domain</th>
@@ -32,7 +32,7 @@
             <tbody>
               @foreach($rows as $r)
                 <tr>
-                  <td>{{ $r['id'] }}</td>
+                  <td>{{ $loop->iteration }}</td>
                   <td>{{ $r['name'] }}</td>
                   <td>{{ $r['email'] }}</td>
                   <td>{{ $r['domain'] ?? '-' }}</td>

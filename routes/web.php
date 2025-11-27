@@ -71,19 +71,19 @@ use App\Http\Controllers\AdminDashboardController;
 
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
             ->name('cms.admin.dashboard')
-            ->middleware('permission:admin');
+            ->middleware('permission:super_admin');
 
         Route::get('/admin/organizations', [AdminDashboardController::class, 'organizations'])
             ->name('cms.admin.organizations')
-            ->middleware('permission:admin');
+            ->middleware('permission:super_admin');
 
         Route::get('/admin/organizations/{organization}/invoice', [AdminDashboardController::class, 'invoice'])
             ->name('cms.admin.organizations.invoice')
-            ->middleware('permission:admin');
+            ->middleware('permission:super_admin');
 
         Route::get('/admin/users', [AdminDashboardController::class, 'users'])
             ->name('cms.admin.users')
-            ->middleware('permission:admin');
+            ->middleware('permission:super_admin');
 
         Route::resource('organization-form', OrganizationController::class)->names([
             'index' => 'cms.organization-form.index',
@@ -177,7 +177,6 @@ use App\Http\Controllers\AdminDashboardController;
         Route::post('volunteer-settings/availability', [VolunteerSettingsController::class, 'storeAvailability'])->name('cms.volunteer-settings.availability.store');
         Route::post('volunteer-settings/project-type', [VolunteerSettingsController::class, 'storeProjectType'])->name('cms.volunteer-settings.project-type.store');
         Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
-        Route::post('volunteer-settings/language', [VolunteerSettingsController::class, 'storeLanguage'])->name('cms.volunteer-settings.language.store');
 
         Route::middleware('permission:volunteers')->group(function () {
             Route::resource('volunteer', VolunteerController::class)->names([
@@ -201,6 +200,10 @@ use App\Http\Controllers\AdminDashboardController;
             'update' => 'cms.setting.update',
             'destroy' => 'cms.setting.destroy',
         ]);
-        Route::post('setting/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
         });
+
+        // Profile page: accessible to all authenticated users
+        Route::get('profile', [SettingController::class, 'profile'])->name('cms.profile.index');
+        Route::post('profile/update', [SettingController::class, 'updateProfile'])->name('cms.setting.update-profile');
+        Route::post('profile/change-password', [SettingController::class, 'changePassword'])->name('cms.setting.change-password');
     });

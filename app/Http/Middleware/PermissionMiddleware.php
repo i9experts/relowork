@@ -18,12 +18,17 @@ class PermissionMiddleware
         $user = $request->user();
 
         if (!$user) {
-            abort(403);
+            return redirect()->route('login')->with('error', 'Please log in to continue.');
         }
 
-        // Admins have full access
-        if ($user->is_admin) {
+        // Super Admins have full access
+        if (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()) {
             return $next($request);
+        }
+
+        // Super admin permission must be explicitly held
+        if ($permission === 'super_admin') {
+            return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
         $perms = $user->permissions ?? [];
@@ -34,10 +39,15 @@ class PermissionMiddleware
             }
         }
 
+        // Organization Admins have full access to org-level modules
+        if ($user->is_admin) {
+            return $next($request);
+        }
+
         if (is_array($perms) && ($perms[$permission] ?? false)) {
             return $next($request);
         }
 
-        abort(403);
+        return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized to access this page.');
     }
 }

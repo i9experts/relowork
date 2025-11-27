@@ -125,6 +125,8 @@
                   </select>
                 </div>
 
+                
+
                 <!-- Availability -->
                 <div class="col-md-6 mb-3">
                   <label for="availability_id">Availability</label>
