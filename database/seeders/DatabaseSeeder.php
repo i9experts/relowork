@@ -79,5 +79,19 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        // Ensure Volunteer role is not marked as system role
+        DB::table('roles')->updateOrInsert(
+            ['slug' => 'volunteer'],
+            [
+                'name' => 'Volunteer',
+                'slug' => 'volunteer',
+                'description' => 'Volunteer User',
+                'is_system' => false,
+                'organization_id' => null,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
     }
 }

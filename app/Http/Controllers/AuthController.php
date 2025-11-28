@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
+use App\Models\Volunteer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -108,6 +109,18 @@ class AuthController extends Controller
                     'email' => 'You are not allowed to access this organization.',
                 ])->onlyInput('email');
             }
+
+            // Block inactive volunteers from logging in
+            if (!($user && (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) && !$user->is_admin) {
+                $volunteer = Volunteer::where('user_id', $user->id)->first();
+                if ($volunteer && strcasecmp((string) $volunteer->status, 'Active') !== 0) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->with('error', 'Your account is inactive. Please contact admin.')->onlyInput('email');
+                }
+            }
+
             $request->session()->put('organization_id', $organization->id);
             return redirect()->route('cms.dashboard.index');
         }

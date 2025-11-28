@@ -81,6 +81,12 @@
                     <h4 class="text-dark text-center mb-3">Sign in to your account</h4>
 
                     @include('partials.errors')
+                    @if(session('error'))
+                      <div class="alert alert-danger py-1 px-2 small mb-3">{{ session('error') }}</div>
+                    @endif
+                    @if(request('error'))
+                      <div class="alert alert-danger py-1 px-2 small mb-3">{{ request('error') }}</div>
+                    @endif
 
                     <form action="{{ route('login.post') }}" method="POST">
                       @csrf

@@ -5,6 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Organization;
+use App\Models\Volunteer;
 
 class PermissionMiddleware
 {
@@ -24,6 +27,29 @@ class PermissionMiddleware
         // Super Admins have full access
         if (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()) {
             return $next($request);
+        }
+
+        // If a volunteer is inactive, force logout and redirect to org login with message
+        if (!$user->is_admin) {
+            $volunteer = Volunteer::where('user_id', $user->id)->first();
+            if ($volunteer && strcasecmp((string) $volunteer->status, 'Active') !== 0) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                $loginUrl = route('login');
+                $org = $user->organization_id ? Organization::find($user->organization_id) : null;
+                if ($org && $org->domain) {
+                    if (app()->environment('local')) {
+                        $loginUrl = 'http://' . $org->domain . '.localhost:8000/login?error=' . urlencode('Your account is inactive. Please contact admin.');
+                    } else {
+                        $loginUrl = 'https://' . $org->domain . '.relowork.com/login?error=' . urlencode('Your account is inactive. Please contact admin.');
+                    }
+                    return redirect()->to($loginUrl);
+                }
+
+                return redirect()->route('login')->with('error', 'Your account is inactive. Please contact admin.');
+            }
         }
 
         // Super admin permission must be explicitly held

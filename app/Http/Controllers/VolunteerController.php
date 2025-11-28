@@ -13,6 +13,7 @@ use App\Models\Organization;
 use App\Mail\VolunteerWelcomeMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
@@ -161,7 +162,7 @@ class VolunteerController extends Controller
                     'name'            => 'Volunteer',
                     'slug'            => 'volunteer',
                     'description'     => 'Volunteer User',
-                    'is_system'       => true,
+                    'is_system'       => false,
                     'organization_id' => $organizationId,
                     'created_at'      => now(),
                     'updated_at'      => now(),
@@ -230,7 +231,7 @@ class VolunteerController extends Controller
             try {
                 Mail::to($user->email)->send(new VolunteerWelcomeMail($user, $plainPassword, $loginUrl));
             } catch (\Throwable $e) {
-                // Fail silently; volunteer can still use forgot password flow
+                Log::error('Volunteer welcome mail failed: '.$e->getMessage());
             }
         }
 
