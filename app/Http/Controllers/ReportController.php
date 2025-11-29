@@ -11,6 +11,7 @@ use App\Models\FinancialManagement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class ReportController extends Controller
 {
@@ -97,6 +98,7 @@ class ReportController extends Controller
     {
         $type = $request->query('type');
         $period = $request->query('period');
+        $download = $request->query('download');
 
         $range = $this->normalizePeriod($period);
         $from = $range['from'] ?? null;
@@ -129,6 +131,28 @@ class ReportController extends Controller
                     'net_balance' => $totalIncome - $totalExpenses,
                     'pending_transactions' => FinancialManagement::where('organization_id', $organizationId)->whereNull('approved_by')->count(),
                 ];
+
+                if ($download === 'pdf') {
+                    $rows = $q->get();
+                    $pdfData = [
+                        'title' => 'Financial Report',
+                        'subtitle' => ($period ?: 'All Periods'),
+                        'columns' => ['Date','Type','Amount','Program','Family','Recorded By','Approved By'],
+                        'rows' => $rows->map(function($r){
+                            return [
+                                optional($r->date)->format('Y-m-d'),
+                                $r->transaction_type,
+                                number_format((float)$r->amount, 2),
+                                optional($r->aidProgram)->name,
+                                optional($r->family)->family_name,
+                                optional($r->recordedBy)->name,
+                                optional($r->approvedBy)->name,
+                            ];
+                        })->toArray(),
+                    ];
+                    $filename = 'financial-report-'.now()->format('Ymd_His').'.pdf';
+                    return PDF::loadView('report.pdf.generic', $pdfData)->download($filename);
+                }
                 break;
             case 'Volunteers':
                 $v = Volunteer::where('organization_id', $organizationId)->latest();
@@ -170,6 +194,27 @@ class ReportController extends Controller
                     'zakat_eligible' => Family::where('organization_id', $organizationId)->where('zakat_eligibility', true)->count(),
                     'avg_household_size' => round((float) Family::where('organization_id', $organizationId)->avg('family_members_count'), 1),
                 ];
+
+                if ($download === 'pdf') {
+                    $rows = $f->get();
+                    $pdfData = [
+                        'title' => 'Families Report',
+                        'subtitle' => ($period ?: 'All Periods'),
+                        'columns' => ['Family Name','Head','Members','Zakat Eligible','Assigned Volunteer','Created At'],
+                        'rows' => $rows->map(function($r){
+                            return [
+                                $r->family_name,
+                                $r->family_head_name,
+                                (int)($r->members_count ?? $r->members_count ?? $r->members()->count()),
+                                $r->zakat_eligibility ? 'Yes' : 'No',
+                                optional($r->volunteer)->full_name,
+                                optional($r->created_at)->format('Y-m-d'),
+                            ];
+                        })->toArray(),
+                    ];
+                    $filename = 'families-report-'.now()->format('Ymd_His').'.pdf';
+                    return PDF::loadView('report.pdf.generic', $pdfData)->download($filename);
+                }
                 break;
         }
 

@@ -200,6 +200,7 @@ use App\Http\Controllers\AdminDashboardController;
             'update' => 'cms.setting.update',
             'destroy' => 'cms.setting.destroy',
         ]);
+        Route::post('setting/test-email', [SettingController::class, 'sendTestEmail'])->name('cms.setting.test-email');
         });
 
         // Profile page: accessible to all authenticated users

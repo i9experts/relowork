@@ -140,23 +140,38 @@
           </div>
 
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-              <div>
-                <h6 class="mb-1 fw-semibold">New Family Registration</h6>
-                <p class="mb-1 text-muted small">Al-Ahmad Family</p>
-                <span class="text-secondary small">5 min ago</span>
-              </div>
-              <span class="badge badge-pill badge-warning">Pending</span>
-            </div>
+            @php($items = [])
+            @foreach(($recent['transactions'] ?? []) as $t)
+              @php($items[] = [
+                'title' => ($t->transaction_type.' — '.number_format((float)$t->amount,2)),
+                'desc' => (optional($t->family)->family_name ?: optional($t->aidProgram)->program_title ?: '—'),
+                'time' => optional($t->date)->diffForHumans(),
+                'badge' => ($t->transaction_type === 'Disbursement' ? 'success' : 'info'),
+                'badgeLabel' => $t->transaction_type,
+              ])
+            @endforeach
+            @foreach(($recent['volunteers'] ?? []) as $v)
+              @php($items[] = [
+                'title' => ('Volunteer — '.($v->full_name ?: $v->user?->name ?: '—')),
+                'desc' => ('Status: '.($v->status ?: '—')),
+                'time' => optional($v->updated_at)->diffForHumans(),
+                'badge' => ($v->status === 'Active' ? 'primary' : 'warning'),
+                'badgeLabel' => ($v->status ?: 'Updated'),
+              ])
+            @endforeach
 
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-              <div>
-                <h6 class="mb-1 fw-semibold">Aid Distribution Approved</h6>
-                <p class="mb-1 text-muted small">Al-Hassan Family</p>
-                <span class="text-secondary small">15 min ago</span>
+            @forelse($items as $it)
+              <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div>
+                  <h6 class="mb-1 fw-semibold">{{ $it['title'] }}</h6>
+                  <p class="mb-1 text-muted small">{{ $it['desc'] }}</p>
+                  <span class="text-secondary small">{{ $it['time'] }}</span>
+                </div>
+                <span class="badge badge-pill badge-{{ $it['badge'] }}">{{ $it['badgeLabel'] }}</span>
               </div>
-              <span class="badge badge-pill badge-success">Approved</span>
-            </div>
+            @empty
+              <p class="text-muted mb-0">No recent activity.</p>
+            @endforelse
           </div>
         </div>
       </div>
@@ -171,17 +186,17 @@
 
           <div class="card-body">
             <div class="d-grid gap-2">
-              <button type="button" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
+              <a href="{{ route('cms.family.create') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                  Add New Family
-              </button>
+              </a>
 
-              <button type="button" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
+              <a href="{{ route('cms.financial-management.index') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                 Approve Aid Requests
-              </button>
+              </a>
 
-              <button type="button" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
+              <a href="{{ route('cms.report.index') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                 Generate Reports
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -193,4 +208,61 @@
 @endsection
 
 @push('page-scripts')
+<script>
+  (function(){
+    try {
+      // Override any pre-rendered demo chart with real monthly data
+      var elMixed = document.querySelector('#mixed-chart-1');
+      if (elMixed && window.ApexCharts) {
+        elMixed.innerHTML = '';
+        var m = @json($monthlyAid['months'] ?? []);
+        var income = @json($monthlyAid['income'] ?? []);
+        var expenses = @json($monthlyAid['expenses'] ?? []);
+        var options = {
+          chart: { height: 370, type: 'bar', toolbar: { show: false } },
+          colors: ['#9e6de0', '#faafca'],
+          legend: { show: true, position: 'top', horizontalAlign: 'right' },
+          plotOptions: { bar: { horizontal: false, columnWidth: '50%' } },
+          dataLabels: { enabled: false },
+          stroke: { show: true, width: 2, curve: 'smooth' },
+          series: [
+            { name: 'Donations', type: 'column', data: income },
+            { name: 'Disbursements', type: 'column', data: expenses },
+            { name: 'Net', type: 'line', data: income.map(function(v,i){ return (v - (expenses[i]||0)); }) }
+          ],
+          xaxis: { categories: m, axisBorder: { show: false }, axisTicks: { show: false }, crosshairs: { width: 40 } },
+          fill: { opacity: 1 },
+          tooltip: { shared: true, intersect: false }
+        };
+        var chartMixed = new ApexCharts(elMixed, options);
+        chartMixed.render();
+      }
+
+      var el = document.querySelector('#simple-pie-chart');
+      if (!el || !window.ApexCharts) return;
+      var chartData = @json($familyStatusChart ?? ['eligible'=>0,'nonEligible'=>0]);
+      var options = {
+        chart: { type: 'pie', height: 320 },
+        labels: ['Zakat Eligible', 'Not Eligible'],
+        series: [chartData.eligible || 0, chartData.nonEligible || 0],
+        colors: ['#46c79e', '#faafca'],
+        legend: { position: 'bottom' },
+        dataLabels: { enabled: true },
+      };
+      var chart = new ApexCharts(el, options);
+      chart.render();
+    } catch (e) {}
+  })();
+</script>
+<script>
+  (function(){
+    try {
+      var container = document.querySelector('.card-body');
+      // Recent Activity dynamic render
+      var recent = @json($recent ?? ['transactions'=>[],'volunteers'=>[]]);
+      var list = document.querySelector('.card .card-body');
+      // We won't manipulate existing static blocks here to avoid layout conflict.
+    } catch (e) {}
+  })();
+</script>
 @endpush

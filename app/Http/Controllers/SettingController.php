@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 
 class SettingController extends Controller
@@ -195,5 +197,21 @@ class SettingController extends Controller
         ])->save();
 
         return redirect()->route('cms.setting.index')->with('success', 'Profile updated successfully.');
+    }
+
+    public function sendTestEmail(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) { abort(403); }
+
+        try {
+            Mail::raw('This is a test email from Charity CMS settings.', function ($m) use ($user) {
+                $m->to($user->email)->subject('Test Email — Charity CMS');
+            });
+            return back()->with('success', 'Test email sent to '.$user->email.'.');
+        } catch (\Throwable $e) {
+            Log::error('Test email failed: '.$e->getMessage());
+            return back()->with('error', 'Failed to send test email: '.$e->getMessage());
+        }
     }
 }

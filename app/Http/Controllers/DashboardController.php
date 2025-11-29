@@ -26,7 +26,41 @@ class DashboardController extends Controller
             ->where('transaction_type', 'Disbursement')
             ->sum('amount');
 
-        // dd($data);
+        $eligible = Family::where('organization_id', $organizationId)->where('zakat_eligibility', true)->count();
+        $nonEligible = max(0, ($data['families'] ?? 0) - $eligible);
+        $data['familyStatusChart'] = [
+            'eligible' => $eligible,
+            'nonEligible' => $nonEligible,
+        ];
+
+        $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        $income = [];
+        $expenses = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $income[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                ->whereIn('transaction_type', ['Donation','Transfer'])
+                ->whereYear('date', now()->year)
+                ->whereMonth('date', $m)
+                ->sum('amount');
+            $expenses[] = (int) FinancialManagement::where('organization_id', $organizationId)
+                ->whereIn('transaction_type', ['Expense','Disbursement'])
+                ->whereYear('date', now()->year)
+                ->whereMonth('date', $m)
+                ->sum('amount');
+        }
+        $data['monthlyAid'] = [ 'months' => $months, 'income' => $income, 'expenses' => $expenses ];
+
+        $recentTransactions = FinancialManagement::with(['family','aidProgram'])
+            ->where('organization_id', $organizationId)
+            ->latest('date')
+            ->take(5)
+            ->get();
+        $recentVolunteers = Volunteer::where('organization_id', $organizationId)
+            ->latest()
+            ->take(5)
+            ->get();
+        $data['recent'] = [ 'transactions' => $recentTransactions, 'volunteers' => $recentVolunteers ];
+
         return view('dashboard.dashboard')->with($data);
     }
 

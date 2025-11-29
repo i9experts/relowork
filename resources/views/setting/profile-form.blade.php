@@ -41,7 +41,7 @@
               </div>
             </div>
             @include('partials.errors')
-            @php($currentUser = auth()->user())
+            @php $currentUser = auth()->user(); @endphp
             <h4 class="card-title fw-bold mb-1">Personal Details</h4>
             <p class="text-muted mb-4">Update your name and email</p>
             <form method="POST" action="{{ route('cms.setting.update-profile') }}">
@@ -84,6 +84,44 @@
                 Update Password
               </button>
             </form>
+
+            @if($volunteer)
+            <div class="col-md-12 mt-4">
+              <hr>
+              <p class="text-center fw-bold mb-3">Volunteer Details</p>
+              <hr>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <tbody>
+                          <tr><th>Full Name</th><td>{{ $volunteer->full_name ?? '—' }}</td></tr>
+                          <tr><th>CNIC / ID</th><td>{{ $volunteer->cnic ?? '—' }}</td></tr>
+                          <tr><th>Gender</th><td>{{ $volunteer->gender ?? '—' }}</td></tr>
+                          <tr><th>Date of Birth</th><td>{{ $volunteer->dob ? \Illuminate\Support\Carbon::parse($volunteer->dob)->format('Y-m-d') : '—' }}</td></tr>
+                          <tr><th>Address</th><td>{{ $volunteer->address ?? '—' }}</td></tr>
+                          <tr><th>Education Level</th><td>{{ $volunteer->education_level ?? '—' }}</td></tr>
+                          <tr><th>Skills</th><td>{{ $volunteer->skills ?? '—' }}</td></tr>
+                          <tr><th>Languages</th><td>{{ $volunteer->languages ?? '—' }}</td></tr>
+                          <tr><th>Availability</th><td>{{ $volunteer->availability ?? '—' }}</td></tr>
+                          <tr>
+                            <th>Preferred Projects</th>
+                            <td>
+                              @php $pp = collect($volunteer->preferred_projects ?? []); @endphp
+                              {{ $pp->isEmpty() ? '—' : $pp->join(', ') }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            @endif
           </div>
         </div>
       </div>

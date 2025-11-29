@@ -7,6 +7,7 @@ use App\Models\FamilyMember;
 use App\Models\Volunteer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Mail\NotificationMailer;
 
 class FamilyController extends Controller
 {
@@ -127,6 +128,9 @@ class FamilyController extends Controller
             }
         });
 
+        try {
+            NotificationMailer::sendEmailNotification($organizationId, [ 'actionUrl' => route('cms.family.index') ]);
+        } catch (\Throwable $e) { /* silent */ }
         return redirect()->route('cms.family.index')->with('success', 'Family registered successfully!');
     }
 

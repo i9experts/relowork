@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Carbon\CarbonPeriod;
+use App\Mail\NotificationMailer;
 
 class FinancialManagementController extends Controller
 {
@@ -229,7 +230,7 @@ class FinancialManagementController extends Controller
                 }
             }
 
-            FinancialManagement::create([
+            $tx = FinancialManagement::create([
                 'transaction_code' => $trxCode,
                 'organization_id' => $organizationId,
                 'date' => $validated['date'],
@@ -245,6 +246,19 @@ class FinancialManagementController extends Controller
                 'approved_by' => $validated['approved_by'] ?? null,
                 'remarks' => $validated['remarks'] ?? null,
             ]);
+
+            // Notify admins based on settings
+            try {
+                if (in_array($validated['transaction_type'], ['Expense','Disbursement'], true) && empty($validated['approved_by'])) {
+                    NotificationMailer::sendAidApprovalAlert($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                }
+                // Generic activity notification
+                NotificationMailer::sendEmailNotification($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                // Optional push-email for Donation events
+                if ($validated['transaction_type'] === 'Donation') {
+                    NotificationMailer::sendPushEmail($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                }
+            } catch (\Throwable $e) { /* silent */ }
         });
 
         return redirect()->route('cms.financial-management.index')->with('success', 'Transaction saved successfully.');

@@ -18,6 +18,9 @@
         <a href="{{ url('report/export').'?type='.urlencode($type).'&period='.urlencode($period) }}" class="btn btn-primary btn-pill mr-2">
           <i class="mdi mdi-download me-1"></i> Export CSV
         </a>
+        <a href="{{ url('report/view').'?type='.urlencode($type).'&period='.urlencode($period).'&download=pdf' }}" class="btn btn-outline-primary btn-pill mr-2">
+          <i class="mdi mdi-file-pdf-box me-1"></i> Download PDF
+        </a>
         @endif
         <a href="{{ route('cms.report.index') }}" class="btn btn-outline-secondary btn-pill">Back to Reports</a>
       </div>
