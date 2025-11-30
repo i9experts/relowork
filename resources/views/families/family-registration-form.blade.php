@@ -32,9 +32,11 @@
                     <div class="w-100 mb-3">
                         @include('partials.errors')
                     </div>
-                    <!-- <div class="alert alert-warning mb-3" role="alert">
+                    @if(($volunteer ?? collect())->isEmpty())
+                    <div class="alert alert-warning mb-3" role="alert">
                         ⚠️ Please ensure a Volunteer is created first. You cannot save this Family Registration Form without selecting or creating a Volunteer.
-                    </div> -->
+                    </div>
+                    @endif
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <h4 class="card-title fw-bold mb-1">Family Registration Form</h4>
@@ -42,7 +44,7 @@
                       </div>
                       
                       <span class="badge badge-secondary ms-auto" style="font-size:0.95rem;">
-                          {{ $next_family_code ?? '' }}
+                          {{ (\Illuminate\Support\Str::startsWith($next_family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($next_family_code ?? '', '-')) : ($next_family_code ?? '')) }}
                       </span>
                     </div>
 

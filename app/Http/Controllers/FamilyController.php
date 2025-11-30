@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\Volunteer;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Mail\NotificationMailer;
+use Illuminate\Validation\Rule;
 
 class FamilyController extends Controller
 {
@@ -36,8 +38,12 @@ class FamilyController extends Controller
      */
     public function create()
     {
-        $data['volunteer'] = Volunteer::get();
-        $data['next_family_code'] = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
+        $org = $organizationId ? Organization::find($organizationId) : null;
+        $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
+        $prefix = 'FAM-' . strtoupper($org->domain ?? ('ORG' . (string) $organizationId));
+        $data['next_family_code'] = $prefix . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
         return view('families.family-registration-form')->with($data);
     }
 
@@ -46,6 +52,8 @@ class FamilyController extends Controller
      */
     public function store(Request $request)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+
         $validated = $request->validate([
             'head_of_family_name' => ['required', 'string', 'max:255'],
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic'],
@@ -65,7 +73,7 @@ class FamilyController extends Controller
             'monthly_expense' => ['nullable', 'integer', 'min:0'],
             'zakat_eligibility' => ['required', 'string', 'in:Yes,No'],
             'comment_note' => ['nullable', 'string'],
-            'volunteer_id' => ['required', 'exists:volunteers,id'],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function($q) use ($organizationId) { $q->where('organization_id', $organizationId); })],
             'members' => ['nullable', 'array'],
             'members.*.name' => ['nullable', 'string', 'max:255'],
             'members.*.age' => ['nullable', 'integer', 'min:0'],
@@ -74,11 +82,10 @@ class FamilyController extends Controller
             'members.*.occupation' => ['nullable', 'string', 'max:100'],
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
-
-        // Determine organization context for the new family
-        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
-
-        $familyCode = 'FAM-' . str_pad((string)((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+        $org = $organizationId ? Organization::find($organizationId) : null;
+        $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
+        $prefix = 'FAM-' . strtoupper($org->domain ?? ('ORG' . (string) $organizationId));
+        $familyCode = $prefix . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $familyCode, $organizationId) {
             $family = Family::create([
@@ -159,6 +166,7 @@ class FamilyController extends Controller
      */
     public function update(Request $request, Family $family)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
             'head_of_family_name' => ['required', 'string', 'max:255'],
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,' . $family->id],
@@ -178,7 +186,7 @@ class FamilyController extends Controller
             'monthly_expense' => ['nullable', 'integer', 'min:0'],
             'zakat_eligibility' => ['required', 'string', 'in:Yes,No'],
             'comment_note' => ['nullable', 'string'],
-            'volunteer_id' => ['required', 'exists:volunteers,id'],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function($q) use ($organizationId) { $q->where('organization_id', $organizationId); })],
             'members' => ['nullable', 'array'],
             'members.*.name' => ['nullable', 'string', 'max:255'],
             'members.*.age' => ['nullable', 'integer', 'min:0'],
