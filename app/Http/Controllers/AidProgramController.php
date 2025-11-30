@@ -99,14 +99,19 @@ class AidProgramController extends Controller
                 'progress_notes' => $validated['progress_notes'] ?? null,
             ]);
 
-            // attach single volunteer if provided via pivot table
             if (!empty($validated['volunteer_id'])) {
-                $program->volunteers()->syncWithoutDetaching([$validated['volunteer_id']]);
+                $program->volunteers()->syncWithoutDetaching([
+                    $validated['volunteer_id'] => ['organization_id' => $organizationId],
+                ]);
             }
 
-            // attach families via pivot
             if (!empty($validated['families'])) {
-                $program->families()->sync($validated['families']);
+                $familiesWithPivot = collect($validated['families'])
+                    ->mapWithKeys(function ($id) use ($organizationId) {
+                        return [$id => ['organization_id' => $organizationId]];
+                    })
+                    ->all();
+                $program->families()->sync($familiesWithPivot);
             }
 
             // handle attachments
@@ -115,6 +120,7 @@ class AidProgramController extends Controller
                     if (!$file->isValid()) { continue; }
                     $path = $file->store('aid_attachments', 'public');
                     $program->attachments()->create([
+                        'organization_id' => $organizationId,
                         'type' => $file->getClientMimeType(),
                         'path' => $path,
                         'original_name' => $file->getClientOriginalName(),
@@ -180,8 +186,9 @@ class AidProgramController extends Controller
             'families.*' => ['integer','exists:families,id'],
             'attachments.*' => ['file','max:5120'],
         ]);
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        DB::transaction(function () use ($validated, $request, $aidProgram) {
+        DB::transaction(function () use ($validated, $request, $aidProgram, $organizationId) {
             $aidProgram->update([
                 'program_title' => $validated['program_title'],
                 'program_type' => $validated['program_type'] ?? null,
@@ -199,11 +206,19 @@ class AidProgramController extends Controller
             ]);
 
             if (!empty($validated['volunteer_id'])) {
-                $aidProgram->volunteers()->syncWithoutDetaching([$validated['volunteer_id']]);
+                $aidProgram->volunteers()->syncWithoutDetaching([
+                    $validated['volunteer_id'] => ['organization_id' => $organizationId],
+                ]);
             }
 
             if (array_key_exists('families', $validated)) {
-                $aidProgram->families()->sync($validated['families'] ?? []);
+                $families = $validated['families'] ?? [];
+                $familiesWithPivot = collect($families)
+                    ->mapWithKeys(function ($id) use ($organizationId) {
+                        return [$id => ['organization_id' => $organizationId]];
+                    })
+                    ->all();
+                $aidProgram->families()->sync($familiesWithPivot);
             }
 
             if ($request->hasFile('attachments')) {
@@ -211,6 +226,7 @@ class AidProgramController extends Controller
                     if (!$file->isValid()) { continue; }
                     $path = $file->store('aid_attachments', 'public');
                     $aidProgram->attachments()->create([
+                        'organization_id' => $organizationId,
                         'type' => $file->getClientMimeType(),
                         'path' => $path,
                         'original_name' => $file->getClientOriginalName(),

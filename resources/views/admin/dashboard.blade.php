@@ -4,15 +4,21 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
-    <!-- Dashboard Header -->
     <div class="mb-1">
-      <h4 class="fw-bold text-dark mb-1">Super Admin Dashboard</h4>
-      <p class="text-muted fs-5">Platform-wide overview of all organizations. </p>
-      <div class="mt-2">
-        <a href="{{ route('cms.setting.index') }}" class="btn btn-outline-secondary btn-sm">Settings</a>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h4 class="fw-bold text-dark mb-1">Super Admin Dashboard</h4>
+          <p class="text-muted fs-5">Platform-wide overview of all organizations.</p>
+        </div>
+
+        <a href="{{ route('cms.setting.index') }}" class="btn btn-outline-secondary btn-sm ms-auto">
+          Settings
+        </a>
       </div>
+
       <hr class="mt-2 mb-2">
     </div>
+
 
       <!-- Top Statistics -->
       <div class="row">

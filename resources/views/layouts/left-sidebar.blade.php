@@ -130,7 +130,7 @@
 
     <!-- Sidebar footer -->
     <div class="sidebar-footer">
-        <div class="sidebar-footer-content">
+        <div class="sidebar-footer-content d-flex justify-content-center">
             <ul class="d-flex">
                 <li>
                     <a href="{{ route('cms.setting.index') }}" data-toggle="tooltip" title="Profile settings">

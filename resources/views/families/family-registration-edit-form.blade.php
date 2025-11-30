@@ -58,7 +58,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="cnic">CNIC / National ID</label>
                                         <input type="text" class="form-control rounded-0 bg-light" id="cnic"
-                                            placeholder="42201-1234567-8" name="cnic" value="{{ old('cnic', $family->cnic) }}">
+                                            placeholder="Enter CNIC / National ID" name="cnic" value="{{ old('cnic', $family->cnic) }}">
                                     </div>
 
                                     <!-- Gender -->

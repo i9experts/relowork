@@ -84,29 +84,29 @@
                     <!-- Amount -->
                     <div class="col-md-6 mb-3">
                       <label for="amount">Amount (PKR)</label>
-                      <input type="number" class="form-control rounded-0 bg-light" id="amount" name="amount" placeholder="10000" value="{{ old('amount') }}" min="1">
+                      <input type="number" class="form-control rounded-0 bg-light" id="amount" name="amount" placeholder="Enter Amount" value="{{ old('amount') }}" min="1">
                     </div>
 
                     <!-- Donor Name -->
                     <div class="col-md-6 mb-3">
                       <label for="donor_name">Donor Name</label>
-                      <input type="text" class="form-control rounded-0 bg-light" id="donor_name" name="donor_name" placeholder="e.g., Mr. Abdul Wahab" value="{{ old('donor_name') }}">
+                      <input type="text" class="form-control rounded-0 bg-light" id="donor_name" name="donor_name" placeholder="Enter Donar Name" value="{{ old('donor_name') }}">
                     </div>
 
-                    <!-- Project / Program Linked -->
+                    <!-- Aid Program -->
                     <div class="col-md-6 mb-3">
-                      <label for="aid_program_id">Project / Program Linked</label>
+                      <label for="aid_program_id">Aid Program</label>
                       <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;">
-                        <option>Select Project / Program</option>
+                        <option>Select Aid Program</option>
                         @foreach($programs as $p)
                           <option value="{{ $p->id }}" {{ old('aid_program_id')==$p->id?'selected':'' }}>{{ $p->program_title }}</option>
                         @endforeach
                       </select>
                     </div>
 
-                    <!-- Beneficiary Family Linked -->
+                    <!-- Family -->
                     <div class="col-md-6 mb-3">
-                      <label for="family_id">Beneficiary Family Linked</label>
+                      <label for="family_id">Families</label>
                       <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;">
                         <option >Select Family</option>
                         @foreach($families as $fam)

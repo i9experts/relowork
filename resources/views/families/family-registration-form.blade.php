@@ -35,15 +35,17 @@
                     <!-- <div class="alert alert-warning mb-3" role="alert">
                         ⚠️ Please ensure a Volunteer is created first. You cannot save this Family Registration Form without selecting or creating a Volunteer.
                     </div> -->
-                    <div class="d-flex justi  fy-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <h4 class="card-title fw-bold mb-1">Family Registration Form</h4>
                         <p class="text-muted mb-4">Purpose: To collect detailed beneficiary family data for eligibility and tracking.</p>
                       </div>
-                      <div>
-                        <span class="badge badge-secondary" style="font-size:0.95rem;">{{ $next_family_code ?? '' }}</span>
-                      </div>
+                      
+                      <span class="badge badge-secondary ms-auto" style="font-size:0.95rem;">
+                          {{ $next_family_code ?? '' }}
+                      </span>
                     </div>
+
                     <div class="row">
                         <div class="col-md-12">
                             <form method="POST" action="{{ route('cms.family.store') }}" enctype="multipart/form-data">
@@ -60,7 +62,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="cnic">CNIC / National ID</label>
                                         <input type="text" class="form-control rounded-0 bg-light" id="cnic"
-                                            placeholder="42201-1234567-8" name="cnic" value="{{ old('cnic') }}">
+                                            placeholder="Enter CNIC / National ID" name="cnic" value="{{ old('cnic') }}">
                                     </div>
 
                                     <!-- Gender -->
