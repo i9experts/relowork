@@ -17,6 +17,8 @@
     color: #6c757d;
     margin-top: 4px;
   }
+  /* Fixed-height scroll areas */
+  .scrollable .card-body { max-height: 340px; overflow-y: auto; }
 </style>
 @endpush
 
@@ -24,10 +26,9 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
-    <!-- Dashboard Header -->
     <div class="mb-1">
-      <h4 class="fw-bold text-dark mb-1">Admin Dashboard</h4>
-      <p class="text-muted fs-5">Welcome back, Administrator </p>
+      <h4 class="fw-bold text-dark mb-1">{{ optional($organization)->organization_name ?: 'Dashboard' }}</h4>
+      <p class="text-muted fs-5">Welcome to ReloWork — {{ optional($organization)->organization_name ?: 'Your Organization' }}</p>
       <hr class="mt-2 mb-2">
     </div>
 
@@ -133,7 +134,7 @@
     <div class="row">
       <div class="col-xl-6">
         <!-- Recent Activity -->
-        <div class="card card-default">
+        <div class="card card-default scrollable">
           <div class="card-header align-items-center d-flex justify-content-between">
             <h2 class="mb-0">Recent Activity</h2>
             <a href="#" class="btn btn-link btn-pill" data-toggle="modal" data-target="#modal-stock">View All</a>
@@ -146,7 +147,7 @@
                 'title' => ($t->transaction_type.' — '.number_format((float)$t->amount,2)),
                 'desc' => (optional($t->family)->family_name ?: optional($t->aidProgram)->program_title ?: '—'),
                 'time' => optional($t->date)->diffForHumans(),
-                'badge' => ($t->transaction_type === 'Disbursement' ? 'success' : 'info'),
+                'badge' => ($t->transaction_type === 'Expense' ? 'danger' : ($t->transaction_type === 'Donation' ? 'secondary' : ($t->transaction_type === 'Disbursement' ? 'warning' : 'info'))),
                 'badgeLabel' => $t->transaction_type,
               ])
             @endforeach
@@ -155,7 +156,7 @@
                 'title' => ('Volunteer — '.($v->full_name ?: $v->user?->name ?: '—')),
                 'desc' => ('Status: '.($v->status ?: '—')),
                 'time' => optional($v->updated_at)->diffForHumans(),
-                'badge' => ($v->status === 'Active' ? 'primary' : 'warning'),
+                'badge' => ($v->status === 'Active' ? 'success' : 'warning'),
                 'badgeLabel' => ($v->status ?: 'Updated'),
               ])
             @endforeach
@@ -178,7 +179,7 @@
 
       <div class="col-xl-6">
         <!-- Quick Actions -->
-        <div class="card card-default">
+        <div class="card card-default scrollable">
           <div class="card-header">
             <h2 class="mb-0">Quick Actions</h2>
             <p class="small">Frequently used actions</p>
@@ -213,33 +214,38 @@
     try {
       // Override any pre-rendered demo chart with real monthly data
       var elMixed = document.querySelector('#mixed-chart-1');
-      if (elMixed && window.ApexCharts) {
-        elMixed.innerHTML = '';
-        var m = @json($monthlyAid['months'] ?? []);
-        var income = @json($monthlyAid['income'] ?? []);
-        var expenses = @json($monthlyAid['expenses'] ?? []);
-        var options = {
-          chart: { height: 370, type: 'bar', toolbar: { show: false } },
-          colors: ['#9e6de0', '#faafca'],
-          legend: { show: true, position: 'top', horizontalAlign: 'right' },
-          plotOptions: { bar: { horizontal: false, columnWidth: '50%' } },
-          dataLabels: { enabled: false },
-          stroke: { show: true, width: 2, curve: 'smooth' },
-          series: [
-            { name: 'Donations', type: 'column', data: income },
-            { name: 'Disbursements', type: 'column', data: expenses },
-            { name: 'Net', type: 'line', data: income.map(function(v,i){ return (v - (expenses[i]||0)); }) }
-          ],
-          xaxis: { categories: m, axisBorder: { show: false }, axisTicks: { show: false }, crosshairs: { width: 40 } },
-          fill: { opacity: 1 },
-          tooltip: { shared: true, intersect: false }
-        };
-        var chartMixed = new ApexCharts(elMixed, options);
-        chartMixed.render();
-      }
+      (function ensureMixedChart(max=20, delay=200){
+        if (!elMixed) return;
+        if (window.ApexCharts) {
+          elMixed.innerHTML = '';
+          var m = @json($monthlyAid['months'] ?? []);
+          var income = @json($monthlyAid['income'] ?? []);
+          var expenses = @json($monthlyAid['expenses'] ?? []);
+          var options = {
+            chart: { height: 370, type: 'bar', toolbar: { show: false } },
+            colors: ['#9e6de0', '#faafca'],
+            legend: { show: true, position: 'top', horizontalAlign: 'right' },
+            plotOptions: { bar: { horizontal: false, columnWidth: '50%' } },
+            dataLabels: { enabled: false },
+            stroke: { show: true, width: 2, curve: 'smooth' },
+            series: [
+              { name: 'Donations', type: 'column', data: income },
+              { name: 'Disbursements', type: 'column', data: expenses },
+              { name: 'Net', type: 'line', data: income.map(function(v,i){ return (v - (expenses[i]||0)); }) }
+            ],
+            xaxis: { categories: m, axisBorder: { show: false }, axisTicks: { show: false }, crosshairs: { width: 40 } },
+            fill: { opacity: 1 },
+            tooltip: { shared: true, intersect: false }
+          };
+          try { new ApexCharts(elMixed, options).render(); } catch (e) {}
+          return;
+        }
+        if (max > 0) setTimeout(function(){ ensureMixedChart(max-1, delay); }, delay);
+      })();
 
       var el = document.querySelector('#simple-pie-chart');
       if (!el || !window.ApexCharts) return;
+      el.innerHTML = '';
       var chartData = @json($familyStatusChart ?? ['eligible'=>0,'nonEligible'=>0]);
       var options = {
         chart: { type: 'pie', height: 320 },

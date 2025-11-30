@@ -355,6 +355,7 @@ class FinancialManagementController extends Controller
 
     public function export(Request $request)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         // 1) Resolve range (same as index)
         $range = $request->query('range', 'this_month');
         $now = now();
@@ -418,10 +419,10 @@ class FinancialManagementController extends Controller
                 $mStart = $m->copy()->startOfMonth();
                 $mEnd = $m->copy()->endOfMonth();
                 $labels[] = $m->format('M Y');
-                $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $incomeTypes)
                     ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
                     ->sum('amount');
-                $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                $expenseSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $expenseTypes)
                     ->whereBetween('date', [$mStart->toDateString(), $mEnd->toDateString()])
                     ->sum('amount');
             }
@@ -433,10 +434,10 @@ class FinancialManagementController extends Controller
                     $dStart = $d->copy()->startOfDay();
                     $dEnd = $d->copy()->endOfDay();
                     $labels[] = $d->format('d M');
-                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $incomeTypes)
                         ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
                         ->sum('amount');
-                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                    $expenseSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $expenseTypes)
                         ->whereBetween('date', [$dStart->toDateString(), $dEnd->toDateString()])
                         ->sum('amount');
                 }
@@ -448,10 +449,10 @@ class FinancialManagementController extends Controller
                     $mmStart = $m->copy()->startOfMonth();
                     $mmEnd = $m->copy()->endOfMonth();
                     $labels[] = $m->format('M Y');
-                    $incomeSeries[] = (int) FinancialManagement::whereIn('transaction_type', $incomeTypes)
+                    $incomeSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $incomeTypes)
                         ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
                         ->sum('amount');
-                    $expenseSeries[] = (int) FinancialManagement::whereIn('transaction_type', $expenseTypes)
+                    $expenseSeries[] = (int) FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $expenseTypes)
                         ->whereBetween('date', [$mmStart->toDateString(), $mmEnd->toDateString()])
                         ->sum('amount');
                 }
@@ -459,8 +460,8 @@ class FinancialManagementController extends Controller
         }
 
         // 3) KPIs
-        $incomeQ = FinancialManagement::whereIn('transaction_type', $incomeTypes);
-        $expenseQ = FinancialManagement::whereIn('transaction_type', $expenseTypes);
+        $incomeQ = FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $incomeTypes);
+        $expenseQ = FinancialManagement::where('organization_id', $organizationId)->whereIn('transaction_type', $expenseTypes);
         if (isset($from, $to) && $from && $to) {
             $incomeQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
             $expenseQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
@@ -468,14 +469,14 @@ class FinancialManagementController extends Controller
         $totalIncome = (int) $incomeQ->sum('amount');
         $totalExpenses = (int) $expenseQ->sum('amount');
         $netBalance = $totalIncome - $totalExpenses;
-        $pendingQ = FinancialManagement::whereNull('approved_by');
+        $pendingQ = FinancialManagement::where('organization_id', $organizationId)->whereNull('approved_by');
         if (isset($from, $to) && $from && $to) {
             $pendingQ->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         }
         $pendingCount = (int) $pendingQ->count();
 
         // 4) Transactions for the section
-        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->orderByDesc('date');
+        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->where('organization_id', $organizationId)->orderByDesc('date');
         if (isset($from, $to) && $from && $to) {
             $tx->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         }

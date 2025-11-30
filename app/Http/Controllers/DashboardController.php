@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\AidProgram;
 use App\Models\FinancialManagement;
 use App\Models\Volunteer;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -60,6 +61,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
         $data['recent'] = [ 'transactions' => $recentTransactions, 'volunteers' => $recentVolunteers ];
+        $data['organization'] = $organizationId ? Organization::find($organizationId) : null;
 
         return view('dashboard.dashboard')->with($data);
     }
