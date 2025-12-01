@@ -12,7 +12,9 @@ class VolunteerWelcomeMail extends Mailable
     use Queueable, SerializesModels;
 
     public User $user;
+
     public string $plainPassword;
+
     public string $loginUrl;
 
     public function __construct(User $user, string $plainPassword, string $loginUrl)

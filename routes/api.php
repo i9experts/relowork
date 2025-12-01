@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Organization;
 
 Route::get('/organizations/check-domain', function (Request $request) {
     $domain = trim((string) $request->query('domain', ''));

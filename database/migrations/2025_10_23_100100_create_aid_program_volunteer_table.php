@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('volunteer_id')->constrained('volunteers')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
-            $table->unique(['aid_program_id','volunteer_id']);
+            $table->unique(['aid_program_id', 'volunteer_id']);
         });
     }
 

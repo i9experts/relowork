@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('survey_code')->unique()->nullable();
             $table->foreignId('family_id')->nullable()->constrained('families')->nullOnDelete();
             $table->unsignedBigInteger('enumerator_id')->nullable()->index();
-            $table->enum('survey_mode', ['In-person','Phone','WhatsApp','Web'])->nullable();
+            $table->enum('survey_mode', ['In-person', 'Phone', 'WhatsApp', 'Web'])->nullable();
             $table->dateTime('ts')->nullable();
             $table->decimal('lat', 10, 6)->nullable();
             $table->decimal('lon', 10, 6)->nullable();
@@ -28,9 +28,9 @@ return new class extends Migration
             $table->json('flags_json')->nullable();
             $table->unsignedInteger('score')->nullable();
             $table->json('recommendations_json')->nullable();
-            $table->softDeletes();            
+            $table->softDeletes();
             $table->timestamps();
-            $table->index(['family_id','enumerator_id']);
+            $table->index(['family_id', 'enumerator_id']);
         });
     }
 

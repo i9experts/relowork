@@ -12,17 +12,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->string('title');
-            $table->enum('report_type', ['financial','aid_distribution','family_assessment','volunteer_activity','survey_summary','custom'])->default('custom');
+            $table->enum('report_type', ['financial', 'aid_distribution', 'family_assessment', 'volunteer_activity', 'survey_summary', 'custom'])->default('custom');
             $table->date('period_start')->nullable();
             $table->date('period_end')->nullable();
             $table->json('filters_json')->nullable();
             $table->string('file_path')->nullable();
-            $table->enum('status', ['queued','processing','ready','failed'])->default('queued');
+            $table->enum('status', ['queued', 'processing', 'ready', 'failed'])->default('queued');
             $table->unsignedBigInteger('size_bytes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->softDeletes();            
+            $table->softDeletes();
             $table->timestamps();
-            $table->index(['report_type','status']);
+            $table->index(['report_type', 'status']);
         });
     }
 

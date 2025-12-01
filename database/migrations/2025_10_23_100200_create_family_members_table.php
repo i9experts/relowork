@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('cnic', 15)->nullable();
             $table->softDeletes();
             $table->timestamps();
-            $table->index(['family_id','relation']);
+            $table->index(['family_id', 'relation']);
         });
     }
 

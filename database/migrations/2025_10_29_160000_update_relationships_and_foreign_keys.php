@@ -45,7 +45,10 @@ return new class extends Migration
         if (Schema::hasColumn('aid_programs', 'volunteer_id')) {
             Schema::table('aid_programs', function (Blueprint $table) {
                 // drop foreign key if exists then column
-                try { $table->dropForeign(['volunteer_id']); } catch (\Throwable $e) {}
+                try {
+                    $table->dropForeign(['volunteer_id']);
+                } catch (\Throwable $e) {
+                }
                 $table->dropColumn('volunteer_id');
             });
         }
@@ -54,7 +57,7 @@ return new class extends Migration
     public function down(): void
     {
         // Re-add aid_programs.volunteer_id (nullable, indexed)
-        if (!Schema::hasColumn('aid_programs', 'volunteer_id')) {
+        if (! Schema::hasColumn('aid_programs', 'volunteer_id')) {
             Schema::table('aid_programs', function (Blueprint $table) {
                 $table->unsignedBigInteger('volunteer_id')->nullable()->index()->after('fund_source');
             });
@@ -62,17 +65,26 @@ return new class extends Migration
 
         // Drop FK survey_members.person_id
         Schema::table('survey_members', function (Blueprint $table) {
-            try { $table->dropForeign(['person_id']); } catch (\Throwable $e) {}
+            try {
+                $table->dropForeign(['person_id']);
+            } catch (\Throwable $e) {
+            }
         });
 
         // Drop FK surveys.enumerator_id
         Schema::table('surveys', function (Blueprint $table) {
-            try { $table->dropForeign(['enumerator_id']); } catch (\Throwable $e) {}
+            try {
+                $table->dropForeign(['enumerator_id']);
+            } catch (\Throwable $e) {
+            }
         });
 
         // Drop FK families.volunteer_id
         Schema::table('families', function (Blueprint $table) {
-            try { $table->dropForeign(['volunteer_id']); } catch (\Throwable $e) {}
+            try {
+                $table->dropForeign(['volunteer_id']);
+            } catch (\Throwable $e) {
+            }
         });
     }
 };

@@ -34,6 +34,22 @@
               Purpose: To record all charity inflows/outflows for audit and reporting.
             </p>
 
+            @if(($programs ?? collect())->isEmpty() || ($families ?? collect())->isEmpty())
+              <div class="alert alert-warning d-flex align-items-start" role="alert">
+                <div>
+                  @if(($programs ?? collect())->isEmpty())
+                    ⚠️ Please create an Aid Program first.
+                    <a href="{{ route('cms.aid-program.create') }}" class="Danger-link">Create Aid Program</a><br>
+                  @endif
+                  @if(($families ?? collect())->isEmpty())
+                    ⚠️ Please create a Family first.
+                    <a href="{{ route('cms.family.create') }}" class="Danger-link">Create Family</a>
+                  @endif
+                </div>
+              </div>
+            @endif
+
+
             <div class="row">
               <div class="col-md-12">
                 <form method="POST" action="{{ route('cms.financial-management.store') }}" enctype="multipart/form-data">
@@ -96,7 +112,7 @@
                     <!-- Aid Program -->
                     <div class="col-md-6 mb-3">
                       <label for="aid_program_id">Aid Program</label>
-                      <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;" required>
                         <option>Select Aid Program</option>
                         @foreach($programs as $p)
                           <option value="{{ $p->id }}" {{ old('aid_program_id')==$p->id?'selected':'' }}>{{ $p->program_title }}</option>
@@ -107,7 +123,7 @@
                     <!-- Family -->
                     <div class="col-md-6 mb-3">
                       <label for="family_id">Families</label>
-                      <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;" required>
                         <option >Select Family</option>
                         @foreach($families as $fam)
                           <option value="{{ $fam->id }}" {{ old('family_id')==$fam->id?'selected':'' }}>{{ $fam->family_code }} - {{ $fam->head_of_family_name }}</option>
@@ -125,7 +141,7 @@
                     <!-- Recorded By -->
                     <div class="col-md-6 mb-3">
                       <label for="recorded_by">Recorded By</label>
-                      <select class="form-control rounded-0 bg-light select2" id="recorded_by" name="recorded_by" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="recorded_by" name="recorded_by" style="width: 100%;" required>
                         <option>Select User</option>
                         @foreach($users as $u)
                           <option value="{{ $u->id }}" {{ old('recorded_by')==$u->id?'selected':'' }}>{{ $u->name }}</option>
@@ -152,7 +168,7 @@
 
                   </div>
 
-                  <button type="submit" class="btn btn-secondary btn-pill mt-2">
+                  <button type="submit" class="btn btn-secondary btn-pill mt-2" {{ (($programs ?? collect())->isEmpty() || ($families ?? collect())->isEmpty()) ? 'disabled' : '' }}>
                     <i class="mdi mdi-check-circle-outline me-1"></i> Save Transaction
                   </button>
                 </form>

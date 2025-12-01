@@ -24,10 +24,10 @@ class OrganizationOtpController extends Controller
     public function verify(Request $request, Organization $organization)
     {
         $data = $request->validate([
-            'otp_code' => ['required','string','min:4','max:10'],
+            'otp_code' => ['required', 'string', 'min:4', 'max:10'],
         ]);
 
-        if (!$organization->otp_code || !$organization->otp_expires_at || now()->greaterThan($organization->otp_expires_at)) {
+        if (! $organization->otp_code || ! $organization->otp_expires_at || now()->greaterThan($organization->otp_expires_at)) {
             return back()->withErrors(['otp_code' => 'The verification code has expired. Please request a new one.']);
         }
 
@@ -37,9 +37,9 @@ class OrganizationOtpController extends Controller
 
         $organization->forceFill([
             'email_verified_at' => now(),
-            'active_status'     => true,
-            'otp_code'          => null,
-            'otp_expires_at'    => null,
+            'active_status' => true,
+            'otp_code' => null,
+            'otp_expires_at' => null,
         ])->save();
 
         $orgLoginUrl = $this->organizationLoginUrl($organization);
@@ -76,10 +76,10 @@ class OrganizationOtpController extends Controller
 
         if (app()->environment('local')) {
             // Example: http://orgname.localhost:8000/login
-            return 'http://' . $domain . '.localhost:8000/login';
+            return 'http://'.$domain.'.localhost:8000/login';
         }
 
         // Production: https://orgname.relowork.com/login
-        return 'https://' . $domain . '.relowork.com/login';
+        return 'https://'.$domain.'.relowork.com/login';
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['aid_program_id','family_id']);
+            $table->unique(['aid_program_id', 'family_id']);
         });
     }
 

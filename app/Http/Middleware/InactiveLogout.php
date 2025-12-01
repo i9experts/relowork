@@ -17,7 +17,7 @@ class InactiveLogout
     public function handle(Request $request, Closure $next): Response
     {
         // If user is not authenticated, just continue.
-        if (!$request->user()) {
+        if (! $request->user()) {
             return $next($request);
         }
 
@@ -31,7 +31,7 @@ class InactiveLogout
         }
 
         // If no settings found or session timeout not enabled, just continue.
-        if (!$setting || !$setting->session_timeout_enabled) {
+        if (! $setting || ! $setting->session_timeout_enabled) {
             return $next($request);
         }
 

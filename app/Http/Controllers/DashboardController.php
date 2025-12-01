@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Family;
 use App\Models\AidProgram;
+use App\Models\Family;
 use App\Models\FinancialManagement;
-use App\Models\Volunteer;
 use App\Models\Organization;
+use App\Models\Volunteer;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -34,24 +34,24 @@ class DashboardController extends Controller
             'nonEligible' => $nonEligible,
         ];
 
-        $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $income = [];
         $expenses = [];
         for ($m = 1; $m <= 12; $m++) {
             $income[] = (int) FinancialManagement::where('organization_id', $organizationId)
-                ->whereIn('transaction_type', ['Donation','Transfer'])
+                ->whereIn('transaction_type', ['Donation', 'Transfer'])
                 ->whereYear('date', now()->year)
                 ->whereMonth('date', $m)
                 ->sum('amount');
             $expenses[] = (int) FinancialManagement::where('organization_id', $organizationId)
-                ->whereIn('transaction_type', ['Expense','Disbursement'])
+                ->whereIn('transaction_type', ['Expense', 'Disbursement'])
                 ->whereYear('date', now()->year)
                 ->whereMonth('date', $m)
                 ->sum('amount');
         }
-        $data['monthlyAid'] = [ 'months' => $months, 'income' => $income, 'expenses' => $expenses ];
+        $data['monthlyAid'] = ['months' => $months, 'income' => $income, 'expenses' => $expenses];
 
-        $recentTransactions = FinancialManagement::with(['family','aidProgram'])
+        $recentTransactions = FinancialManagement::with(['family', 'aidProgram'])
             ->where('organization_id', $organizationId)
             ->latest('date')
             ->take(5)
@@ -60,7 +60,7 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get();
-        $data['recent'] = [ 'transactions' => $recentTransactions, 'volunteers' => $recentVolunteers ];
+        $data['recent'] = ['transactions' => $recentTransactions, 'volunteers' => $recentVolunteers];
         $data['organization'] = $organizationId ? Organization::find($organizationId) : null;
 
         return view('dashboard.dashboard')->with($data);

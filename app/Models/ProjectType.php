@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProjectType extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
 }

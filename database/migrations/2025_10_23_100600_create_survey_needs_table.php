@@ -15,10 +15,10 @@ return new class extends Migration
             $table->string('sector');
             $table->unsignedTinyInteger('severity')->default(0); // 0-3
             $table->text('details')->nullable();
-            $table->enum('priority', ['High','Medium','Low'])->nullable();
-            $table->softDeletes();            
+            $table->enum('priority', ['High', 'Medium', 'Low'])->nullable();
+            $table->softDeletes();
             $table->timestamps();
-            $table->index(['survey_id','sector']);
+            $table->index(['survey_id', 'sector']);
         });
     }
 

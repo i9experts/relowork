@@ -16,6 +16,7 @@ class AuthController extends Controller
             if ($u && (method_exists($u, 'isSystemAdmin') && $u->isSystemAdmin())) {
                 return redirect()->route('cms.admin.dashboard');
             }
+
             return redirect()->route('cms.dashboard.index');
         }
 
@@ -78,7 +79,7 @@ class AuthController extends Controller
                 ->whereNotNull('email_verified_at')
                 ->where('active_status', true)
                 ->first();
-            if (!$organization) {
+            if (! $organization) {
                 return back()->withErrors([
                     'email' => 'Your organization is not verified or does not exist.',
                 ])->onlyInput('email');
@@ -88,8 +89,8 @@ class AuthController extends Controller
         $remember = (bool) $request->boolean('remember');
 
         // First authenticate user by email/password
-        if (!Auth::attempt([
-            'email'    => $credentials['email'],
+        if (! Auth::attempt([
+            'email' => $credentials['email'],
             'password' => $credentials['password'],
         ], $remember)) {
             return back()->withErrors([
@@ -101,34 +102,38 @@ class AuthController extends Controller
 
         $user = $request->user();
         if ($organization) {
-            if (!$user || $user->organization_id !== $organization->id) {
+            if (! $user || $user->organization_id !== $organization->id) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+
                 return back()->withErrors([
                     'email' => 'You are not allowed to access this organization.',
                 ])->onlyInput('email');
             }
 
             // Block inactive volunteers from logging in
-            if (!($user && (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) && !$user->is_admin) {
+            if (! ($user && (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) && ! $user->is_admin) {
                 $volunteer = Volunteer::where('user_id', $user->id)->first();
                 if ($volunteer && strcasecmp((string) $volunteer->status, 'Active') !== 0) {
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
+
                     return back()->with('error', 'Your account is inactive. Please contact admin.')->onlyInput('email');
                 }
             }
 
             $request->session()->put('organization_id', $organization->id);
+
             return redirect()->route('cms.dashboard.index');
         }
 
-        if (!$user || !(method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
+        if (! $user || ! (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return back()->withErrors([
                 'email' => 'Please use your organization URL to log in.',
             ])->onlyInput('email');
@@ -142,6 +147,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }

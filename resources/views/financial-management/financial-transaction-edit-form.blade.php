@@ -100,7 +100,7 @@
                     <!-- Aid Program -->
                     <div class="col-md-6 mb-3">
                       <label for="aid_program_id">Aid Program</label>
-                      <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="aid_program_id" name="aid_program_id" style="width: 100%;" required>
                         <option>Select Aid Program</option>
                         @php($aid = old('aid_program_id', $financialManagement->aid_program_id))
                         @foreach($programs as $p)
@@ -112,7 +112,7 @@
                     <!-- Family -->
                     <div class="col-md-6 mb-3">
                       <label for="family_id">Families</label>
-                      <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;" required>
                         <option >Select Family</option>
                         @php($famSel = old('family_id', $financialManagement->family_id))
                         @foreach($families as $fam)
@@ -136,7 +136,7 @@
                     <!-- Recorded By -->
                     <div class="col-md-6 mb-3">
                       <label for="recorded_by">Recorded By</label>
-                      <select class="form-control rounded-0 bg-light select2" id="recorded_by" name="recorded_by" style="width: 100%;">
+                      <select class="form-control rounded-0 bg-light select2" id="recorded_by" name="recorded_by" style="width: 100%;" required>
                         <option>Select User</option>
                         @php($rec = old('recorded_by', $financialManagement->recorded_by))
                         @foreach($users as $u)
@@ -165,7 +165,7 @@
 
                   </div>
 
-                  <button type="submit" class="btn btn-secondary btn-pill mt-2">
+                  <button type="submit" class="btn btn-secondary btn-pill mt-2" {{ (($programs ?? collect())->isEmpty() || ($families ?? collect())->isEmpty()) ? 'disabled' : '' }}>
                     <i class="mdi mdi-check-circle-outline me-1"></i> Update Transaction
                   </button>
                 </form>

@@ -18,7 +18,7 @@ return new class extends Migration
     public function down(): void
     {
         // Restore ts as nullable dateTime if rolled back
-        if (!Schema::hasColumn('surveys', 'ts')) {
+        if (! Schema::hasColumn('surveys', 'ts')) {
             Schema::table('surveys', function (Blueprint $table) {
                 $table->dateTime('ts')->nullable()->after('survey_mode');
             });

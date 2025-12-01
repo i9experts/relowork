@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AidProgram;
 use App\Models\Family;
 use App\Models\Volunteer;
-use App\Models\AidProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AidProgramController extends Controller
 {
@@ -20,7 +21,7 @@ class AidProgramController extends Controller
 
         $status = request('status');
         $query = AidProgram::where('organization_id', $organizationId)
-            ->withCount(['families','volunteers','attachments'])
+            ->withCount(['families', 'volunteers', 'attachments'])
             ->withSum(['transactions as disbursed_amount' => function ($q) {
                 $q->where('transaction_type', 'Disbursement');
             }], 'amount');
@@ -29,14 +30,15 @@ class AidProgramController extends Controller
             $query->where('status', $status);
         }
 
-        $data['programs'] = $query->orderBy('id','desc')->get();
+        $data['programs'] = $query->orderBy('id', 'desc')->get();
         $data['active_programs'] = AidProgram::where('organization_id', $organizationId)
-            ->where('status','Active')->count();
+            ->where('status', 'Active')->count();
         $data['total_budget_active'] = AidProgram::where('organization_id', $organizationId)
-            ->where('status','Active')->sum('total_budget');
+            ->where('status', 'Active')->sum('total_budget');
         $data['beneficiaries_total'] = AidProgram::where('organization_id', $organizationId)
             ->sum('target_beneficiaries');
         $data['current_status'] = $status;
+
         return view('aid-program.aid-program-list')->with($data);
     }
 
@@ -47,10 +49,12 @@ class AidProgramController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
-        $data['families'] = Family::select('id','family_code','head_of_family_name')
+        $data['volunteersCount'] = $data['volunteers']->count();
+        $data['families'] = Family::select('id', 'family_code', 'head_of_family_name')
             ->where('organization_id', $organizationId)
-            ->orderBy('id','desc')
+            ->orderBy('id', 'desc')
             ->get();
+
         return view('aid-program.aid_program_form')->with($data);
     }
 
@@ -59,27 +63,31 @@ class AidProgramController extends Controller
      */
     public function store(Request $request)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
-            'program_title' => ['required','string','max:255'],
-            'program_type' => ['nullable','in:Food,Education,Water,Medical,Housing,Emergency'],
-            'description' => ['nullable','string'],
-            'start_date' => ['nullable','date'],
-            'end_date' => ['nullable','date','after_or_equal:start_date'],
-            'location' => ['nullable','string','max:255'],
-            'target_beneficiaries' => ['nullable','integer','min:0'],
-            'status' => ['nullable','in:Planned,Active,Completed,On Hold'],
-            'total_budget' => ['nullable','integer','min:0'],
-            'fund_source' => ['nullable','in:Zakat,Sadaqah,General Donation,Grant'],
-            'monitoring_frequency' => ['nullable','in:Weekly,Monthly,Quarterly'],
-            'progress_notes' => ['nullable','string'],
-            'volunteer_id' => ['nullable','exists:volunteers,id'],
-            'families' => ['nullable','array'],
-            'families.*' => ['integer','exists:families,id'],
-            'attachments.*' => ['file','max:5120'],
+            'program_title' => ['required', 'string', 'max:255'],
+            'program_type' => ['nullable', 'in:Food,Education,Water,Medical,Housing,Emergency'],
+            'description' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'target_beneficiaries' => ['nullable', 'integer', 'min:0'],
+            'status' => ['nullable', 'in:Planned,Active,Completed,On Hold'],
+            'total_budget' => ['nullable', 'integer', 'min:0'],
+            'fund_source' => ['nullable', 'in:Zakat,Sadaqah,General Donation,Grant'],
+            'monitoring_frequency' => ['nullable', 'in:Weekly,Monthly,Quarterly'],
+            'progress_notes' => ['nullable', 'string'],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'families' => ['required', 'array', 'min:1'],
+            'families.*' => [Rule::exists('families', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'attachments.*' => ['file', 'max:5120'],
         ]);
 
-        $programCode = 'PRG-' . str_pad((string)((AidProgram::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
-        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+        $programCode = 'PRG-'.str_pad((string) ((AidProgram::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $request, $programCode, $organizationId) {
             $program = AidProgram::create([
@@ -99,13 +107,13 @@ class AidProgramController extends Controller
                 'progress_notes' => $validated['progress_notes'] ?? null,
             ]);
 
-            if (!empty($validated['volunteer_id'])) {
+            if (! empty($validated['volunteer_id'])) {
                 $program->volunteers()->syncWithoutDetaching([
                     $validated['volunteer_id'] => ['organization_id' => $organizationId],
                 ]);
             }
 
-            if (!empty($validated['families'])) {
+            if (! empty($validated['families'])) {
                 $familiesWithPivot = collect($validated['families'])
                     ->mapWithKeys(function ($id) use ($organizationId) {
                         return [$id => ['organization_id' => $organizationId]];
@@ -117,7 +125,9 @@ class AidProgramController extends Controller
             // handle attachments
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    if (!$file->isValid()) { continue; }
+                    if (! $file->isValid()) {
+                        continue;
+                    }
                     $path = $file->store('aid_attachments', 'public');
                     $program->attachments()->create([
                         'organization_id' => $organizationId,
@@ -137,7 +147,7 @@ class AidProgramController extends Controller
      */
     public function show(AidProgram $aidProgram)
     {
-        $aidProgram->loadCount(['families','volunteers','attachments'])
+        $aidProgram->loadCount(['families', 'volunteers', 'attachments'])
             ->load(['families:id,family_code,head_of_family_name', 'volunteers:id,full_name', 'attachments']);
 
         $aidProgram->loadSum(['transactions as disbursed_amount' => function ($q) {
@@ -154,13 +164,14 @@ class AidProgramController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $volunteers = Volunteer::where('organization_id', $organizationId)->get();
-        $families = Family::select('id','family_code','head_of_family_name')
+        $families = Family::select('id', 'family_code', 'head_of_family_name')
             ->where('organization_id', $organizationId)
-            ->orderBy('id','desc')
+            ->orderBy('id', 'desc')
             ->get();
         // Preload relationships used by the form for defaults
         $aidProgram->load(['families:id', 'volunteers:id']);
-        return view('aid-program.aid_program_edit-form', compact('aidProgram','volunteers','families'));
+
+        return view('aid-program.aid_program_edit-form', compact('aidProgram', 'volunteers', 'families'));
     }
 
     /**
@@ -168,25 +179,29 @@ class AidProgramController extends Controller
      */
     public function update(Request $request, AidProgram $aidProgram)
     {
-        $validated = $request->validate([
-            'program_title' => ['required','string','max:255'],
-            'program_type' => ['nullable','in:Food,Education,Water,Medical,Housing,Emergency'],
-            'description' => ['nullable','string'],
-            'start_date' => ['nullable','date'],
-            'end_date' => ['nullable','date','after_or_equal:start_date'],
-            'location' => ['nullable','string','max:255'],
-            'target_beneficiaries' => ['nullable','integer','min:0'],
-            'status' => ['nullable','in:Planned,Active,Completed,On Hold'],
-            'total_budget' => ['nullable','integer','min:0'],
-            'fund_source' => ['nullable','in:Zakat,Sadaqah,General Donation,Grant'],
-            'monitoring_frequency' => ['nullable','in:Weekly,Monthly,Quarterly'],
-            'progress_notes' => ['nullable','string'],
-            'volunteer_id' => ['nullable','exists:volunteers,id'],
-            'families' => ['nullable','array'],
-            'families.*' => ['integer','exists:families,id'],
-            'attachments.*' => ['file','max:5120'],
-        ]);
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+        $validated = $request->validate([
+            'program_title' => ['required', 'string', 'max:255'],
+            'program_type' => ['nullable', 'in:Food,Education,Water,Medical,Housing,Emergency'],
+            'description' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'target_beneficiaries' => ['nullable', 'integer', 'min:0'],
+            'status' => ['nullable', 'in:Planned,Active,Completed,On Hold'],
+            'total_budget' => ['nullable', 'integer', 'min:0'],
+            'fund_source' => ['nullable', 'in:Zakat,Sadaqah,General Donation,Grant'],
+            'monitoring_frequency' => ['nullable', 'in:Weekly,Monthly,Quarterly'],
+            'progress_notes' => ['nullable', 'string'],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'families' => ['required', 'array', 'min:1'],
+            'families.*' => [Rule::exists('families', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'attachments.*' => ['file', 'max:5120'],
+        ]);
 
         DB::transaction(function () use ($validated, $request, $aidProgram, $organizationId) {
             $aidProgram->update([
@@ -205,7 +220,7 @@ class AidProgramController extends Controller
                 'volunteer_id' => $validated['volunteer_id'] ?? null,
             ]);
 
-            if (!empty($validated['volunteer_id'])) {
+            if (! empty($validated['volunteer_id'])) {
                 $aidProgram->volunteers()->syncWithoutDetaching([
                     $validated['volunteer_id'] => ['organization_id' => $organizationId],
                 ]);
@@ -223,7 +238,9 @@ class AidProgramController extends Controller
 
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    if (!$file->isValid()) { continue; }
+                    if (! $file->isValid()) {
+                        continue;
+                    }
                     $path = $file->store('aid_attachments', 'public');
                     $aidProgram->attachments()->create([
                         'organization_id' => $organizationId,
@@ -254,7 +271,7 @@ class AidProgramController extends Controller
             // Delete attachments (including files if present)
             if (method_exists($aidProgram, 'attachments')) {
                 foreach ($aidProgram->attachments as $att) {
-                    if (!empty($att->path)) {
+                    if (! empty($att->path)) {
                         $p = $att->path;
                         if (function_exists('str_starts_with') && str_starts_with($p, 'public/')) {
                             $p = substr($p, 7);

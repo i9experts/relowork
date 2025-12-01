@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('baseline')->nullable();
             $table->string('target_3m')->nullable();
             $table->string('target_6m')->nullable();
-            $table->softDeletes();            
+            $table->softDeletes();
             $table->timestamps();
         });
     }

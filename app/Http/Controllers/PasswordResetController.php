@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PasswordResetMail;
-use App\Models\User;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -48,7 +48,7 @@ class PasswordResetController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         // Generic response even if user not found
-        if (!$user) {
+        if (! $user) {
             return back()->with('status', 'If this email is registered, a password reset link has been sent.');
         }
 
@@ -58,7 +58,7 @@ class PasswordResetController extends Controller
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
-                'token'      => $token,
+                'token' => $token,
                 'created_at' => now(),
             ]
         );
@@ -99,8 +99,8 @@ class PasswordResetController extends Controller
     public function reset(Request $request)
     {
         $data = $request->validate([
-            'token'    => ['required', 'string'],
-            'email'    => ['required', 'email'],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', 'min:8'],
         ]);
 
@@ -108,7 +108,7 @@ class PasswordResetController extends Controller
             ->where('email', $data['email'])
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return back()->withErrors(['email' => 'This password reset link is invalid or has expired.']);
         }
 
@@ -124,7 +124,7 @@ class PasswordResetController extends Controller
 
         $user = User::where('email', $data['email'])->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors(['email' => 'We could not find a user with this email address.']);
         }
 

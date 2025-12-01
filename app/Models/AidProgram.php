@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AidProgram extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
+
     public function families()
     {
         return $this->belongsToMany(Family::class, 'aid_program_family');

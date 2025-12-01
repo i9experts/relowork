@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('surveys', function (Blueprint $table) {
-            if (!Schema::hasColumn('surveys', 'date_time')) {
+            if (! Schema::hasColumn('surveys', 'date_time')) {
                 $table->dateTime('date_time')->nullable()->after('survey_mode');
             }
         });

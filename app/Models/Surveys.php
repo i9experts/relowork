@@ -2,19 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Family;
-use App\Models\Volunteer;
-use App\Models\SurveyNeed;
-use App\Models\SurveyAsset;
-use App\Models\SurveyMember;
-use App\Models\SurveyUpload;
-use App\Models\SurveyOutcome;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Surveys extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
 
     protected $casts = [

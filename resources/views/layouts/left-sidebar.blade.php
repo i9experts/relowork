@@ -5,7 +5,9 @@
     <div class="app-brand">
       @php
         $orgId = optional(request()->user())->organization_id ?? session('organization_id');
-        $settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null;
+        $settings = $orgId
+          ? optional(\App\Models\Setting::where('organization_id', $orgId)->first())
+          : optional(\App\Models\Setting::whereNull('organization_id')->first());
         $u = auth()->user();
       @endphp
       <a href="{{ ($u && (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin())) ? route('cms.admin.dashboard') : route('cms.dashboard.index') }}" class="d-flex align-items-center justify-content-center py-2">

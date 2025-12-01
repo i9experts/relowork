@@ -14,9 +14,9 @@ return new class extends Migration
             $table->foreignId('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->string('asset');
             $table->boolean('present')->default(false);
-            $table->softDeletes();            
+            $table->softDeletes();
             $table->timestamps();
-            $table->index(['survey_id','asset']);
+            $table->index(['survey_id', 'asset']);
         });
     }
 

@@ -15,12 +15,12 @@ return new class extends Migration
             $table->unsignedBigInteger('person_id')->nullable();
             $table->string('name')->nullable();
             $table->unsignedTinyInteger('age')->nullable();
-            $table->enum('gender', ['Male','Female','Other'])->nullable();
+            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
             $table->string('relation')->nullable();
             $table->string('cnic', 15)->nullable();
             $table->string('disability')->nullable();
             $table->string('school_work')->nullable();
-            $table->softDeletes();            
+            $table->softDeletes();
             $table->timestamps();
         });
     }

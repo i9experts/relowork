@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Surveys;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SurveyUpload extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
 
     public function survey()

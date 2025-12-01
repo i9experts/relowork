@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('url');
             $table->softDeletes();
             $table->timestamps();
-            $table->index(['survey_id','type']);
+            $table->index(['survey_id', 'type']);
         });
     }
 

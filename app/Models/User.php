@@ -4,9 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
@@ -25,6 +25,7 @@ class User extends Authenticatable
         'organization_id',
         'is_admin',
         'permissions',
+        'avatar_path',
     ];
 
     /**
@@ -59,6 +60,7 @@ class User extends Authenticatable
         }
 
         $perms = $this->permissions ?? [];
+
         return is_array($perms) && ($perms[$key] ?? false);
     }
 

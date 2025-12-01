@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AidProgramAttachment extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
+
     public function aidProgram()
     {
         return $this->belongsTo(AidProgram::class);

@@ -29,7 +29,11 @@
   <!-- FAVICON -->
   @php
     $orgId = optional(request()->user())->organization_id ?? session('organization_id');
-    $__settings = $orgId ? optional(\App\Models\Setting::where('organization_id', $orgId)->first()) : null;
+    $__settings = $orgId
+      ? optional(\App\Models\Setting::where('organization_id', $orgId)->first())
+      : optional(\App\Models\Setting::whereNull('organization_id')->first());
+    $u = auth()->user();
+    $fallbackTitle = ($u && (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin())) ? 'Super Admin' : 'Your Name';
   @endphp
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
@@ -110,7 +114,7 @@
             <span class="sr-only">Toggle navigation</span>
           </button>
 
-          <span class="page-title">{{ optional($__settings)->organization_name ?: 'Your Name' }}</span>
+          <span class="page-title">{{ optional($__settings)->organization_name ?: $fallbackTitle }}</span>
 
           <div class="navbar-right">
 
@@ -396,7 +400,8 @@
               <!-- User Account -->
               <li class="dropdown user-menu">
                 <button class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  <img src="{{ Auth::user()->image ? asset('storage/' . Auth::user()->image) : url('assets/images/user/user-defult-profile.png') }}"
+                  @php $__avatar = optional(Auth::user())->avatar_path; @endphp
+                  <img src="{{ $__avatar ? asset('storage/' . $__avatar) : url('assets/images/user/user-defult-profile.png') }}"
                       class="user-image rounded-circle" alt="User Image">
                   <span class="d-none d-lg-inline-block">{{ Auth::user()->name }}</span>
                 </button>

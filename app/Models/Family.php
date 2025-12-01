@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Family extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
+
     public function volunteer()
     {
         return $this->belongsTo(Volunteer::class, 'volunteer_id');

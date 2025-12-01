@@ -31,10 +31,28 @@
       <div class="w-100 mb-3">
           @include('partials.errors')
       </div>
+     @if(($volunteers ?? collect())->isEmpty() || ($families ?? collect())->isEmpty())
+        <div class="alert alert-warning" role="alert">
+          @if(($volunteers ?? collect())->isEmpty())
+            ⚠️ Please create a Volunteer first.
+            <a href="{{ route('cms.volunteer.create') }}" class="danger-link">Create Volunteer</a> <br>
+          @endif
+
+          @if(($families ?? collect())->isEmpty())
+            ⚠️ Please create a Family first.
+            <a href="{{ route('cms.family.create') }}" class="danger-link">Create Family</a>
+          @endif
+        </div>
+      @endif
+
+
+        
         <h4 class="card-title fw-bold mb-1">Aid Program Form</h4>
         <p class="text-muted mb-4">
           Purpose: To define, categorize, and track ongoing or past charity projects.
         </p>
+
+        
 
         <div class="row">
           <div class="col-md-12">
@@ -130,7 +148,7 @@
                 <!-- Responsible Volunteer / Supervisor -->
                 <div class="col-md-6 mb-3">
                   <label for="volunteer_id">Responsible Volunteer / Supervisor</label>
-                  <select class="form-control rounded-0 bg-light select2" id="volunteer_id" name="volunteer_id" style="width: 100%;">
+                  <select class="form-control rounded-0 bg-light select2" id="volunteer_id" name="volunteer_id" style="width: 100%;" required>
                     <option value="">Select Volunteer</option>
                     @foreach($volunteers as $volunteer)
                       <option value="{{ $volunteer->id }}"{{ (old('volunteer_id') == $volunteer->id) ? 'selected' : '' }}>{{ $volunteer->full_name }}</option>
@@ -143,7 +161,7 @@
                   <label for="families">Associated Families</label>
                     <div class="form-group">
                     @php $oldFamilies = old('families', []); @endphp
-                    <select class="form-control select2" name="families[]" multiple="multiple" style="width: 100%;">
+                    <select class="form-control select2" name="families[]" multiple="multiple" style="width: 100%;" required>
                         @foreach($families as $fam)
                           <option value="{{ $fam->id }}" {{ in_array($fam->id, (array)$oldFamilies) ? 'selected' : '' }}>
                             {{ $fam->family_code }} - {{ $fam->head_of_family_name }}
@@ -180,7 +198,7 @@
 
               </div>
 
-              <button type="submit" class="btn btn-secondary btn-pill mt-2">
+              <button type="submit" class="btn btn-secondary btn-pill mt-2" {{ (($volunteers ?? collect())->isEmpty() || ($families ?? collect())->isEmpty()) ? 'disabled' : '' }}>
                 <i class="mdi mdi-check-circle-outline me-1"></i> Save Program
               </button>
             </form>

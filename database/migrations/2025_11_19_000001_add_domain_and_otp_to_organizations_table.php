@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('organizations', function (Blueprint $table) {
-            if (!Schema::hasColumn('organizations', 'domain')) {
+            if (! Schema::hasColumn('organizations', 'domain')) {
                 $table->string('domain')->unique()->nullable()->after('email');
             }
-            if (!Schema::hasColumn('organizations', 'email_verified_at')) {
+            if (! Schema::hasColumn('organizations', 'email_verified_at')) {
                 $table->timestamp('email_verified_at')->nullable()->after('domain');
             }
-            if (!Schema::hasColumn('organizations', 'otp_code')) {
+            if (! Schema::hasColumn('organizations', 'otp_code')) {
                 $table->string('otp_code', 10)->nullable()->after('email_verified_at');
             }
-            if (!Schema::hasColumn('organizations', 'otp_expires_at')) {
+            if (! Schema::hasColumn('organizations', 'otp_expires_at')) {
                 $table->timestamp('otp_expires_at')->nullable()->after('otp_code');
             }
         });

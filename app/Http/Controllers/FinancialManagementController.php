@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FinancialManagement;
-use App\Models\Volunteer;
+use App\Mail\NotificationMailer;
 use App\Models\AidProgram;
 use App\Models\Family;
+use App\Models\FinancialManagement;
 use App\Models\User;
+use App\Models\Volunteer;
+use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
-use Carbon\CarbonPeriod;
-use App\Mail\NotificationMailer;
+use Illuminate\Validation\Rule;
 
 class FinancialManagementController extends Controller
 {
@@ -42,7 +43,8 @@ class FinancialManagementController extends Controller
                 $to = $now->copy()->endOfYear();
                 break;
             case 'all_time':
-                $from = null; $to = null; // no date filter
+                $from = null;
+                $to = null; // no date filter
                 break;
             case 'this_month':
             default:
@@ -54,11 +56,11 @@ class FinancialManagementController extends Controller
 
         // Build dynamic titles for chart/header based on selected range
         $labelMap = [
-            'this_month'   => 'This Month',
-            'last_month'   => 'Last Month',
+            'this_month' => 'This Month',
+            'last_month' => 'Last Month',
             'this_quarter' => 'This Quarter',
-            'this_year'    => 'This Year',
-            'all_time'     => 'All Time',
+            'this_year' => 'This Year',
+            'all_time' => 'All Time',
         ];
         $periodLabel = $labelMap[$range] ?? 'This Month';
 
@@ -68,7 +70,7 @@ class FinancialManagementController extends Controller
         } elseif ($range === 'last_month') {
             $periodDetail = $from->format('F Y');
         } elseif ($range === 'this_quarter') {
-            $periodDetail = 'Q' . $from->quarter . ' ' . $from->format('Y');
+            $periodDetail = 'Q'.$from->quarter.' '.$from->format('Y');
         } elseif ($range === 'this_year') {
             $periodDetail = $from->format('Y');
         } elseif ($range === 'all_time') {
@@ -77,18 +79,18 @@ class FinancialManagementController extends Controller
             $periodDetail = $periodLabel;
         }
 
-        $data['chartTitle'] = 'Financial Overview — ' . $periodLabel;
-        $data['chartSubtitle'] = 'Income vs Expenses for ' . $periodDetail;
+        $data['chartTitle'] = 'Financial Overview — '.$periodLabel;
+        $data['chartSubtitle'] = 'Income vs Expenses for '.$periodDetail;
 
         // Build dynamic chart data (labels + income/expense series)
         $labels = [];
         $incomeSeries = [];
         $expenseSeries = [];
 
-        $incomeTypes = ['Donation','Transfer'];
-        $expenseTypes = ['Expense','Disbursement'];
+        $incomeTypes = ['Donation', 'Transfer'];
+        $expenseTypes = ['Expense', 'Disbursement'];
 
-        if (!isset($from, $to) || !$from || !$to) {
+        if (! isset($from, $to) || ! $from || ! $to) {
             $start = $now->copy()->subMonthsNoOverflow(11)->startOfMonth();
             $end = $now->copy()->endOfMonth();
             $period = CarbonPeriod::create($start, '1 month', $end);
@@ -106,7 +108,7 @@ class FinancialManagementController extends Controller
                     ->sum('amount');
             }
         } else {
-            $isDaily = in_array($range, ['this_month','last_month'], true);
+            $isDaily = in_array($range, ['this_month', 'last_month'], true);
             if ($isDaily) {
                 $period = CarbonPeriod::create($from->copy()->startOfDay(), '1 day', $to->copy()->endOfDay());
                 foreach ($period as $d) {
@@ -146,7 +148,7 @@ class FinancialManagementController extends Controller
         $data['chartExpenses'] = $expenseSeries;
 
         // Transactions list (respect range if provided)
-        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])
+        $tx = FinancialManagement::with(['aidProgram', 'family', 'recordedBy', 'approvedBy'])
             ->where('organization_id', $organizationId)
             ->latest();
         if (isset($from, $to) && $from && $to) {
@@ -155,8 +157,8 @@ class FinancialManagementController extends Controller
         $data['financialTransactions'] = $tx->paginate(15)->appends(['range' => $range]);
 
         // KPIs
-        $incomeTypes = ['Donation','Transfer'];
-        $expenseTypes = ['Expense','Disbursement'];
+        $incomeTypes = ['Donation', 'Transfer'];
+        $expenseTypes = ['Expense', 'Disbursement'];
 
         $incomeQ = FinancialManagement::where('organization_id', $organizationId)
             ->whereIn('transaction_type', $incomeTypes);
@@ -188,10 +190,10 @@ class FinancialManagementController extends Controller
     public function create()
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
-        $data['programs'] = AidProgram::where('organization_id', $organizationId)->orderByDesc('id')->get(['id','program_title']);
-        $data['families'] = Family::where('organization_id', $organizationId)->orderByDesc('id')->get(['id','family_code','head_of_family_name']);
-        $data['users'] = User::where('organization_id', $organizationId)->orderBy('name')->get(['id','name']);
-        $data['categories'] = ['Zakat','Sadaqah','Project Fund','Admin Cost'];
+        $data['programs'] = AidProgram::where('organization_id', $organizationId)->orderByDesc('id')->get(['id', 'program_title']);
+        $data['families'] = Family::where('organization_id', $organizationId)->orderByDesc('id')->get(['id', 'family_code', 'head_of_family_name']);
+        $data['users'] = User::where('organization_id', $organizationId)->orderBy('name')->get(['id', 'name']);
+        $data['categories'] = ['Zakat', 'Sadaqah', 'Project Fund', 'Admin Cost'];
 
         return view('financial-management.financial_transaction_form')->with($data);
     }
@@ -201,25 +203,32 @@ class FinancialManagementController extends Controller
      */
     public function store(Request $request)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
-            'date' => ['required','date'],
-            'transaction_type' => ['required','in:Donation,Expense,Disbursement,Transfer'],
-            'category' => ['nullable','in:Zakat,Sadaqah,Project Fund,Admin Cost'],
-            'payment_mode' => ['nullable','in:Cash,Bank Transfer,Easypaisa,Cheque'],
-            'amount' => ['required','integer','min:1'],
-            'donor_name' => ['nullable','string','max:255'],
-            'aid_program_id' => ['nullable','exists:aid_programs,id'],
-            'family_id' => ['nullable','exists:families,id'],
-            'payment_proof' => ['nullable','file','max:5120'],
-            'recorded_by' => ['nullable','exists:users,id'],
-            'approved_by' => ['nullable','exists:users,id'],
-            'remarks' => ['nullable','string'],
+            'date' => ['required', 'date'],
+            'transaction_type' => ['required', 'in:Donation,Expense,Disbursement,Transfer'],
+            'category' => ['nullable', 'in:Zakat,Sadaqah,Project Fund,Admin Cost'],
+            'payment_mode' => ['nullable', 'in:Cash,Bank Transfer,Easypaisa,Cheque'],
+            'amount' => ['required', 'integer', 'min:1'],
+            'donor_name' => ['nullable', 'string', 'max:255'],
+            'aid_program_id' => ['required', Rule::exists('aid_programs', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'family_id' => ['required', Rule::exists('families', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'payment_proof' => ['nullable', 'file', 'max:5120'],
+            'recorded_by' => ['required', Rule::exists('users', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'approved_by' => ['nullable', Rule::exists('users', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'remarks' => ['nullable', 'string'],
         ]);
 
-        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
-
         DB::transaction(function () use ($request, $validated, $organizationId) {
-            $trxCode = 'TRX-' . now()->format('Y') . '-' . str_pad((string)((FinancialManagement::max('id') ?? 0) + 1), 3, '0', STR_PAD_LEFT);
+            $trxCode = 'TRX-'.now()->format('Y').'-'.str_pad((string) ((FinancialManagement::max('id') ?? 0) + 1), 3, '0', STR_PAD_LEFT);
 
             $proofPath = null;
             if ($request->hasFile('payment_proof')) {
@@ -249,16 +258,17 @@ class FinancialManagementController extends Controller
 
             // Notify admins based on settings
             try {
-                if (in_array($validated['transaction_type'], ['Expense','Disbursement'], true) && empty($validated['approved_by'])) {
-                    NotificationMailer::sendAidApprovalAlert($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                if (in_array($validated['transaction_type'], ['Expense', 'Disbursement'], true) && empty($validated['approved_by'])) {
+                    NotificationMailer::sendAidApprovalAlert($organizationId, ['actionUrl' => route('cms.financial-management.index')]);
                 }
                 // Generic activity notification
-                NotificationMailer::sendEmailNotification($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                NotificationMailer::sendEmailNotification($organizationId, ['actionUrl' => route('cms.financial-management.index')]);
                 // Optional push-email for Donation events
                 if ($validated['transaction_type'] === 'Donation') {
-                    NotificationMailer::sendPushEmail($organizationId, [ 'actionUrl' => route('cms.financial-management.index') ]);
+                    NotificationMailer::sendPushEmail($organizationId, ['actionUrl' => route('cms.financial-management.index')]);
                 }
-            } catch (\Throwable $e) { /* silent */ }
+            } catch (\Throwable $e) { /* silent */
+            }
         });
 
         return redirect()->route('cms.financial-management.index')->with('success', 'Transaction saved successfully.');
@@ -277,10 +287,11 @@ class FinancialManagementController extends Controller
      */
     public function edit(FinancialManagement $financialManagement)
     {
-        $data['programs'] = AidProgram::orderByDesc('id')->get(['id','program_title']);
-        $data['families'] = Family::orderByDesc('id')->get(['id','family_code','head_of_family_name']);
-        $data['users'] = User::orderBy('name')->get(['id','name']);
-        $data['categories'] = ['Zakat','Sadaqah','Project Fund','Admin Cost'];
+        $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
+        $data['programs'] = AidProgram::where('organization_id', $organizationId)->orderByDesc('id')->get(['id', 'program_title']);
+        $data['families'] = Family::where('organization_id', $organizationId)->orderByDesc('id')->get(['id', 'family_code', 'head_of_family_name']);
+        $data['users'] = User::where('organization_id', $organizationId)->orderBy('name')->get(['id', 'name']);
+        $data['categories'] = ['Zakat', 'Sadaqah', 'Project Fund', 'Admin Cost'];
         $data['financialManagement'] = $financialManagement;
 
         return view('financial-management.financial-transaction-edit-form')->with($data);
@@ -291,19 +302,28 @@ class FinancialManagementController extends Controller
      */
     public function update(Request $request, FinancialManagement $financialManagement)
     {
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
-            'date' => ['required','date'],
-            'transaction_type' => ['required','in:Donation,Expense,Disbursement,Transfer'],
-            'category' => ['nullable','in:Zakat,Sadaqah,Project Fund,Admin Cost'],
-            'payment_mode' => ['nullable','in:Cash,Bank Transfer,Easypaisa,Cheque'],
-            'amount' => ['required','integer','min:1'],
-            'donor_name' => ['nullable','string','max:255'],
-            'aid_program_id' => ['nullable','exists:aid_programs,id'],
-            'family_id' => ['nullable','exists:families,id'],
-            'payment_proof' => ['nullable','file','max:5120'],
-            'recorded_by' => ['nullable','exists:users,id'],
-            'approved_by' => ['nullable','exists:users,id'],
-            'remarks' => ['nullable','string'],
+            'date' => ['required', 'date'],
+            'transaction_type' => ['required', 'in:Donation,Expense,Disbursement,Transfer'],
+            'category' => ['nullable', 'in:Zakat,Sadaqah,Project Fund,Admin Cost'],
+            'payment_mode' => ['nullable', 'in:Cash,Bank Transfer,Easypaisa,Cheque'],
+            'amount' => ['required', 'integer', 'min:1'],
+            'donor_name' => ['nullable', 'string', 'max:255'],
+            'aid_program_id' => ['required', Rule::exists('aid_programs', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'family_id' => ['required', Rule::exists('families', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'payment_proof' => ['nullable', 'file', 'max:5120'],
+            'recorded_by' => ['required', Rule::exists('users', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'approved_by' => ['nullable', Rule::exists('users', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
+            'remarks' => ['nullable', 'string'],
         ]);
 
         DB::transaction(function () use ($request, $validated, $financialManagement) {
@@ -373,7 +393,8 @@ class FinancialManagementController extends Controller
                 $to = $now->copy()->endOfYear();
                 break;
             case 'all_time':
-                $from = null; $to = null; // no filter
+                $from = null;
+                $to = null; // no filter
                 break;
             case 'this_month':
             default:
@@ -383,11 +404,11 @@ class FinancialManagementController extends Controller
         }
 
         $labelMap = [
-            'this_month'   => 'This Month',
-            'last_month'   => 'Last Month',
+            'this_month' => 'This Month',
+            'last_month' => 'Last Month',
             'this_quarter' => 'This Quarter',
-            'this_year'    => 'This Year',
-            'all_time'     => 'All Time',
+            'this_year' => 'This Year',
+            'all_time' => 'All Time',
         ];
         $periodLabel = $labelMap[$range] ?? 'This Month';
         if ($range === 'this_month') {
@@ -395,7 +416,7 @@ class FinancialManagementController extends Controller
         } elseif ($range === 'last_month') {
             $periodDetail = $from->format('F Y');
         } elseif ($range === 'this_quarter') {
-            $periodDetail = 'Q' . $from->quarter . ' ' . $from->format('Y');
+            $periodDetail = 'Q'.$from->quarter.' '.$from->format('Y');
         } elseif ($range === 'this_year') {
             $periodDetail = $from->format('Y');
         } elseif ($range === 'all_time') {
@@ -408,10 +429,10 @@ class FinancialManagementController extends Controller
         $labels = [];
         $incomeSeries = [];
         $expenseSeries = [];
-        $incomeTypes = ['Donation','Transfer'];
-        $expenseTypes = ['Expense','Disbursement'];
+        $incomeTypes = ['Donation', 'Transfer'];
+        $expenseTypes = ['Expense', 'Disbursement'];
 
-        if (!isset($from, $to) || !$from || !$to) {
+        if (! isset($from, $to) || ! $from || ! $to) {
             $start = $now->copy()->subMonthsNoOverflow(11)->startOfMonth();
             $end = $now->copy()->endOfMonth();
             $period = \Carbon\CarbonPeriod::create($start, '1 month', $end);
@@ -427,7 +448,7 @@ class FinancialManagementController extends Controller
                     ->sum('amount');
             }
         } else {
-            $isDaily = in_array($range, ['this_month','last_month'], true);
+            $isDaily = in_array($range, ['this_month', 'last_month'], true);
             if ($isDaily) {
                 $period = \Carbon\CarbonPeriod::create($from->copy()->startOfDay(), '1 day', $to->copy()->endOfDay());
                 foreach ($period as $d) {
@@ -476,20 +497,21 @@ class FinancialManagementController extends Controller
         $pendingCount = (int) $pendingQ->count();
 
         // 4) Transactions for the section
-        $tx = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])->where('organization_id', $organizationId)->orderByDesc('date');
+        $tx = FinancialManagement::with(['aidProgram', 'family', 'recordedBy', 'approvedBy'])->where('organization_id', $organizationId)->orderByDesc('date');
         if (isset($from, $to) && $from && $to) {
             $tx->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         }
         $rows = $tx->get();
 
         // 5) Stream CSV with sections
-        $filename = 'financial-report-' . $range . '-' . now()->format('Ymd_His') . '.csv';
-        return response()->streamDownload(function() use ($periodLabel, $periodDetail, $labels, $incomeSeries, $expenseSeries, $totalIncome, $totalExpenses, $netBalance, $pendingCount, $rows) {
+        $filename = 'financial-report-'.$range.'-'.now()->format('Ymd_His').'.csv';
+
+        return response()->streamDownload(function () use ($periodLabel, $periodDetail, $labels, $incomeSeries, $expenseSeries, $totalIncome, $totalExpenses, $netBalance, $pendingCount, $rows) {
             $out = fopen('php://output', 'w');
 
             // Header section
-            fputcsv($out, ['Financial Overview — ' . $periodLabel]);
-            fputcsv($out, ['Income vs Expenses for ' . $periodDetail]);
+            fputcsv($out, ['Financial Overview — '.$periodLabel]);
+            fputcsv($out, ['Income vs Expenses for '.$periodDetail]);
             fputcsv($out, ['Generated At', now()->toDateTimeString()]);
             fputcsv($out, []);
 

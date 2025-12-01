@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NotificationMailer;
 use App\Models\Family;
 use App\Models\FamilyMember;
-use App\Models\Volunteer;
 use App\Models\Organization;
+use App\Models\Volunteer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Mail\NotificationMailer;
 use Illuminate\Validation\Rule;
 
 class FamilyController extends Controller
@@ -30,6 +30,7 @@ class FamilyController extends Controller
             ->where('zakat_eligibility', true)
             ->count();
         $data['pending_reviews'] = 0; // adjust when a review workflow exists
+
         return view('families.family-list')->with($data);
     }
 
@@ -42,8 +43,9 @@ class FamilyController extends Controller
         $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
         $org = $organizationId ? Organization::find($organizationId) : null;
         $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-' . strtoupper($org->domain ?? ('ORG' . (string) $organizationId));
-        $data['next_family_code'] = $prefix . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $prefix = 'FAM-'.strtoupper($org->domain ?? ('ORG'.(string) $organizationId));
+        $data['next_family_code'] = $prefix.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+
         return view('families.family-registration-form')->with($data);
     }
 
@@ -68,12 +70,14 @@ class FamilyController extends Controller
             'gps_lat' => ['nullable', 'numeric'],
             'gps_long' => ['nullable', 'numeric'],
             'family_members_count' => ['nullable', 'integer', 'min:0'],
-            'monthly_income' => ['nullable', 'integer', 'min:0'],    
+            'monthly_income' => ['nullable', 'integer', 'min:0'],
             'income_source' => ['nullable', 'string', 'max:100'],
             'monthly_expense' => ['nullable', 'integer', 'min:0'],
             'zakat_eligibility' => ['required', 'string', 'in:Yes,No'],
             'comment_note' => ['nullable', 'string'],
-            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function($q) use ($organizationId) { $q->where('organization_id', $organizationId); })],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
             'members' => ['nullable', 'array'],
             'members.*.name' => ['nullable', 'string', 'max:255'],
             'members.*.age' => ['nullable', 'integer', 'min:0'],
@@ -84,32 +88,32 @@ class FamilyController extends Controller
         ]);
         $org = $organizationId ? Organization::find($organizationId) : null;
         $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-' . strtoupper($org->domain ?? ('ORG' . (string) $organizationId));
-        $familyCode = $prefix . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $prefix = 'FAM-'.strtoupper($org->domain ?? ('ORG'.(string) $organizationId));
+        $familyCode = $prefix.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $familyCode, $organizationId) {
             $family = Family::create([
-                'family_code'           => $familyCode,
-                'organization_id'       => $organizationId,
-                'head_of_family_name'   => $validated['head_of_family_name'],
-                'cnic'                  => $validated['cnic'],
-                'gender'                => $validated['gender'],
-                'age'                   => $validated['age'] ?? null,
-                'marital_status'        => $validated['marital_status'] ?? null,
-                'contact_number'        => $validated['contact_number'] ?? null,
-                'address'               => $validated['address'] ?? null,
-                'province'              => $validated['province'] ?? null,
-                'city'                  => $validated['city'] ?? null,
-                'area'                  => $validated['area'] ?? null,
-                'gps_lat'               => $validated['gps_lat'] ?? null,
-                'gps_long'              => $validated['gps_long'] ?? null,
-                'family_members_count'  => $validated['family_members_count'] ?? 0,
-                'monthly_income'        => $validated['monthly_income'] ?? null,
-                'income_source'         => $validated['income_source'] ?? null,
-                'monthly_expense'       => $validated['monthly_expense'] ?? null,
-                'zakat_eligibility'     => ($validated['zakat_eligibility'] === 'Yes'),
-                'comment_note'          => $validated['comment_note'] ?? null,
-                'volunteer_id'          => $validated['volunteer_id'],
+                'family_code' => $familyCode,
+                'organization_id' => $organizationId,
+                'head_of_family_name' => $validated['head_of_family_name'],
+                'cnic' => $validated['cnic'],
+                'gender' => $validated['gender'],
+                'age' => $validated['age'] ?? null,
+                'marital_status' => $validated['marital_status'] ?? null,
+                'contact_number' => $validated['contact_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'province' => $validated['province'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'area' => $validated['area'] ?? null,
+                'gps_lat' => $validated['gps_lat'] ?? null,
+                'gps_long' => $validated['gps_long'] ?? null,
+                'family_members_count' => $validated['family_members_count'] ?? 0,
+                'monthly_income' => $validated['monthly_income'] ?? null,
+                'income_source' => $validated['income_source'] ?? null,
+                'monthly_expense' => $validated['monthly_expense'] ?? null,
+                'zakat_eligibility' => ($validated['zakat_eligibility'] === 'Yes'),
+                'comment_note' => $validated['comment_note'] ?? null,
+                'volunteer_id' => $validated['volunteer_id'],
                 // 'organization_id'       => auth()->user()->organization_id,
             ]);
 
@@ -118,29 +122,32 @@ class FamilyController extends Controller
                 $toCreate = [];
                 foreach ($members as $m) {
                     $name = isset($m['name']) ? trim($m['name']) : '';
-                    if ($name === '') { continue; }
+                    if ($name === '') {
+                        continue;
+                    }
                     $toCreate[] = [
                         'organization_id' => $family->organization_id,
-                        'name'            => $name,
-                        'age'             => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
-                        'relation'        => $m['relation'] ?? null,
-                        'education'       => $m['education'] ?? null,
-                        'occupation'      => $m['occupation'] ?? null,
-                        'cnic'            => $m['cnic'] ?? null,
+                        'name' => $name,
+                        'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
+                        'relation' => $m['relation'] ?? null,
+                        'education' => $m['education'] ?? null,
+                        'occupation' => $m['occupation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
                     ];
                 }
-                if (!empty($toCreate)) {
+                if (! empty($toCreate)) {
                     $family->members()->createMany($toCreate);
                 }
             }
         });
 
         try {
-            NotificationMailer::sendEmailNotification($organizationId, [ 'actionUrl' => route('cms.family.index') ]);
-        } catch (\Throwable $e) { /* silent */ }
+            NotificationMailer::sendEmailNotification($organizationId, ['actionUrl' => route('cms.family.index')]);
+        } catch (\Throwable $e) { /* silent */
+        }
+
         return redirect()->route('cms.family.index')->with('success', 'Family registered successfully!');
     }
-
 
     /**
      * Display the specified resource.
@@ -158,6 +165,7 @@ class FamilyController extends Controller
         $data['family'] = $family->load('members');
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
+
         return view('families.family-registration-edit-form')->with($data);
     }
 
@@ -169,7 +177,7 @@ class FamilyController extends Controller
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
             'head_of_family_name' => ['required', 'string', 'max:255'],
-            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,' . $family->id],
+            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,'.$family->id],
             'gender' => ['required', 'string', 'in:Male,Female,Other'],
             'age' => ['nullable', 'integer', 'min:0'],
             'marital_status' => ['nullable', 'string', 'in:Married,Widowed,Divorced,Single'],
@@ -181,12 +189,14 @@ class FamilyController extends Controller
             'gps_lat' => ['nullable', 'numeric'],
             'gps_long' => ['nullable', 'numeric'],
             'family_members_count' => ['nullable', 'integer', 'min:0'],
-            'monthly_income' => ['nullable', 'integer', 'min:0'],    
+            'monthly_income' => ['nullable', 'integer', 'min:0'],
             'income_source' => ['nullable', 'string', 'max:100'],
             'monthly_expense' => ['nullable', 'integer', 'min:0'],
             'zakat_eligibility' => ['required', 'string', 'in:Yes,No'],
             'comment_note' => ['nullable', 'string'],
-            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function($q) use ($organizationId) { $q->where('organization_id', $organizationId); })],
+            'volunteer_id' => ['required', Rule::exists('volunteers', 'id')->where(function ($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })],
             'members' => ['nullable', 'array'],
             'members.*.name' => ['nullable', 'string', 'max:255'],
             'members.*.age' => ['nullable', 'integer', 'min:0'],
@@ -198,25 +208,25 @@ class FamilyController extends Controller
 
         DB::transaction(function () use ($family, $validated) {
             $family->update([
-                'head_of_family_name'   => $validated['head_of_family_name'],
-                'cnic'                  => $validated['cnic'],
-                'gender'                => $validated['gender'],
-                'age'                   => $validated['age'] ?? null,
-                'marital_status'        => $validated['marital_status'] ?? null,
-                'contact_number'        => $validated['contact_number'] ?? null,
-                'address'               => $validated['address'] ?? null,
-                'province'              => $validated['province'] ?? null,
-                'city'                  => $validated['city'] ?? null,
-                'area'                  => $validated['area'] ?? null,
-                'gps_lat'               => $validated['gps_lat'] ?? null,
-                'gps_long'              => $validated['gps_long'] ?? null,
-                'family_members_count'  => $validated['family_members_count'] ?? 0,
-                'monthly_income'        => $validated['monthly_income'] ?? null,
-                'income_source'         => $validated['income_source'] ?? null,
-                'monthly_expense'       => $validated['monthly_expense'] ?? null,
-                'zakat_eligibility'     => ($validated['zakat_eligibility'] === 'Yes'),
-                'comment_note'          => $validated['comment_note'] ?? null,
-                'volunteer_id'          => $validated['volunteer_id'],
+                'head_of_family_name' => $validated['head_of_family_name'],
+                'cnic' => $validated['cnic'],
+                'gender' => $validated['gender'],
+                'age' => $validated['age'] ?? null,
+                'marital_status' => $validated['marital_status'] ?? null,
+                'contact_number' => $validated['contact_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'province' => $validated['province'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'area' => $validated['area'] ?? null,
+                'gps_lat' => $validated['gps_lat'] ?? null,
+                'gps_long' => $validated['gps_long'] ?? null,
+                'family_members_count' => $validated['family_members_count'] ?? 0,
+                'monthly_income' => $validated['monthly_income'] ?? null,
+                'income_source' => $validated['income_source'] ?? null,
+                'monthly_expense' => $validated['monthly_expense'] ?? null,
+                'zakat_eligibility' => ($validated['zakat_eligibility'] === 'Yes'),
+                'comment_note' => $validated['comment_note'] ?? null,
+                'volunteer_id' => $validated['volunteer_id'],
             ]);
 
             $members = request('members', []);
@@ -224,21 +234,23 @@ class FamilyController extends Controller
             if (is_array($members) && count($members)) {
                 foreach ($members as $m) {
                     $name = isset($m['name']) ? trim($m['name']) : '';
-                    if ($name === '') { continue; }
+                    if ($name === '') {
+                        continue;
+                    }
                     $toCreate[] = [
                         'organization_id' => $family->organization_id,
-                        'name'            => $name,
-                        'age'             => isset($m['age']) && $m['age'] !== '' ? (int)$m['age'] : null,
-                        'relation'        => $m['relation'] ?? null,
-                        'education'       => $m['education'] ?? null,
-                        'occupation'      => $m['occupation'] ?? null,
-                        'cnic'            => $m['cnic'] ?? null,
+                        'name' => $name,
+                        'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
+                        'relation' => $m['relation'] ?? null,
+                        'education' => $m['education'] ?? null,
+                        'occupation' => $m['occupation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
                     ];
                 }
             }
             // simple sync: delete and recreate
             $family->members()->delete();
-            if (!empty($toCreate)) {
+            if (! empty($toCreate)) {
                 $family->members()->createMany($toCreate);
             }
             // update cached count
@@ -257,15 +269,17 @@ class FamilyController extends Controller
             $family->members()->delete();
             $family->delete();
         });
+
         return redirect()->route('cms.family.index')->with('success', 'Family deleted successfully!');
     }
-    
+
     /**
      * Return family with members as JSON for AJAX auto-fill.
      */
     public function json(Family $family)
     {
         $family->load('members');
+
         return response()->json($family);
     }
 
@@ -275,12 +289,12 @@ class FamilyController extends Controller
     public function addMember(Request $request, Family $family)
     {
         $data = $request->validate([
-            'name' => ['nullable','string','max:255'],
-            'age' => ['nullable','integer','min:0','max:120'],
-            'relation' => ['nullable','string','max:100'],
-            'education' => ['nullable','string','max:100'],
-            'occupation' => ['nullable','string','max:100'],
-            'cnic' => ['nullable','string','max:15'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'relation' => ['nullable', 'string', 'max:100'],
+            'education' => ['nullable', 'string', 'max:100'],
+            'occupation' => ['nullable', 'string', 'max:100'],
+            'cnic' => ['nullable', 'string', 'max:15'],
         ]);
 
         $member = $family->members()->create(array_merge(
@@ -303,6 +317,7 @@ class FamilyController extends Controller
         if ($family) {
             $family->update(['family_members_count' => $family->members()->count()]);
         }
+
         return response()->json(['ok' => true]);
     }
 
@@ -312,35 +327,35 @@ class FamilyController extends Controller
     public function quickCreate(Request $request)
     {
         $data = $request->validate([
-            'head_of_family' => ['required','string','max:255'],
-            'survey_cnic' => ['nullable','regex:/^\d{5}-\d{7}-\d$/'],
-            'household_size' => ['nullable','integer','min:0'],
-            'zakat_elig' => ['nullable','in:yes,no,unsure'],
-            'monthly_income' => ['nullable','integer','min:0'],
-            'monthly_expenses' => ['nullable','integer','min:0'],
-            'address_full' => ['nullable','string','max:1000'],
-            'province' => ['nullable','string','max:100'],
-            'district' => ['nullable','string','max:100'],
-            'tehsil' => ['nullable','string','max:100'],
+            'head_of_family' => ['required', 'string', 'max:255'],
+            'survey_cnic' => ['nullable', 'regex:/^\d{5}-\d{7}-\d$/'],
+            'household_size' => ['nullable', 'integer', 'min:0'],
+            'zakat_elig' => ['nullable', 'in:yes,no,unsure'],
+            'monthly_income' => ['nullable', 'integer', 'min:0'],
+            'monthly_expenses' => ['nullable', 'integer', 'min:0'],
+            'address_full' => ['nullable', 'string', 'max:1000'],
+            'province' => ['nullable', 'string', 'max:100'],
+            'district' => ['nullable', 'string', 'max:100'],
+            'tehsil' => ['nullable', 'string', 'max:100'],
         ]);
 
         // Determine organization for quick-created family
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
         $family = Family::create([
-            'organization_id'      => $organizationId,
-            'head_of_family_name'  => $data['head_of_family'],
-            'cnic'                 => $data['survey_cnic'] ?? null,
+            'organization_id' => $organizationId,
+            'head_of_family_name' => $data['head_of_family'],
+            'cnic' => $data['survey_cnic'] ?? null,
             'family_members_count' => $data['household_size'] ?? 0,
-            'zakat_eligibility'    => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
-            'monthly_income'       => $data['monthly_income'] ?? null,
-            'monthly_expense'      => $data['monthly_expenses'] ?? null,
-            'address'              => $data['address_full'] ?? null,
-            'province'             => $data['province'] ?? null,
-            'city'                 => $data['district'] ?? null,
-            'area'                 => $data['tehsil'] ?? null,
+            'zakat_eligibility' => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
+            'monthly_income' => $data['monthly_income'] ?? null,
+            'monthly_expense' => $data['monthly_expenses'] ?? null,
+            'address' => $data['address_full'] ?? null,
+            'province' => $data['province'] ?? null,
+            'city' => $data['district'] ?? null,
+            'area' => $data['tehsil'] ?? null,
         ]);
 
-        return response()->json(['ok'=>true,'family'=>$family]);
+        return response()->json(['ok' => true, 'family' => $family]);
     }
 }

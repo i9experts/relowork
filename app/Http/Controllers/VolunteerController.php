@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Volunteer;
-use App\Models\User;
-use App\Models\EducationLevel;
+use App\Mail\VolunteerWelcomeMail;
 use App\Models\Availability;
-use App\Models\ProjectType;
-use App\Models\VolunteerRole;
+use App\Models\EducationLevel;
 use App\Models\Language;
 use App\Models\Organization;
-use App\Mail\VolunteerWelcomeMail;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
+use App\Models\ProjectType;
+use App\Models\User;
+use App\Models\Volunteer;
+use App\Models\VolunteerRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class VolunteerController extends Controller
 {
@@ -36,12 +36,12 @@ class VolunteerController extends Controller
         $topVolunteers = Volunteer::where('organization_id', $organizationId)
             ->orderByDesc('joining_date')
             ->take(5)
-            ->get(['id','full_name','joining_date']);
+            ->get(['id', 'full_name', 'joining_date']);
 
         $recentActivity = Volunteer::where('organization_id', $organizationId)
             ->orderByDesc('updated_at')
             ->take(5)
-            ->get(['id','full_name','updated_at']);
+            ->get(['id', 'full_name', 'updated_at']);
 
         $volunteers = Volunteer::where('organization_id', $organizationId)
             ->latest()
@@ -69,19 +69,19 @@ class VolunteerController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
 
-        $data['educationLevels'] = EducationLevel::where(function($q) use ($organizationId) {
+        $data['educationLevels'] = EducationLevel::where(function ($q) use ($organizationId) {
             $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
         })->orderBy('name')->get();
 
-        $data['availabilities'] = Availability::where(function($q) use ($organizationId) {
+        $data['availabilities'] = Availability::where(function ($q) use ($organizationId) {
             $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
         })->orderBy('name')->get();
 
-        $data['projectTypes'] = ProjectType::where(function($q) use ($organizationId) {
+        $data['projectTypes'] = ProjectType::where(function ($q) use ($organizationId) {
             $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
         })->orderBy('name')->get();
 
-        $data['volunteerRoles'] = VolunteerRole::where(function($q) use ($organizationId) {
+        $data['volunteerRoles'] = VolunteerRole::where(function ($q) use ($organizationId) {
             $q->whereNull('organization_id')->orWhere('organization_id', $organizationId);
         })->orderBy('name')->get();
 
@@ -96,30 +96,30 @@ class VolunteerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => ['required','string','max:255'],
-            'email' => ['required','email','max:255','unique:users,email'],
-            'password' => ['required','string','min:8','confirmed'],
-            'contact_number' => ['nullable','string','max:20'],
-            'cnic' => ['nullable','string','max:15'],
-            'gender' => ['nullable','in:Male,Female,Other'],
-            'dob' => ['nullable','date'],
-            'address' => ['nullable','string','max:255'],
-            'education_level_id' => ['nullable','exists:education_levels,id'],
-            'skills' => ['nullable','string'],
-            'language_ids' => ['nullable','array'],
-            'language_ids.*' => ['integer','exists:languages,id'],
-            'availability_id' => ['nullable','exists:availabilities,id'],
-            'preferred_project_type_ids' => ['nullable','array'],
-            'preferred_project_type_ids.*' => ['integer','exists:project_types,id'],
-            'assigned_project_type_ids' => ['nullable','array'],
-            'assigned_project_type_ids.*' => ['integer','exists:project_types,id'],
-            'emergency_contact' => ['nullable','string','max:20'],
-            'volunteer_role_id' => ['nullable','exists:volunteer_roles,id'],
-            'joining_date' => ['nullable','date'],
-            'picture' => ['nullable','image','max:2048'],
-            'remarks' => ['nullable','string'],
-            'is_admin' => ['sometimes','boolean'],
-            'permissions' => ['sometimes','array'],
+            'full_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'contact_number' => ['nullable', 'string', 'max:20'],
+            'cnic' => ['nullable', 'string', 'max:15'],
+            'gender' => ['nullable', 'in:Male,Female,Other'],
+            'dob' => ['nullable', 'date'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'education_level_id' => ['nullable', 'exists:education_levels,id'],
+            'skills' => ['nullable', 'string'],
+            'language_ids' => ['nullable', 'array'],
+            'language_ids.*' => ['integer', 'exists:languages,id'],
+            'availability_id' => ['nullable', 'exists:availabilities,id'],
+            'preferred_project_type_ids' => ['nullable', 'array'],
+            'preferred_project_type_ids.*' => ['integer', 'exists:project_types,id'],
+            'assigned_project_type_ids' => ['nullable', 'array'],
+            'assigned_project_type_ids.*' => ['integer', 'exists:project_types,id'],
+            'emergency_contact' => ['nullable', 'string', 'max:20'],
+            'volunteer_role_id' => ['nullable', 'exists:volunteer_roles,id'],
+            'joining_date' => ['nullable', 'date'],
+            'picture' => ['nullable', 'image', 'max:2048'],
+            'remarks' => ['nullable', 'string'],
+            'is_admin' => ['sometimes', 'boolean'],
+            'permissions' => ['sometimes', 'array'],
         ]);
 
         $picturePath = null;
@@ -157,15 +157,15 @@ class VolunteerController extends Controller
 
             // Ensure volunteer role exists and assign
             $roleId = DB::table('roles')->where('slug', 'volunteer')->value('id');
-            if (!$roleId) {
+            if (! $roleId) {
                 $roleId = DB::table('roles')->insertGetId([
-                    'name'            => 'Volunteer',
-                    'slug'            => 'volunteer',
-                    'description'     => 'Volunteer User',
-                    'is_system'       => false,
+                    'name' => 'Volunteer',
+                    'slug' => 'volunteer',
+                    'description' => 'Volunteer User',
+                    'is_system' => false,
                     'organization_id' => $organizationId,
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             }
             DB::table('role_user')->updateOrInsert(
@@ -173,15 +173,14 @@ class VolunteerController extends Controller
                 [
                     'organization_id' => $organizationId, // add this if table has this column
                     'created_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]
             );
 
-
             // Generate unique volunteer code
-            $volunteerCode = 'VOL-' . strtoupper(Str::random(6));
+            $volunteerCode = 'VOL-'.strtoupper(Str::random(6));
             while (Volunteer::where('volunteer_code', $volunteerCode)->exists()) {
-                $volunteerCode = 'VOL-' . strtoupper(Str::random(6));
+                $volunteerCode = 'VOL-'.strtoupper(Str::random(6));
             }
 
             // Create volunteer record
@@ -219,9 +218,9 @@ class VolunteerController extends Controller
             if ($organization && $organization->domain) {
                 $domain = $organization->domain;
                 if (app()->environment('local')) {
-                    $loginUrl = 'http://' . $domain . '.localhost:8000/login';
+                    $loginUrl = 'http://'.$domain.'.localhost:8000/login';
                 } else {
-                    $loginUrl = 'https://' . $domain . '.relowork.com/login';
+                    $loginUrl = 'https://'.$domain.'.relowork.com/login';
                 }
             } else {
                 // Fallback to current app login route
@@ -273,30 +272,30 @@ class VolunteerController extends Controller
     public function update(Request $request, Volunteer $volunteer)
     {
         $validated = $request->validate([
-            'full_name' => ['nullable','string','max:255'],
-            'email' => ['nullable','email','max:255','unique:users,email,' . ($volunteer->user_id ?? 'NULL')],
-            'contact_number' => ['nullable','string','max:20'],
-            'cnic' => ['nullable','string','max:15'],
-            'gender' => ['nullable','in:Male,Female,Other'],
-            'dob' => ['nullable','date'],
-            'address' => ['nullable','string','max:255'],
-            'education_level_id' => ['nullable','exists:education_levels,id'],
-            'skills' => ['nullable','string'],
-            'language_ids' => ['nullable','array'],
-            'language_ids.*' => ['integer','exists:languages,id'],
-            'availability_id' => ['nullable','exists:availabilities,id'],
-            'preferred_project_type_ids' => ['nullable','array'],
-            'preferred_project_type_ids.*' => ['integer','exists:project_types,id'],
-            'assigned_project_type_ids' => ['nullable','array'],
-            'assigned_project_type_ids.*' => ['integer','exists:project_types,id'],
-            'emergency_contact' => ['nullable','string','max:20'],
-            'volunteer_role_id' => ['nullable','exists:volunteer_roles,id'],
-            'joining_date' => ['nullable','date'],
-            'picture' => ['nullable','image','max:2048'],
-            'remarks' => ['nullable','string'],
-            'is_admin' => ['sometimes','boolean'],
-            'permissions' => ['sometimes','array'],
-            'status' => ['required','in:Active,Inactive'],
+            'full_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:users,email,'.($volunteer->user_id ?? 'NULL')],
+            'contact_number' => ['nullable', 'string', 'max:20'],
+            'cnic' => ['nullable', 'string', 'max:15'],
+            'gender' => ['nullable', 'in:Male,Female,Other'],
+            'dob' => ['nullable', 'date'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'education_level_id' => ['nullable', 'exists:education_levels,id'],
+            'skills' => ['nullable', 'string'],
+            'language_ids' => ['nullable', 'array'],
+            'language_ids.*' => ['integer', 'exists:languages,id'],
+            'availability_id' => ['nullable', 'exists:availabilities,id'],
+            'preferred_project_type_ids' => ['nullable', 'array'],
+            'preferred_project_type_ids.*' => ['integer', 'exists:project_types,id'],
+            'assigned_project_type_ids' => ['nullable', 'array'],
+            'assigned_project_type_ids.*' => ['integer', 'exists:project_types,id'],
+            'emergency_contact' => ['nullable', 'string', 'max:20'],
+            'volunteer_role_id' => ['nullable', 'exists:volunteer_roles,id'],
+            'joining_date' => ['nullable', 'date'],
+            'picture' => ['nullable', 'image', 'max:2048'],
+            'remarks' => ['nullable', 'string'],
+            'is_admin' => ['sometimes', 'boolean'],
+            'permissions' => ['sometimes', 'array'],
+            'status' => ['required', 'in:Active,Inactive'],
         ]);
 
         $picturePath = $volunteer->picture_path;
@@ -309,10 +308,10 @@ class VolunteerController extends Controller
             // Update linked user name/email and access if provided
             if ($volunteer->user) {
                 $userUpdates = [];
-                if (!empty($validated['full_name'])) {
+                if (! empty($validated['full_name'])) {
                     $userUpdates['name'] = $validated['full_name'];
                 }
-                if (!empty($validated['email'])) {
+                if (! empty($validated['email'])) {
                     $userUpdates['email'] = $validated['email'];
                 }
 
@@ -327,7 +326,7 @@ class VolunteerController extends Controller
                 $userUpdates['is_admin'] = $request->boolean('is_admin');
                 $userUpdates['permissions'] = $permissionsPayload;
 
-                if (!empty($userUpdates)) {
+                if (! empty($userUpdates)) {
                     $volunteer->user->update($userUpdates);
                 }
             }

@@ -35,4 +35,3 @@ class TenantContextMiddleware
         return $next($request);
     }
 }
-

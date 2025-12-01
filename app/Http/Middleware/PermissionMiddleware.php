@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Organization;
 use App\Models\Volunteer;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class PermissionMiddleware
 {
@@ -20,7 +20,7 @@ class PermissionMiddleware
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login')->with('error', 'Please log in to continue.');
         }
 
@@ -30,7 +30,7 @@ class PermissionMiddleware
         }
 
         // If a volunteer is inactive, force logout and redirect to org login with message
-        if (!$user->is_admin) {
+        if (! $user->is_admin) {
             $volunteer = Volunteer::where('user_id', $user->id)->first();
             if ($volunteer && strcasecmp((string) $volunteer->status, 'Active') !== 0) {
                 Auth::logout();
@@ -41,10 +41,11 @@ class PermissionMiddleware
                 $org = $user->organization_id ? Organization::find($user->organization_id) : null;
                 if ($org && $org->domain) {
                     if (app()->environment('local')) {
-                        $loginUrl = 'http://' . $org->domain . '.localhost:8000/login?error=' . urlencode('Your account is inactive. Please contact admin.');
+                        $loginUrl = 'http://'.$org->domain.'.localhost:8000/login?error='.urlencode('Your account is inactive. Please contact admin.');
                     } else {
-                        $loginUrl = 'https://' . $org->domain . '.relowork.com/login?error=' . urlencode('Your account is inactive. Please contact admin.');
+                        $loginUrl = 'https://'.$org->domain.'.relowork.com/login?error='.urlencode('Your account is inactive. Please contact admin.');
                     }
+
                     return redirect()->to($loginUrl);
                 }
 

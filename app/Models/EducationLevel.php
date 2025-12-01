@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class EducationLevel extends Model
 {
     use SoftDeletes;
+
     protected $guarded = [];
 }
