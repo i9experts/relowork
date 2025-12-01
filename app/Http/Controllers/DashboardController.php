@@ -26,6 +26,10 @@ class DashboardController extends Controller
         $data['disbursements'] = FinancialManagement::where('organization_id', $organizationId)
             ->where('transaction_type', 'Disbursement')
             ->sum('amount');
+        $data['donationsTotal'] = FinancialManagement::where('organization_id', $organizationId)
+            ->where('transaction_type', 'Donation')
+            ->sum('amount');
+        $data['surveysCount'] = \App\Models\Surveys::where('organization_id', $organizationId)->count();
 
         $eligible = Family::where('organization_id', $organizationId)->where('zakat_eligibility', true)->count();
         $nonEligible = max(0, ($data['families'] ?? 0) - $eligible);

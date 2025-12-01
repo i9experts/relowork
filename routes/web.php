@@ -8,6 +8,7 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FinancialManagementController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SurveysController;
@@ -60,6 +61,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/search', [SearchController::class, 'search'])->name('search');
     Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
+    Route::get('/notifications/feed', [NotificationsController::class, 'feed'])->name('notifications.feed');
     Route::resource('/dashboard', DashboardController::class)->names([
         'index' => 'cms.dashboard.index',
         'create' => 'cms.dashboard.create',

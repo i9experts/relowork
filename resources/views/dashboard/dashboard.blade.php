@@ -35,11 +35,11 @@
     <!-- Top Statistics -->
     <div class="row">
       <!-- First box -->
-      <div class="col-xl-3 col-md-6 mb-3">
+      <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-secondary shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-              <i class="mdi mdi-account-plus-outline text-secondary" style="font-size:24px;"></i>
+              <i class="mdi mdi-home-heart text-secondary" style="font-size:24px;"></i>
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Total Families</p>
@@ -51,7 +51,7 @@
       </div>
 
       <!-- Second box -->
-      <div class="col-xl-3 col-md-6 mb-3">
+      <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-success shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -67,7 +67,7 @@
       </div>
 
       <!-- Third box -->
-      <div class="col-xl-3 col-md-6 mb-3">
+      <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-primary shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -83,11 +83,11 @@
       </div>
 
       <!-- Fourth box -->
-      <div class="col-xl-3 col-md-6 mb-3">
+      <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-info shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-              <i class="mdi mdi-bell text-info" style="font-size:24px;"></i>
+              <i class="mdi mdi-account-multiple-check text-info" style="font-size:24px;"></i>
             </div>
             <div class="text-right">
               <p class="text-white mb-1 fw-semibold">Active Volunteers</p>
@@ -97,6 +97,37 @@
           </div>
         </div>
       </div>
+
+      <!-- fifth box -->
+      <div class="col-xl-4 col-md-6 mb-3">
+        <div class="card card-default bg-warning shadow-sm border-0">
+          <div class="d-flex align-items-center p-4 justify-content-between">
+            <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+              <i class="mdi mdi-cash-multiple text-warning" style="font-size:26px;"></i>
+            </div>
+            <div class="text-right">
+              <p class="text-white mb-1 fw-semibold">Total Donations</p>
+              <span class="h3 d-block text-white mb-0">{{ $donationsTotal }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- sixth box -->
+      <div class="col-xl-4 col-md-6 mb-3">
+        <div class="card card-default bg-danger shadow-sm border-0">
+          <div class="d-flex align-items-center p-4 justify-content-between">
+            <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+              <i class="mdi mdi-poll text-danger" style="font-size:26px;"></i>
+            </div>
+            <div class="text-right">
+              <p class="text-white mb-1 fw-semibold">Surveys</p>
+              <span class="h3 d-block text-white mb-0">{{ $surveysCount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Income And Expenses row -->

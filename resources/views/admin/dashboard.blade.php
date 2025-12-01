@@ -60,7 +60,7 @@
           <div class="card card-default bg-primary shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-home-group text-primary" style="font-size:24px;"></i>
+                <i class="mdi mdi-home-heart text-primary" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Total Families</p>
@@ -90,7 +90,7 @@
           <div class="card card-default bg-info shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-hand-heart text-info" style="font-size:24px;"></i>
+                <i class="mdi-heart-hand text-info" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Total Aid Programs</p>
@@ -105,7 +105,7 @@
           <div class="card card-default bg-danger shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-check-decagram-outline text-danger" style="font-size:24px;"></i>
+                <i class="mdi-office-building text-danger" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Active Organizations</p>
@@ -120,7 +120,7 @@
           <div class="card card-default bg-dark shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-cancel text-dark" style="font-size:24px;"></i>
+                <i class="mdi-office-building text-dark" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Inactive Organizations</p>

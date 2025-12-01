@@ -161,259 +161,35 @@
               <li class="custom-dropdown">
                 <button class="notify-toggler custom-dropdown-toggler">
                   <i class="mdi mdi-bell-outline icon"></i>
-                  <span class="badge badge-xs rounded-circle">21</span>
+                  <span class="badge badge-xs rounded-circle">0</span>
                 </button>
                 <div class="dropdown-notify">
 
                   <header>
                     <div class="nav nav-underline" id="nav-tab" role="tablist">
                       <a class="nav-item nav-link active" id="all-tabs" data-toggle="tab" href="#all" role="tab"
-                        aria-controls="nav-home" aria-selected="true">All (5)</a>
+                        aria-controls="nav-home" aria-selected="true">All (0)</a>
                       <a class="nav-item nav-link" id="message-tab" data-toggle="tab" href="#message" role="tab"
-                        aria-controls="nav-profile" aria-selected="false">Msgs (4)</a>
+                        aria-controls="nav-profile" aria-selected="false">Msgs (0)</a>
                       <a class="nav-item nav-link" id="other-tab" data-toggle="tab" href="#other" role="tab"
-                        aria-controls="nav-contact" aria-selected="false">Others (3)</a>
+                        aria-controls="nav-contact" aria-selected="false">Others (0)</a>
                     </div>
                   </header>
 
                   <div class="" data-simplebar style="height: 325px;">
                     <div class="tab-content" id="myTabContent">
-
-                      <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tabs">
-
-                        <div class="media media-sm bg-warning-10 p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="images/user/user-sm-02.jpg" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">John Doe</span>
-                              <span class="discribe">Extremity sweetness difficult behaviour he of. On disposal of as
-                                landlord horrible. Afraid at highly months do things on at.</span>
-                              <span class="time">
-                                <time>Just now</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 bg-light mb-0">
-                          <div class="media-sm-wrapper bg-primary">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-calendar-check-outline"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">New event added</span>
-                              <span class="discribe">1/3/2014 (1pm - 2pm)</span>
-                              <span class="time">
-                                <time>10 min ago...</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="images/user/user-sm-03.jpg" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Sagge Hudson</span>
-                              <span class="discribe">On disposal of as landlord Afraid at highly months do things on
-                                at.</span>
-                              <span class="time">
-                                <time>1 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper bg-info-dark">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-account-multiple-check"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Add request</span>
-                              <span class="discribe">Add Dany Jones as your contact.</span>
-                              <div class="buttons">
-                                <a href="#" class="btn btn-sm btn-success shadow-none text-white">accept</a>
-                                <a href="#" class="btn btn-sm shadow-none">delete</a>
-                              </div>
-                              <span class="time">
-                                <time>6 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper bg-info">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-playlist-check"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Task complete</span>
-                              <span class="discribe">Afraid at highly months do things on at.</span>
-                              <span class="time">
-                                <time>1 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                      </div>
-
-                      <div class="tab-pane fade" id="message" role="tabpanel" aria-labelledby="message-tab">
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="{{ url('assets/images/user/user-sm-01.jpg') }}" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Selena Wagner</span>
-                              <span class="discribe">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</span>
-                              <span class="time">
-                                <time>15 min ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="{{ url('assets/images/user/user-sm-03.jpg') }}" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Sagge Hudson</span>
-                              <span class="discribe">On disposal of as landlord Afraid at highly months do things on
-                                at.</span>
-                              <span class="time">
-                                <time>1 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm bg-warning-10 p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="{{ url('assets/images/user/user-sm-02.jpg') }}" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">John Doe</span>
-                              <span class="discribe">Extremity sweetness difficult behaviour he of. On disposal of as
-                                landlord horrible. Afraid
-                                at highly months do things on at.</span>
-                              <span class="time">
-                                <time>Just now</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper">
-                            <a href="user-profile.html">
-                              <img src="{{ url('assets/images/user/user-sm-04.jpg') }}" alt="User Image">
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Albrecht Straub</span>
-                              <span class="discribe"> Beatae quia natus assumenda laboriosam, nisi perferendis aliquid
-                                consectetur expedita non tenetur.</span>
-                              <span class="time">
-                                <time>Just now</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                      </div>
-                      <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="contact-tab">
-
-                        <div class="media media-sm p-4 bg-light mb-0">
-                          <div class="media-sm-wrapper bg-primary">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-calendar-check-outline"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">New event added</span>
-                              <span class="discribe">1/3/2014 (1pm - 2pm)</span>
-                              <span class="time">
-                                <time>10 min ago...</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper bg-info-dark">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-account-multiple-check"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Add request</span>
-                              <span class="discribe">Add Dany Jones as your contact.</span>
-                              <div class="buttons">
-                                <a href="#" class="btn btn-sm btn-success shadow-none text-white">accept</a>
-                                <a href="#" class="btn btn-sm shadow-none">delete</a>
-                              </div>
-                              <span class="time">
-                                <time>6 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                        <div class="media media-sm p-4 mb-0">
-                          <div class="media-sm-wrapper bg-info">
-                            <a href="user-profile.html">
-                              <i class="mdi mdi-playlist-check"></i>
-                            </a>
-                          </div>
-                          <div class="media-body">
-                            <a href="user-profile.html">
-                              <span class="title mb-0">Task complete</span>
-                              <span class="discribe">Afraid at highly months do things on at.</span>
-                              <span class="time">
-                                <time>1 hrs ago</time>...
-                              </span>
-                            </a>
-                          </div>
-                        </div>
-
-                      </div>
+                      <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tabs"></div>
+                      <div class="tab-pane fade" id="message" role="tabpanel" aria-labelledby="message-tab"></div>
+                      <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab"></div>
                     </div>
                   </div>
 
                   <footer class="border-top dropdown-notify-footer">
                     <div class="d-flex justify-content-between align-items-center py-2 px-4">
                       <span>Last updated 3 min ago</span>
-                      <a id="refress-button" href="javascript:" class="btn mdi mdi-cached btn-refress"></a>
+                      <div>
+                        <a id="refress-button" href="javascript:" class="btn mdi mdi-cached btn-refress"></a>
+                      </div>
                     </div>
                   </footer>
                 </div>
@@ -583,6 +359,7 @@
           @if(!$u || $u->hasPermission('financial'))
             extras.push({ label: 'Financials', url: '{{ route('cms.financial-management.index') }}' });
             extras.push({ label: 'New Transaction', url: '{{ route('cms.financial-management.create') }}' });
+            extras.push({ label: 'Donations', url: '{{ route('cms.financial-management.index') }}' });
           @endif
           @if(!$u || $u->hasPermission('surveys'))
             extras.push({ label: 'Surveys', url: '{{ route('cms.survey.index') }}' });
@@ -679,7 +456,6 @@
           }
           clearTimeout(debounce);
           debounce = setTimeout(function(){
-            if (($input.val() || '').trim().length === 0) { $menu.removeClass('show').hide(); return; }
             update();
           }, 150);
         });
@@ -702,6 +478,92 @@
         // Quick focus with /
         $(document).on('keydown', function(e){ if (e.key === '/' && !$(e.target).is('input,textarea')) { e.preventDefault(); $input.trigger('focus'); } });
         // Open on mouse click handled by anchor; additionally, Enter selects active
+      });
+    })(jQuery);
+  </script>
+
+  <script>
+    (function($){
+      $(function(){
+        var loading = false;
+        var userId = @json(optional(auth()->user())->id ?: 'guest');
+        var lsKey = 'cms:notif:lastSeen:'+userId;
+        function getSince(){
+          var v = localStorage.getItem(lsKey);
+          return v ? parseInt(v,10) || 0 : 0;
+        }
+        function setSince(ts){
+          localStorage.setItem(lsKey, String(ts || 0));
+        }
+        function renderList($container, list){
+          $container.empty();
+          if (!list || !list.length) {
+            $container.append('<div class="p-3 text-muted">No notifications</div>');
+            return;
+          }
+          list.forEach(function(it){
+            var badge = it.badge || 'info';
+            var badgeLabel = it.badgeLabel || '';
+            var a = $('<a/>', { href: it.href || '#'});
+            var media = $('<div/>', { 'class': 'media media-sm p-4 mb-0' });
+            var body = $('<div/>', { 'class': 'media-body' });
+            var title = $('<span/>', { 'class': 'title mb-0' }).text(it.title || '');
+            var desc = $('<span/>', { 'class': 'discribe' }).text(it.desc || '');
+            var time = $('<span/>', { 'class': 'time' }).append($('<time/>').text(it.time || ''));
+            var badgeEl = $('<span/>', { 'class': 'badge badge-pill badge-'+badge }).text(badgeLabel);
+            body.append(a.append(title).append(desc).append(time));
+            media.append(body).append(badgeEl);
+            $container.append(media);
+          });
+        }
+        function loadNotifications(){
+          if (loading) return;
+          loading = true;
+          var placeholder = '<div class="p-3 text-center text-muted">Loading...</div>';
+          $('#all').html(placeholder);
+          $('#message').html(placeholder);
+          $('#other').html(placeholder);
+          $('#refress-button').addClass('mdi-spin');
+          $.ajax({ url: "{{ route('notifications.feed') }}", dataType: 'json', data: { since: getSince() }, global: false })
+            .done(function(res){
+              var $all = $('#all');
+              var $msg = $('#message');
+              var $other = $('#other');
+              renderList($all, res.all || []);
+              renderList($msg, res.message || []);
+              renderList($other, res.other || []);
+              $('#all-tabs').text('All (' + (res.counts ? res.counts.all : (res.all||[]).length) + ')');
+              $('#message-tab').text('Msgs (' + (res.counts ? res.counts.message : (res.message||[]).length) + ')');
+              $('#other-tab').text('Others (' + (res.counts ? res.counts.other : (res.other||[]).length) + ')');
+              $('.dropdown-notify-footer span').text('Last updated ' + (res.lastUpdated || ''));
+              var badge = (res.counts ? res.counts.unread : 0);
+              if (!badge || badge < 0) { badge = (res.counts ? res.counts.all : (res.all||[]).length) || 0; }
+              $('.notify-toggler .badge').text(badge);
+              if (typeof res.nowTs === 'number') { /* no-op */ }
+            })
+            .fail(function(){
+              var err = '<div class="p-3 text-center text-danger">Failed to load notifications</div>';
+              $('#all').html(err);
+              $('#message').empty();
+              $('#other').empty();
+            })
+            .always(function(){ loading = false; $('#refress-button').removeClass('mdi-spin'); });
+        }
+        $('.notify-toggler').on('click', function(){ loadNotifications(); });
+        $('#refress-button').on('click', function(){ loadNotifications(); });
+        $('#mark-seen-button').on('click', function(){ setSince(Math.floor(Date.now()/1000)); loadNotifications(); });
+        setInterval(function(){ loadNotifications(); }, 30000);
+        $(document).on('keydown', function(e){ if (e.key === 'Escape' && $('.dropdown-notify').is(':visible')) { $('.dropdown-notify').fadeOut(5); } });
+
+        function primeBadge(){
+          $.ajax({ url: "{{ route('notifications.feed') }}", dataType: 'json', data: { since: getSince() }, global: false })
+            .done(function(res){
+              var badge = (res.counts ? res.counts.unread : 0);
+              if (!badge || badge < 0) { badge = (res.counts ? res.counts.all : (res.all||[]).length) || 0; }
+              $('.notify-toggler .badge').text(badge);
+            });
+        }
+        primeBadge();
       });
     })(jQuery);
   </script>
