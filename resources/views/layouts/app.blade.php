@@ -69,6 +69,27 @@
     .sidebar-minified .app-brand .brand-logo {
       max-height: 56px;
     }
+
+    /* Search input icon sizing/alignment */
+    #input-group-search .input-group-text {
+      height: 100%;            /* Icon span height = input height */
+      padding: 0 12px;         /* Left & right padding */
+      display: flex;
+      align-items: center;      /* Vertical center */
+      justify-content: center;  /* Horizontal center */
+      /* background-color: #fff; */
+      border-right: 0;
+    }
+
+    #input-group-search .form-control {
+      border-left: 0;
+    }
+
+    /* Adjust icon size to match input height */
+    #input-group-search .mdi.mdi-magnify {
+      font-size: 1.7rem;       /* Adjust as needed; matches input height */
+    }
+
   </style>
 
   <!--
@@ -122,17 +143,18 @@
             <div class="search-form">
               <form action="#" method="get" onsubmit="return false;">
                 <div class="input-group input-group-sm" id="input-group-search">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="mdi mdi-magnify"></i>
+                    </span>
+                  </div>
                   <input type="text" autocomplete="off" name="query" id="search-input" class="form-control"
                     placeholder="Search..." />
-                  <div class="input-group-append">
-                    <button class="btn" type="button" id="search-kbd">/</button>
-                  </div>
                 </div>
               </form>
               <ul class="dropdown-menu dropdown-menu-search" style="min-width: 260px;">
                 <!-- dynamic search suggestions here -->
               </ul>
-
             </div>
 
             <ul class="nav navbar-nav">
@@ -527,6 +549,7 @@
         var $input = $('#search-input');
         var $menu = $('.dropdown-menu-search');
         var index = [];
+        var defaults = [];
         function buildIndex(){
           index = [];
           // Collect from left sidebar
@@ -538,20 +561,57 @@
               index.push({ label: label, url: url, key: label.toLowerCase() });
             }
           });
-          // Add common shortcuts (ensure unique by url)
-          var extras = [
-            { label: 'Dashboard', url: '{{ route('cms.dashboard.index') }}' },
-            { label: 'Families', url: '{{ route('cms.family.index') }}' },
-            { label: 'Aid Programs', url: '{{ route('cms.aid-program.index') }}' },
-            { label: 'Financials', url: '{{ route('cms.financial-management.index') }}' },
-            { label: 'Surveys', url: '{{ route('cms.survey.index') }}' },
-            { label: 'Reports', url: '{{ route('cms.report.index') }}' },
-            { label: 'Volunteers', url: '{{ route('cms.volunteer.index') }}' },
-            { label: 'Settings', url: '{{ route('cms.setting.index') }}' },
-          ];
+          // Add shortcuts based on permissions (ensure unique by url)
+          var extras = [];
+          @php $u = auth()->user(); @endphp
+          @if($u && (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin()))
+            extras.push({ label: 'Admin Dashboard', url: '{{ route('cms.admin.dashboard') }}' });
+            extras.push({ label: 'Organizations', url: '{{ route('cms.admin.organizations') }}' });
+            extras.push({ label: 'Users', url: '{{ route('cms.admin.users') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('dashboard'))
+            extras.push({ label: 'Dashboard', url: '{{ route('cms.dashboard.index') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('families'))
+            extras.push({ label: 'Families', url: '{{ route('cms.family.index') }}' });
+            extras.push({ label: 'New Family', url: '{{ route('cms.family.create') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('aid_programs'))
+            extras.push({ label: 'Aid Programs', url: '{{ route('cms.aid-program.index') }}' });
+            extras.push({ label: 'New Aid Program', url: '{{ route('cms.aid-program.create') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('financial'))
+            extras.push({ label: 'Financials', url: '{{ route('cms.financial-management.index') }}' });
+            extras.push({ label: 'New Transaction', url: '{{ route('cms.financial-management.create') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('surveys'))
+            extras.push({ label: 'Surveys', url: '{{ route('cms.survey.index') }}' });
+            extras.push({ label: 'New Survey', url: '{{ route('cms.survey.create') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('reports'))
+            extras.push({ label: 'Reports', url: '{{ route('cms.report.index') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('volunteers'))
+            extras.push({ label: 'Volunteers', url: '{{ route('cms.volunteer.index') }}' });
+            extras.push({ label: 'New Volunteer', url: '{{ route('cms.volunteer.create') }}' });
+          @endif
+          @if(!$u || $u->hasPermission('settings'))
+            extras.push({ label: 'Settings', url: '{{ route('cms.setting.index') }}' });
+          @endif
+          extras.push({ label: 'Profile', url: '{{ route('cms.profile.index') }}' });
           var seen = {};
           index.forEach(function(i){ seen[i.url] = true; });
-          extras.forEach(function(e){ if (!seen[e.url]) { index.push({ label: e.label, url: e.url, key: e.label.toLowerCase() }); } });
+          defaults = [];
+          extras.forEach(function(e){
+            if (!seen[e.url]) {
+              var item = { label: e.label, url: e.url, key: e.label.toLowerCase() };
+              index.push(item);
+              defaults.push(item);
+            } else {
+              // If already in index, still add to defaults for empty-query suggestions
+              defaults.push({ label: e.label, url: e.url, key: e.label.toLowerCase() });
+            }
+          });
         }
         buildIndex();
 
@@ -598,6 +658,12 @@
         var active = -1;
         function update(){
           var q = ($input.val() || '').trim();
+          if (q.length === 0) {
+            current = (defaults || []).slice(0, 10);
+            active = current.length ? 0 : -1;
+            render(current, active);
+            return;
+          }
           current = filterIndex(q);
           active = current.length ? 0 : -1;
           render(current, active);
@@ -624,9 +690,18 @@
           }
         });
 
+        // Ensure mouse click navigates
+        $menu.on('click', 'a.dropdown-item', function(e){
+          var href = $(this).attr('href');
+          if (href && href !== '#') {
+            e.preventDefault();
+            window.location.href = href;
+          }
+        });
+
         // Quick focus with /
-        $('#search-kbd').on('click', function(){ $input.trigger('focus'); });
         $(document).on('keydown', function(e){ if (e.key === '/' && !$(e.target).is('input,textarea')) { e.preventDefault(); $input.trigger('focus'); } });
+        // Open on mouse click handled by anchor; additionally, Enter selects active
       });
     })(jQuery);
   </script>
