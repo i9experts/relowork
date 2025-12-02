@@ -130,11 +130,11 @@
                                     <select class="form-control rounded-0 bg-light select2" id="reportType" name="type"
                                         style="width: 100%;">
                                         <option value="">Select Report Type</option>
-                                        <option value="Financial" {{ (data_get($filters,'type')=='Financial')?'selected':'' }}>Financial Report</option>
-                                        <option value="Attendance" {{ (data_get($filters,'type')=='Attendance')?'selected':'' }}>Attendance Report</option>
-                                        <option value="Performance" {{ (data_get($filters,'type')=='Performance')?'selected':'' }}>Performance Report</option>
-                                        <option value="Survey" {{ (data_get($filters,'type')=='Survey')?'selected':'' }}>Survey Summary</option>
-                                        <option value="Custom" {{ (data_get($filters,'type')=='Custom')?'selected':'' }}>Custom Report</option>
+                                        <option value="Families" {{ (data_get($filters,'type')=='Families')?'selected':'' }}>Family Report</option>
+                                        <option value="Aid Programs" {{ (data_get($filters,'type')=='Aid Programs')?'selected':'' }}>Aid Program Report</option>
+                                        <option value="Financial" {{ (data_get($filters,'type')=='Financial')?'selected':'' }}>Financial Management Report</option>
+                                        <option value="Survey" {{ (data_get($filters,'type')=='Survey')?'selected':'' }}>Survey Report</option>
+                                        <option value="Volunteers" {{ (data_get($filters,'type')=='Volunteers')?'selected':'' }}>Volunteer Report</option>
                                     </select>
                                 </div>
 
@@ -143,12 +143,26 @@
                                     <select class="form-control rounded-0 bg-light select2" id="period" name="period"
                                         style="width: 100%;">
                                         <option value="">Select Period</option>
+                                        <option value="Last 7 Days" {{ (data_get($filters,'period')=='Last 7 Days')?'selected':'' }}>Last 7 Days</option>
+                                        <option value="Last 30 Days" {{ (data_get($filters,'period')=='Last 30 Days')?'selected':'' }}>Last 30 Days</option>
                                         <option value="This Month" {{ (data_get($filters,'period')=='This Month')?'selected':'' }}>This Month</option>
                                         <option value="Last Month" {{ (data_get($filters,'period')=='Last Month')?'selected':'' }}>Last Month</option>
                                         <option value="This Quarter" {{ (data_get($filters,'period')=='This Quarter')?'selected':'' }}>This Quarter</option>
                                         <option value="This Year" {{ (data_get($filters,'period')=='This Year')?'selected':'' }}>This Year</option>
                                         <option value="Custom Range" {{ (data_get($filters,'period')=='Custom Range')?'selected':'' }}>Custom Range</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div class="row" id="customRangeFields" style="display:none;">
+                                <!-- From Date -->
+                                <div class="col-md-6 mb-3">
+                                    <input type="date" class="form-control rounded-0 bg-light" id="from_date" name="from_date" value="{{ data_get($filters,'from_date') }}" placeholder="From date">
+                                </div>
+
+                                <!-- To Date -->
+                                <div class="col-md-6 mb-3">
+                                    <input type="date" class="form-control rounded-0 bg-light" id="to_date" name="to_date"  value="{{ data_get($filters,'to_date') }}"  placeholder="To date">
                                 </div>
                             </div>
 
@@ -189,8 +203,8 @@
                                       </td>
                                       <td class="text-end">
                                         @if($user && $user->hasPermission('reports'))
-                                        <a href="{{ url('report/view').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-outline-primary me-2">View Report</a>
-                                        <a href="{{ url('report/export').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')) }}" class="btn btn-sm btn-primary me-2"><i class="mdi mdi-download"></i> Download</a>
+                                        <a href="{{ url('report/view').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')).(data_get($filters,'from_date')?'&from='.urlencode(data_get($filters,'from_date')):'').(data_get($filters,'to_date')?'&to='.urlencode(data_get($filters,'to_date')):'') }}" class="btn btn-sm btn-outline-primary me-2">View Report</a>
+                                        <a href="{{ url('report/export').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')).(data_get($filters,'from_date')?'&from='.urlencode(data_get($filters,'from_date')):'').(data_get($filters,'to_date')?'&to='.urlencode(data_get($filters,'to_date')):'') }}" class="btn btn-sm btn-primary me-2"><i class="mdi mdi-download"></i> Download</a>
                                         @endif
                                       </td>
                                   </tr>
@@ -213,6 +227,13 @@
         $('#reportType, #period').select2({
             width: '100%'
         });
+
+        function toggleCustomRange(){
+            var show = ($('#period').val() === 'Custom Range');
+            $('#customRangeFields').css('display', show ? '' : 'none');
+        }
+        $('#period').on('change', toggleCustomRange);
+        toggleCustomRange();
     });
 
     function exportWithFilters() {
@@ -221,6 +242,10 @@
         var url = new URL("{{ url('report/export') }}", window.location.origin);
         if (type) url.searchParams.set('type', type);
         if (period) url.searchParams.set('period', period);
+        var from = document.getElementById('from_date')?.value;
+        var to = document.getElementById('to_date')?.value;
+        if (from) url.searchParams.set('from', from);
+        if (to) url.searchParams.set('to', to);
         window.location.href = url.toString();
     }
 </script>

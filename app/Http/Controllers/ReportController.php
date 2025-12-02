@@ -11,6 +11,7 @@ use App\Models\Volunteer;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class ReportController extends Controller
 {
@@ -34,17 +35,31 @@ class ReportController extends Controller
         $validated = $request->validate([
             'type' => ['required', 'string', 'max:100'],
             'period' => ['required', 'string', 'max:100'],
-        ],
-            [
-                'type.required' => 'Please select a report type.',
-                'period.required' => 'Please select a report period.',
+            'from_date' => ['nullable', 'date'],
+            'to_date' => ['nullable', 'date'],
+        ], [
+            'type.required' => 'Please select a report type.',
+            'period.required' => 'Please select a report period.',
+        ]);
+
+        if (($validated['period'] ?? null) === 'Custom Range') {
+            $request->validate([
+                'from_date' => ['required', 'date'],
+                'to_date' => ['required', 'date', 'after_or_equal:from_date'],
+            ], [
+                'from_date.required' => 'Please select start date.',
+                'to_date.required' => 'Please select end date.',
+                'to_date.after_or_equal' => 'End date must be after or equal to start date.',
             ]);
+        }
 
         $data['reports'] = Report::query()->latest()->get();
         $data['should_load_report_list1'] = true;
         $data['filters'] = [
             'type' => $validated['type'] ?? null,
             'period' => $validated['period'] ?? null,
+            'from_date' => $request->input('from_date'),
+            'to_date' => $request->input('to_date'),
         ];
 
         return view('report.report')->with($data);
@@ -54,19 +69,143 @@ class ReportController extends Controller
     {
         $type = $request->query('type');
         $period = $request->query('period');
+        $format = strtolower($request->query('format','csv'));
+        $from = $request->query('from');
+        $to = $request->query('to');
 
-        $filename = 'report'.($type ? '-'.preg_replace('/\s+/', '-', strtolower($type)) : '').($period ? '-'.preg_replace('/\s+/', '-', strtolower($period)) : '').'-'.now()->format('Ymd_His').'.csv';
+        $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+        $range = $this->normalizePeriod($period);
+        $fromC = $from ? \Illuminate\Support\Carbon::parse($from) : ($range['from'] ?? null);
+        $toC = $to ? \Illuminate\Support\Carbon::parse($to) : ($range['to'] ?? null);
 
+        $filenameBase = 'report'.($type ? '-'.preg_replace('/\s+/', '-', strtolower($type)) : '').($period ? '-'.preg_replace('/\s+/', '-', strtolower($period)) : '').'-'.now()->format('Ymd_His');
+
+        switch ($type) {
+            case 'Financial':
+                $q = FinancialManagement::with(['aidProgram','family','recordedBy','approvedBy'])
+                    ->where('organization_id',$organizationId)->latest();
+                if ($fromC && $toC) $q->whereBetween('date', [$fromC->toDateString(), $toC->toDateString()]);
+                $rows = $q->get();
+                $columns = ['S.No','Date','Type','Amount','Program','Family','Recorded By','Approved By'];
+                $mapped = $rows->values()->map(function($r, $i){
+                    return [
+                        $i + 1,
+                        optional($r->date)->format('Y-m-d'),
+                        $r->transaction_type,
+                        (float) $r->amount,
+                        optional($r->aidProgram)->program_title,
+                        optional($r->family)->family_code,
+                        optional($r->recordedBy)->name,
+                        optional($r->approvedBy)->name,
+                    ];
+                });
+                $title = 'Financial Report';
+                break;
+            case 'Aid Programs':
+                $q = AidProgram::where('organization_id',$organizationId)
+                    ->withCount(['families','volunteers'])
+                    ->with(['families:id,family_code,head_of_family_name,family_members_count','volunteers:id,full_name'])
+                    ->latest();
+                $rows = $q->get();
+                $columns = ['S.No','Program','Status','Families','Volunteers','Members Total','Family Codes','Head Names','Volunteer Names','Created'];
+                $mapped = $rows->values()->map(function($r, $i){
+                    $familyCodes = collect($r->families)->pluck('family_code')->filter()->take(10)->join(', ');
+                    $headNames = collect($r->families)->pluck('head_of_family_name')->filter()->take(10)->join(', ');
+                    $volNames = collect($r->volunteers)->pluck('full_name')->filter()->take(10)->join(', ');
+                    $membersTotal = (int) collect($r->families)->sum(function($f){ return (int) ($f->family_members_count ?? 0); });
+                    return [
+                        $i + 1,
+                        $r->program_title,
+                        $r->status,
+                        (int) ($r->families_count ?? 0),
+                        (int) ($r->volunteers_count ?? 0),
+                        $membersTotal,
+                        $familyCodes,
+                        $headNames,
+                        $volNames,
+                        optional($r->created_at)->format('Y-m-d'),
+                    ];
+                });
+                $title = 'Aid Programs Report';
+                break;
+            case 'Survey':
+                $q = Surveys::where('organization_id',$organizationId)->with(['enumerator','family'])->latest();
+                if ($fromC && $toC) $q->whereBetween('created_at', [$fromC->toDateTimeString(), $toC->toDateTimeString()]);
+                $rows = $q->get();
+                $columns = ['S.No','Code','Family','Enumerator','Members','Uploads','Created'];
+                $mapped = $rows->values()->map(function($r, $i){
+                    return [
+                        $i + 1,
+                        ($r->survey_code ?: ('S-'.$r->id)),
+                        optional($r->family)->family_code,
+                        optional($r->enumerator)->full_name,
+                        (int) ($r->members_count ?? $r->members()->count()),
+                        (int) ($r->uploads_count ?? $r->uploads()->count()),
+                        optional($r->created_at)->format('Y-m-d'),
+                    ];
+                });
+                $title = 'Survey Report';
+                break;
+            case 'Volunteers':
+                $q = Volunteer::where('organization_id',$organizationId)->latest();
+                $rows = $q->get();
+                $columns = ['S.No','Name','Email','Contact','Joining Date','Status'];
+                $mapped = $rows->values()->map(function($r, $i){
+                    return [
+                        $i + 1,
+                        $r->full_name,
+                        $r->email,
+                        $r->contact_number,
+                        optional($r->joining_date)->format('Y-m-d'),
+                        $r->status,
+                    ];
+                });
+                $title = 'Volunteers Report';
+                break;
+            case 'Families':
+            default:
+                $q = Family::where('organization_id',$organizationId)->with(['volunteer'])->latest();
+                if ($fromC && $toC) $q->whereBetween('created_at', [$fromC->toDateTimeString(), $toC->toDateTimeString()]);
+                $rows = $q->get();
+                $columns = ['S.No','Family Code','Head','Members','Volunteer','Zakat Eligible','Created'];
+                $mapped = $rows->values()->map(function($r, $i){
+                    return [
+                        $i + 1,
+                        $r->family_code,
+                        ($r->head_of_family_name ?? $r->family_head_name),
+                        (int) ($r->members_count ?? $r->members()->count()),
+                        optional($r->volunteer)->full_name,
+                        ($r->zakat_eligibility ? 'Yes' : 'No'),
+                        optional($r->created_at)->format('Y-m-d'),
+                    ];
+                });
+                $title = 'Families Report';
+                break;
+        }
+
+        if ($format === 'pdf') {
+            $pdfData = [
+                'title' => $title,
+                'subtitle' => ($period ?: 'All Periods'),
+                'columns' => $columns,
+                'rows' => $mapped->toArray(),
+            ];
+            $filename = $filenameBase.'.pdf';
+            return PDF::loadView('report.pdf.generic', $pdfData)->download($filename);
+        }
+
+        $filename = $filenameBase.'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $callback = function () use ($type, $period) {
+        $callback = function () use ($columns, $mapped, $type, $period) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['Report Type', 'Period', 'Generated At']);
             fputcsv($handle, [$type ?: 'All', $period ?: 'All', now()->toDateTimeString()]);
-            // TODO: Write real rows based on $type/$period filters
+            fputcsv($handle, $columns);
+            foreach ($mapped as $row) { fputcsv($handle, $row); }
             fclose($handle);
         };
 
@@ -86,13 +225,68 @@ class ReportController extends Controller
             abort(500, 'Could not create ZIP');
         }
 
-        // Minimal placeholder: include a summary CSV
-        $summary = "Type,Period,Generated At\nAll,All,".now()->toDateTimeString()."\n";
-        $zip->addFromString('summary.csv', $summary);
+        $organizationId = optional(auth()->user())->organization_id ?? session('organization_id');
+
+        // Families
+        $families = Family::where('organization_id',$organizationId)->with(['volunteer'])->latest()->get();
+        $zip->addFromString('families.csv', $this->toCsv(['S.No','Family Code','Head','Members','Volunteer','Zakat Eligible','Created'], $families->values()->map(function($r, $i){ return [
+            $i + 1, $r->family_code, ($r->head_of_family_name ?? $r->family_head_name), (int) ($r->members_count ?? $r->members()->count()), optional($r->volunteer)->full_name, ($r->zakat_eligibility ? 'Yes' : 'No'), optional($r->created_at)->format('Y-m-d')
+        ]; })->toArray()));
+
+        // Aid Programs
+        $programs = AidProgram::where('organization_id',$organizationId)->withCount(['families','volunteers'])->latest()->get();
+        $zip->addFromString('aid-programs.csv', $this->toCsv(['S.No','Program','Status','Families','Volunteers','Created'], $programs->values()->map(function($r, $i){ return [
+            $i + 1, $r->program_title, $r->status, (int) ($r->families_count ?? 0), (int) ($r->volunteers_count ?? 0), optional($r->created_at)->format('Y-m-d')
+        ]; })->toArray()));
+
+        // Financial
+        $financial = FinancialManagement::where('organization_id',$organizationId)->with(['aidProgram','family','recordedBy','approvedBy'])->latest()->get();
+        $zip->addFromString('financial.csv', $this->toCsv(['S.No','Date','Type','Amount','Program','Family','Recorded By','Approved By'], $financial->values()->map(function($r, $i){ return [
+            $i + 1, optional($r->date)->format('Y-m-d'), $r->transaction_type, (float) $r->amount, optional($r->aidProgram)->program_title, optional($r->family)->family_code, optional($r->recordedBy)->name, optional($r->approvedBy)->name
+        ]; })->toArray()));
+
+        // Survey
+        $surveys = Surveys::where('organization_id',$organizationId)->with(['enumerator','family'])->latest()->get();
+        $zip->addFromString('surveys.csv', $this->toCsv(['S.No','Code','Family','Enumerator','Members','Uploads','Created'], $surveys->values()->map(function($r, $i){ return [
+            $i + 1, ($r->survey_code ?: ('S-'.$r->id)), optional($r->family)->family_code, optional($r->enumerator)->full_name, (int) ($r->members_count ?? $r->members()->count()), (int) ($r->uploads_count ?? $r->uploads()->count()), optional($r->created_at)->format('Y-m-d')
+        ]; })->toArray()));
+
+        // Volunteers
+        $vols = Volunteer::where('organization_id',$organizationId)->latest()->get();
+        $zip->addFromString('volunteers.csv', $this->toCsv(['S.No','Name','Email','Contact','Joining Date','Status'], $vols->values()->map(function($r, $i){ return [
+            $i + 1, $r->full_name, $r->email, $r->contact_number, optional($r->joining_date)->format('Y-m-d'), $r->status
+        ]; })->toArray()));
+
+        // Summary PDF with organization branding
+        $pdfData = [
+            'title' => 'All Reports Summary',
+            'subtitle' => 'Generated '.now()->format('Y-m-d H:i'),
+            'columns' => ['Section','Count'],
+            'rows' => [
+                ['Families', count($families)],
+                ['Aid Programs', count($programs)],
+                ['Financial Records', count($financial)],
+                ['Surveys', count($surveys)],
+                ['Volunteers', count($vols)],
+            ],
+        ];
+        $pdf = PDF::loadView('report.pdf.generic', $pdfData);
+        $pdfPath = $tmpPath.'/summary-'.now()->format('Ymd_His').'.pdf';
+        @file_put_contents($pdfPath, $pdf->output());
+        if (file_exists($pdfPath)) {
+            $zip->addFile($pdfPath, 'summary.pdf');
+        }
 
         $zip->close();
 
-        return response()->download($zipPath)->deleteFileAfterSend(true);
+        $response = response()->download($zipPath, basename($zipPath), [
+            'Content-Type' => 'application/zip'
+        ])->deleteFileAfterSend(true);
+
+        // Optionally cleanup temp pdf asynchronously
+        try { if (file_exists($pdfPath)) { @unlink($pdfPath); } } catch (\Throwable $e) {}
+
+        return $response;
     }
 
     public function view(Request $request)
@@ -102,8 +296,8 @@ class ReportController extends Controller
         $download = $request->query('download');
 
         $range = $this->normalizePeriod($period);
-        $from = $range['from'] ?? null;
-        $to = $range['to'] ?? null;
+        $from = $request->query('from') ? \Illuminate\Support\Carbon::parse($request->query('from')) : ($range['from'] ?? null);
+        $to = $request->query('to') ? \Illuminate\Support\Carbon::parse($request->query('to')) : ($range['to'] ?? null);
 
         $data = [
             'filters' => ['type' => $type, 'period' => $period],
@@ -172,6 +366,7 @@ class ReportController extends Controller
             case 'Aid Programs':
                 $p = AidProgram::where('organization_id', $organizationId)
                     ->withCount(['families', 'volunteers', 'attachments'])
+                    ->with(['families:id,family_code,head_of_family_name,family_members_count', 'volunteers:id,full_name'])
                     ->withSum(['transactions as disbursed_amount' => function ($q) {
                         $q->where('transaction_type', 'Disbursement');
                     }], 'amount')
@@ -242,6 +437,10 @@ class ReportController extends Controller
         }
         $now = now();
         switch ($period) {
+            case 'Last 7 Days':
+                return ['from' => $now->copy()->subDays(6)->startOfDay(), 'to' => $now->copy()->endOfDay()];
+            case 'Last 30 Days':
+                return ['from' => $now->copy()->subDays(29)->startOfDay(), 'to' => $now->copy()->endOfDay()];
             case 'This Month':
                 return ['from' => $now->copy()->startOfMonth(), 'to' => $now->copy()->endOfMonth()];
             case 'Last Month':
@@ -259,6 +458,17 @@ class ReportController extends Controller
             default:
                 return ['from' => null, 'to' => null];
         }
+    }
+
+    private function toCsv(array $columns, array $rows)
+    {
+        $fh = fopen('php://temp', 'w+');
+        fputcsv($fh, $columns);
+        foreach ($rows as $r) { fputcsv($fh, $r); }
+        rewind($fh);
+        $csv = stream_get_contents($fh);
+        fclose($fh);
+        return $csv;
     }
 
     /**
