@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('aid_programs', function (Blueprint $table) {
@@ -25,7 +22,6 @@ return new class extends Migration
             $table->enum('status', ['Planned', 'Active', 'Completed', 'On Hold'])->default('Planned');
             $table->unsignedBigInteger('total_budget')->nullable();
             $table->enum('fund_source', ['Zakat', 'Sadaqah', 'General Donation', 'Grant'])->nullable();
-            $table->unsignedBigInteger('volunteer_id')->nullable()->index();
             $table->enum('monitoring_frequency', ['Weekly', 'Monthly', 'Quarterly'])->nullable();
             $table->text('progress_notes')->nullable();
             $table->softDeletes();
@@ -33,9 +29,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('aid_programs');

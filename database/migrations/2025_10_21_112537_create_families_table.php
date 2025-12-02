@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('families', function (Blueprint $table) {
@@ -33,17 +30,21 @@ return new class extends Migration
             $table->string('income_source')->nullable();
             $table->boolean('zakat_eligibility')->default(false);
             $table->text('comment_note')->nullable();
+
+            // ✅ New addition
             $table->unsignedBigInteger('volunteer_id')->nullable()->index();
+            $table->foreign('volunteer_id')->references('id')->on('volunteers')->nullOnDelete();
+
             $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::table('families', function(Blueprint $table){
+            $table->dropForeign(['volunteer_id']);
+        });
         Schema::dropIfExists('families');
     }
 };

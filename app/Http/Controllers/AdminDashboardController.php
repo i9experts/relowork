@@ -64,7 +64,13 @@ class AdminDashboardController extends Controller
         })->toArray();
 
         // Simple activity logs (recent user signups)
-        $data['recentUsers'] = User::whereNotNull('organization_id')->orderByDesc('id')->take(10)->get(['id', 'name', 'email', 'organization_id', 'created_at']);
+        $data['recentUsers'] = DB::table('users')
+            ->leftJoin('organizations', 'users.organization_id', '=', 'organizations.id')
+            ->whereNotNull('users.organization_id')
+            ->orderByDesc('users.id')
+            ->take(10)
+            ->select('users.id','users.name','users.email','users.organization_id','users.created_at','organizations.organization_name as org_name')
+            ->get();
 
         return view('admin.dashboard')->with($data);
     }

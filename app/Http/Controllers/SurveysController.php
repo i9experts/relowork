@@ -142,14 +142,22 @@ class SurveysController extends Controller
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
+            $organizationId = optional($request->user())->organization_id ?? session('organization_id');
             // Create Survey
             $survey = new Surveys;
             // Generate Survey ID: SUR-YYYY-00001 (yearly reset)
             $year = now()->year;
             $yearCount = Surveys::whereYear('created_at', $year)->lockForUpdate()->count() + 1;
             $survey->survey_code = sprintf('SUR-%d-%05d', $year, $yearCount);
-            // Set family_id if provided (and not the "new" placeholder)
             $familyId = $request->input('family_id');
+            if (!$organizationId && $familyId && $familyId !== 'new') {
+                $organizationId = optional(Family::find((int) $familyId))->organization_id;
+            }
+            if (!$organizationId && ($validated['enumerator_id'] ?? null)) {
+                $organizationId = optional(Volunteer::find((int) $validated['enumerator_id']))->organization_id;
+            }
+            $survey->organization_id = $organizationId;
+            // Set family_id if provided (and not the "new" placeholder)
             if ($familyId && $familyId !== 'new') {
                 $survey->family_id = (int) $familyId;
             } else {
@@ -222,6 +230,7 @@ class SurveysController extends Controller
                 if ($file->isValid()) {
                     $path = $file->store('survey/consent', 'public');
                     SurveyUpload::create([
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'type' => 'consent',
                         'url' => $path,
@@ -234,6 +243,7 @@ class SurveysController extends Controller
                 if ($p && $p->isValid()) {
                     $path = $p->store('survey/photos', 'public');
                     SurveyUpload::create([
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'type' => 'photo',
                         'url' => $path,
@@ -247,6 +257,7 @@ class SurveysController extends Controller
                 if ($a->isValid()) {
                     $path = $a->store('survey/audio', 'public');
                     SurveyUpload::create([
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'type' => 'audio',
                         'url' => $path,
@@ -288,6 +299,7 @@ class SurveysController extends Controller
 
                     Log::info('Survey member raw input', ['member' => $m]);
                     $createPayload = [
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'person_id' => null,
                         'name' => $nameVal,
@@ -311,6 +323,7 @@ class SurveysController extends Controller
                         continue;
                     }
                     SurveyAsset::create([
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'asset' => $asset,
                         'present' => true,
@@ -372,14 +385,15 @@ class SurveysController extends Controller
                         if ($nameVal === '') {
                             continue;
                         }
-                        $fmToCreate[] = [
-                            'name' => $nameVal,
-                            'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
-                            'relation' => $m['relation'] ?? null,
-                            'education' => $m['education'] ?? null,
-                            'occupation' => $m['occupation'] ?? null,
-                            'cnic' => $m['cnic'] ?? null,
-                        ];
+                    $fmToCreate[] = [
+                        'organization_id' => $family->organization_id,
+                        'name' => $nameVal,
+                        'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
+                        'relation' => $m['relation'] ?? null,
+                        'education' => $m['education'] ?? null,
+                        'occupation' => $m['occupation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
+                    ];
                     }
                     if (! empty($fmToCreate)) {
                         $family->members()->createMany($fmToCreate);
@@ -424,6 +438,7 @@ class SurveysController extends Controller
                         continue;
                     }
                     $fmToCreate[] = [
+                        'organization_id' => $family->organization_id,
                         'name' => $nameVal,
                         'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
                         'relation' => $m['relation'] ?? null,
@@ -625,20 +640,20 @@ class SurveysController extends Controller
                 $file = $request->file('consent_attachment');
                 if ($file->isValid()) {
                     $path = $file->store('survey/consent', 'public');
-                    SurveyUpload::create(['survey_id' => $survey->id, 'type' => 'consent', 'url' => $path]);
+                    SurveyUpload::create(['organization_id' => $survey->organization_id, 'survey_id' => $survey->id, 'type' => 'consent', 'url' => $path]);
                 }
             }
             foreach ($request->file('photos', []) as $p) {
                 if ($p && $p->isValid()) {
                     $path = $p->store('survey/photos', 'public');
-                    SurveyUpload::create(['survey_id' => $survey->id, 'type' => 'photo', 'url' => $path]);
+                    SurveyUpload::create(['organization_id' => $survey->organization_id, 'survey_id' => $survey->id, 'type' => 'photo', 'url' => $path]);
                 }
             }
             if ($request->hasFile('audio_note')) {
                 $a = $request->file('audio_note');
                 if ($a->isValid()) {
                     $path = $a->store('survey/audio', 'public');
-                    SurveyUpload::create(['survey_id' => $survey->id, 'type' => 'audio', 'url' => $path]);
+                    SurveyUpload::create(['organization_id' => $survey->organization_id, 'survey_id' => $survey->id, 'type' => 'audio', 'url' => $path]);
                 }
             }
 
@@ -659,6 +674,7 @@ class SurveysController extends Controller
                         $ageVal = null;
                     }
                     SurveyMember::create([
+                        'organization_id' => $survey->organization_id,
                         'survey_id' => $survey->id,
                         'person_id' => null,
                         'name' => $nameVal,
@@ -678,7 +694,7 @@ class SurveysController extends Controller
                 if (! $asset) {
                     continue;
                 }
-                SurveyAsset::create(['survey_id' => $survey->id, 'asset' => $asset, 'present' => true]);
+                SurveyAsset::create(['organization_id' => $survey->organization_id, 'survey_id' => $survey->id, 'asset' => $asset, 'present' => true]);
             }
 
             // If linked to a family, sync family core fields and members
@@ -717,18 +733,19 @@ class SurveysController extends Controller
                         if ($nameVal === '') {
                             continue;
                         }
-                        $fmToCreate[] = [
-                            'name' => $nameVal,
-                            'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
-                            'relation' => $m['relation'] ?? null,
-                            'education' => $m['education'] ?? null,
-                            'occupation' => $m['occupation'] ?? null,
-                            'cnic' => $m['cnic'] ?? null,
-                        ];
-                    }
-                    if (! empty($fmToCreate)) {
-                        $family->members()->createMany($fmToCreate);
-                    }
+                    $fmToCreate[] = [
+                        'organization_id' => $family->organization_id,
+                        'name' => $nameVal,
+                        'age' => isset($m['age']) && $m['age'] !== '' ? (int) $m['age'] : null,
+                        'relation' => $m['relation'] ?? null,
+                        'education' => $m['education'] ?? null,
+                        'occupation' => $m['occupation'] ?? null,
+                        'cnic' => $m['cnic'] ?? null,
+                    ];
+                }
+                if (! empty($fmToCreate)) {
+                    $family->members()->createMany($fmToCreate);
+                }
                     $family->update(['family_members_count' => count($fmToCreate)]);
                 }
             }

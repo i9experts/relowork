@@ -16,6 +16,12 @@ return new class extends Migration
             $table->string('registration_number')->unique();
             $table->string('organization_name');
             $table->string('email')->unique();
+
+            $table->string('domain')->unique()->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('otp_code', 10)->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+
             $table->string('phone', 20)->nullable();
             $table->string('address')->nullable();
             $table->string('website')->nullable();

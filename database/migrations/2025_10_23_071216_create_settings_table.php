@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
+
+            // Organization ID: nullable aur foreign key with ON DELETE SET NULL
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+
             // Organization Information
             $table->string('logo_path')->nullable();
             $table->string('favicon_path')->nullable();
@@ -30,11 +33,12 @@ return new class extends Migration
             // Security Settings
             $table->boolean('two_factor_enabled')->default(false);
             $table->boolean('session_timeout_enabled')->default(false);
-            $table->integer('session_timeout_minutes')->default(30); // <-- Added field
+            $table->integer('session_timeout_minutes')->default(30);
 
             // Appearance
             $table->enum('theme', ['Light', 'Dark'])->default('Light');
             $table->enum('language', ['English', 'Urdu'])->default('English');
+
             $table->softDeletes();
             $table->timestamps();
         });

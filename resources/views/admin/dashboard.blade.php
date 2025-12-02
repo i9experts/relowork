@@ -207,10 +207,10 @@
             </div>
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="adminOrganizationsTable">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>S.No</th>
                       <th>Name</th>
                       <th>Email</th>
                       <th>Status</th>
@@ -246,10 +246,10 @@
             </div>
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="adminUsersTable">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>S.No</th>
                       <th>Name</th>
                       <th>Email</th>
                       <th>Organization</th>
@@ -262,7 +262,7 @@
                       <td>{{ $loop->iteration }}</td>
                       <td>{{ $u->name }}</td>
                       <td>{{ $u->email }}</td>
-                      <td>{{ $u->organization_id }}</td>
+                      <td>{{ $u->org_name ?? $u->organization_id }}</td>
                       <td>{{ optional($u->created_at)->format('Y-m-d') }}</td>
                     </tr>
                     @endforeach
@@ -280,7 +280,6 @@
 @endsection
 
 @push('page-scripts')
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
 (function(){
   var months = @json($months ?? []);
@@ -291,10 +290,11 @@
     var o = {
       chart: { type: 'bar', height: 320, toolbar: { show: false } },
       series: [{ name: 'Registrations', data: orgRegs }],
-      colors: ['#6c9ef0'],
+      colors: ['#9e6de0'],
       xaxis: { categories: months },
       dataLabels: { enabled: false },
-      legend: { show: false }
+      legend: { show: false },
+      noData: { text: 'No data for selected range' }
     };
     try { new ApexCharts(document.querySelector('#orgRegChart'), o).render(); } catch(e){}
   }
@@ -303,12 +303,13 @@
     var a = {
       chart: { type: 'area', height: 320, toolbar: { show: false } },
       series: [{ name: 'Aid Distributed', data: aidDist }],
-      colors: ['#faafca'],
+      colors: ['#fec400'],
       xaxis: { categories: months },
       dataLabels: { enabled: false },
       stroke: { curve: 'smooth', width: 2 },
       fill: { opacity: 0.3 },
-      legend: { show: false }
+      legend: { show: false },
+      noData: { text: 'No data for selected range' }
     };
     try { new ApexCharts(document.querySelector('#aidDistChart'), a).render(); } catch(e){}
   }

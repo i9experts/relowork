@@ -198,10 +198,18 @@
               <!-- User Account -->
               <li class="dropdown user-menu">
                 <button class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  @php $__avatar = optional(Auth::user())->avatar_path; @endphp
-                  <img src="{{ $__avatar ? asset('storage/' . $__avatar) : url('assets/images/user/user-defult-profile.png') }}"
+                  @php
+                    $u = Auth::user();
+                    $__avatar = optional($u)->avatar_path;
+                    $__volPic = null;
+                    if (!$__avatar && $u) {
+                      $vol = \App\Models\Volunteer::where('user_id', $u->id)->first();
+                      $__volPic = optional($vol)->picture_path;
+                    }
+                  @endphp
+                  <img src="{{ $__avatar ? asset('storage/' . $__avatar) : ($__volPic ? asset($__volPic) : url('assets/images/user/user-defult-profile.png')) }}"
                       class="user-image rounded-circle" alt="User Image">
-                  <span class="d-none d-lg-inline-block">{{ Auth::user()->name }}</span>
+                  <span class="d-none d-lg-inline-block">{{ Auth::user()->full_name ?? Auth::user()->name }}</span>
                 </button>
 
                   <ul class="dropdown-menu dropdown-menu-right">

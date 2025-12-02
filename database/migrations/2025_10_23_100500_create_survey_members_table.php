@@ -12,7 +12,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->constrained('organizations')->nullOnDelete();
             $table->foreignId('survey_id')->constrained('surveys')->cascadeOnDelete();
+
+            // ✅ New addition
             $table->unsignedBigInteger('person_id')->nullable();
+            $table->foreign('person_id')->references('id')->on('family_members')->nullOnDelete();
+
             $table->string('name')->nullable();
             $table->unsignedTinyInteger('age')->nullable();
             $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
@@ -27,6 +31,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::table('survey_members', function(Blueprint $table){
+            $table->dropForeign(['person_id']);
+        });
         Schema::dropIfExists('survey_members');
     }
 };
