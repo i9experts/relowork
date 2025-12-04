@@ -10,4 +10,12 @@ class Organization extends Model
     use SoftDeletes;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'active_status' => 'boolean',
+            'subscription_expires_at' => 'datetime',
+        ];
+    }
 }

@@ -75,6 +75,11 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard')->with($data);
     }
 
+    public function systemNotifications()
+    {
+        return view('admin.system-notifications.index');
+    }
+
     public function organizations(Request $request)
     {
         $user = $request->user();
@@ -90,6 +95,8 @@ class AdminDashboardController extends Controller
                 'name' => $org->organization_name,
                 'email' => $org->email,
                 'domain' => $org->domain ?? null,
+                'billing_status' => $org->billing_status ?? 'active',
+                'subscription_expires_at' => optional($org->subscription_expires_at)->format('Y-m-d'),
                 'families' => Family::where('organization_id', $org->id)->count(),
                 'volunteers' => Volunteer::where('organization_id', $org->id)->count(),
                 'aid_programs' => AidProgram::where('organization_id', $org->id)->count(),
@@ -137,7 +144,7 @@ class AdminDashboardController extends Controller
             ->whereNull('users.deleted_at')
             ->select(
                 'users.id', 'users.name', 'users.email', 'users.is_admin',
-                'organizations.organization_name as org_name', 'organizations.id as org_id',
+                'organizations.organization_name as org_name', 'organizations.id as org_id', 'organizations.active_status as org_active',
                 DB::raw('MAX(CASE WHEN roles.is_system = 1 THEN 1 ELSE 0 END) as is_system_admin')
             )
             ->groupBy('users.id', 'users.name', 'users.email', 'users.is_admin', 'organizations.organization_name', 'organizations.id')

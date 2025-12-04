@@ -9,6 +9,7 @@ use App\Http\Controllers\FinancialManagementController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\AdminBillingController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SurveysController;
@@ -76,6 +77,10 @@ Route::middleware('auth')->group(function () {
         ->name('cms.admin.dashboard')
         ->middleware('permission:super_admin');
 
+    Route::get('/admin/system-notifications', [AdminDashboardController::class, 'systemNotifications'])
+        ->name('cms.admin.system-notifications')
+        ->middleware('permission:super_admin');
+
     Route::get('/admin/organizations', [AdminDashboardController::class, 'organizations'])
         ->name('cms.admin.organizations')
         ->middleware('permission:super_admin');
@@ -86,6 +91,23 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/users', [AdminDashboardController::class, 'users'])
         ->name('cms.admin.users')
+        ->middleware('permission:super_admin');
+
+    // Super Admin Billing pages
+    Route::match(['get','post'], '/admin/billing/history', [AdminBillingController::class, 'history'])
+        ->name('cms.admin.billing.history')
+        ->middleware('permission:super_admin');
+    Route::post('/admin/billing/history', [AdminBillingController::class, 'history'])
+        ->name('cms.admin.billing.history')
+        ->middleware('permission:super_admin');
+    Route::get('/admin/billing/history/print', [AdminBillingController::class, 'historyPrint'])
+        ->name('cms.admin.billing.history.print')
+        ->middleware('permission:super_admin');
+    Route::get('/admin/billing/settings', [AdminBillingController::class, 'settings'])
+        ->name('cms.admin.billing.settings')
+        ->middleware('permission:super_admin');
+    Route::post('/admin/billing/settings/{organization}/update-expiry', [AdminBillingController::class, 'updateExpiry'])
+        ->name('cms.admin.billing.settings.update')
         ->middleware('permission:super_admin');
 
     Route::resource('organization-form', OrganizationController::class)->names([

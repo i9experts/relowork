@@ -72,4 +72,22 @@ class NotificationMailer
             }
         }
     }
+
+    public static function sendOrgBillingAlert(int $organizationId, array $data = []): void
+    {
+        $admins = self::orgAdmins($organizationId);
+        $org = \App\Models\Organization::find($organizationId);
+        foreach ($admins as $admin) {
+            try {
+                Mail::send('emails.billing.billing-alert', [
+                    'org' => $org,
+                    'reason' => $data['reason'] ?? null,
+                    'actionUrl' => $data['actionUrl'] ?? route('cms.setting.index'),
+                ], function ($m) use ($admin) {
+                    $m->to($admin->email)->subject('Billing / Subscription Alert');
+                });
+            } catch (\Throwable $e) {
+            }
+        }
+    }
 }

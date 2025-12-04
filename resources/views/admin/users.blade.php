@@ -23,6 +23,7 @@
                 <th>Email</th>
                 <th>Role</th>
                 <th>Organization</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -34,6 +35,13 @@
                   <td>{{ $r->email }}</td>
                   <td>{{ ($r->is_system_admin ?? 0) ? 'Super Admin' : (($r->is_admin ?? 0) ? 'Admin' : 'User') }}</td>
                   <td>{{ $r->org_name ?? '-' }}</td>
+                  <td>
+                    @if(isset($r->org_active) && !$r->org_active)
+                      <span class="badge badge-dark">Inactive (Org)</span>
+                    @else
+                      <span class="badge badge-success">Active</span>
+                    @endif
+                  </td>
                   <td>
                     @if($r->org_id)
                     <a href="{{ route('cms.admin.organizations.invoice', $r->org_id) }}" class="btn btn-sm btn-outline-secondary">Org</a>

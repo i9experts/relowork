@@ -22,6 +22,8 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Domain</th>
+                <th>Billing Status</th>
+                <th>Plan Expires</th>
                 <th>Families</th>
                 <th>Volunteers</th>
                 <th>Aid Programs</th>
@@ -38,6 +40,13 @@
                   <td>{{ $r['name'] }}</td>
                   <td>{{ $r['email'] }}</td>
                   <td>{{ $r['domain'] ?? '-' }}</td>
+                  <td>
+                    @php $bs = $r['billing_status'] ?? 'active'; @endphp
+                    <span class="badge {{ $bs==='expired' ? 'badge-dark' : ($bs==='expiring_1' ? 'badge-danger' : ($bs==='expiring_10' ? 'badge-warning' : 'badge-success')) }}">
+                      {{ ucfirst(str_replace('_', ' ', $bs)) }}
+                    </span>
+                  </td>
+                  <td>{{ $r['subscription_expires_at'] ?? '—' }}</td>
                   <td>{{ $r['families'] }}</td>
                   <td>{{ $r['volunteers'] }}</td>
                   <td>{{ $r['aid_programs'] }}</td>

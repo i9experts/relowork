@@ -53,6 +53,18 @@
             <span class="nav-text">New Organization</span>
           </a>
         </li>
+        <li class="{{ request()->routeIs('cms.admin.billing.history') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.admin.billing.history') ? 'active' : '' }}" href="{{ route('cms.admin.billing.history') }}">
+            <i class="mdi mdi-receipt"></i>
+            <span class="nav-text">Billing History</span>
+          </a>
+        </li>
+        <li class="{{ request()->routeIs('cms.admin.billing.settings') ? 'active' : '' }}">
+          <a class="sidenav-item-link {{ request()->routeIs('cms.admin.billing.settings') ? 'active' : '' }}" href="{{ route('cms.admin.billing.settings') }}">
+            <i class="mdi mdi-credit-card-settings"></i>
+            <span class="nav-text">Billing Settings</span>
+          </a>
+        </li>
         @else
         @if(!$user || $user->hasPermission('dashboard'))
         <li class="{{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}">

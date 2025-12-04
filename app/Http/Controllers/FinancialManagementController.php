@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Mail\SystemNotificationMailer;
 
 class FinancialManagementController extends Controller
 {
@@ -268,7 +269,24 @@ class FinancialManagementController extends Controller
                     NotificationMailer::sendPushEmail($organizationId, ['actionUrl' => route('cms.financial-management.index')]);
                 }
             } catch (\Throwable $e) { /* silent */
+                try { SystemNotificationMailer::sendSystemErrorAlert(['message' => 'Org notification send failed', 'context' => $e->getMessage()]); } catch (\Throwable $e2) {}
             }
+
+            // System-level high value alert
+            try {
+                $threshold = (int) (env('HIGH_VALUE_TX_THRESHOLD', 100000));
+                if ((int) $tx->amount >= $threshold) {
+                    SystemNotificationMailer::sendHighValueTransactionAlert([
+                        'org_name' => optional(\App\Models\Organization::find($organizationId))->organization_name,
+                        'amount' => (float) $tx->amount,
+                        'type' => $tx->transaction_type,
+                        'transaction_code' => $tx->transaction_code,
+                        'recorded_by_name' => optional($tx->recordedBy)->name,
+                        'actionUrl' => route('cms.financial-management.index'),
+                        'reason' => 'Threshold exceeded',
+                    ]);
+                }
+            } catch (\Throwable $e) {}
         });
 
         return redirect()->route('cms.financial-management.index')->with('success', 'Transaction saved successfully.');

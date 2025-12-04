@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\SystemNotificationMailer;
 
 class OrganizationController extends Controller
 {
@@ -157,7 +158,10 @@ class OrganizationController extends Controller
             Mail::to($organization->email)->send(new \App\Mail\OrganizationOtpMail($organization));
         } catch (\Throwable $e) {
             // In case of mail failure, we still allow manual OTP retrieval if needed.
+            try { SystemNotificationMailer::sendSystemErrorAlert(['message' => 'OTP mail send failed', 'context' => $e->getMessage()]); } catch (\Throwable $e2) {}
         }
+
+        try { SystemNotificationMailer::sendOrganizationRegistered($organization); } catch (\Throwable $e) {}
 
         return redirect()->route('organization.otp.show', ['organization' => $organization->id])
             ->with('success', 'We\'ve sent a verification code to your email. Please verify to continue.');
@@ -184,7 +188,35 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, Organization $organization)
     {
-        //
+        $validated = $request->validate([
+            'organization_name' => ['sometimes','string','max:255'],
+            'active_status' => ['sometimes','boolean'],
+            'reason' => ['nullable','string','max:500']
+        ]);
+
+        $originalActive = (bool) $organization->active_status;
+        if (array_key_exists('organization_name', $validated)) {
+            $organization->organization_name = $validated['organization_name'];
+        }
+        if (array_key_exists('active_status', $validated)) {
+            $organization->active_status = (bool) $validated['active_status'];
+        }
+        $organization->save();
+
+        $changedBy = $request->user();
+        if ($originalActive !== (bool) $organization->active_status) {
+            if ($organization->active_status) {
+                try { SystemNotificationMailer::sendOrganizationActivated($organization, ['changedBy' => $changedBy]); } catch (\Throwable $e) {}
+            } else {
+                try { SystemNotificationMailer::sendOrganizationDeactivated($organization, ['changedBy' => $changedBy, 'reason' => $validated['reason'] ?? null]); } catch (\Throwable $e) {}
+                $r = strtolower((string) ($validated['reason'] ?? ''));
+                if ($r && (str_contains($r, 'billing') || str_contains($r, 'subscription') || str_contains($r, 'renewal') || str_contains($r, 'plan'))) {
+                    try { SystemNotificationMailer::sendBillingAlert($organization, ['reason' => $validated['reason'] ?? null]); } catch (\Throwable $e) {}
+                }
+            }
+        }
+
+        return redirect()->route('cms.organization-form.index')->with('success','Organization updated');
     }
 
     /**

@@ -6,6 +6,8 @@ use App\Models\Organization;
 use App\Models\Volunteer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use App\Mail\SystemNotificationMailer;
 
 class AuthController extends Controller
 {
@@ -93,6 +95,22 @@ class AuthController extends Controller
             'email' => $credentials['email'],
             'password' => $credentials['password'],
         ], $remember)) {
+            try {
+                $identifier = $credentials['email'];
+                $ip = $request->ip();
+                $key = 'login_failures:'.md5($identifier.'|'.$ip);
+                $attempts = (int) Cache::get($key, 0) + 1;
+                Cache::put($key, $attempts, now()->addMinutes(10));
+                if ($attempts >= 5) {
+                    SystemNotificationMailer::sendSecurityAlert([
+                        'identifier' => $identifier,
+                        'ip' => $ip,
+                        'attempts' => $attempts,
+                        'window' => '10 minutes',
+                        'actionUrl' => route('cms.admin.users'),
+                    ]);
+                }
+            } catch (\Throwable $e) {}
             return back()->withErrors([
                 'email' => 'Invalid credentials provided.',
             ])->onlyInput('email');
