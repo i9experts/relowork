@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\VolunteerWelcomeMail;
+use App\Mail\PasswordResetMail;
 use App\Models\Availability;
 use App\Models\EducationLevel;
 use App\Models\Language;
@@ -19,6 +19,13 @@ use Illuminate\Support\Str;
 
 class VolunteerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:volunteers')->only(['index','show']);
+        $this->middleware('permission:volunteers_create')->only(['create','store']);
+        $this->middleware('permission:volunteers_edit')->only(['edit','update']);
+        $this->middleware('permission:volunteers_delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -98,7 +105,6 @@ class VolunteerController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'cnic' => ['nullable', 'string', 'max:15'],
             'gender' => ['nullable', 'in:Male,Female,Other'],
@@ -131,12 +137,9 @@ class VolunteerController extends Controller
         // Determine organization context for the new volunteer user
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        // Capture plain password before transaction for email purposes
-        $plainPassword = $validated['password'];
-
         $user = null;
-
-        DB::transaction(function () use ($request, $validated, $picturePath, $organizationId, $plainPassword, &$user) {
+        
+        DB::transaction(function () use ($request, $validated, $picturePath, $organizationId, &$user) {
             // Create linked user using provided password
             $permissionsPayload = [];
             $rawPerms = $request->input('permissions', []);
@@ -146,10 +149,13 @@ class VolunteerController extends Controller
                 }
             }
 
+            // Ensure volunteers module access by default for volunteer users
+            $permissionsPayload['volunteers'] = true;
+
             $user = User::create([
                 'name' => $validated['full_name'],
                 'email' => $validated['email'],
-                'password' => $plainPassword,
+                'password' => \Illuminate\Support\Str::random(24),
                 'organization_id' => $organizationId,
                 'is_admin' => $request->boolean('is_admin'),
                 'permissions' => $permissionsPayload,
@@ -210,27 +216,17 @@ class VolunteerController extends Controller
             ]);
         });
 
-        // Send welcome email with login credentials if user and organization context are available
-        if ($user && $organizationId) {
-            $organization = Organization::find($organizationId);
-
-            // Build login URL similar to OrganizationOtpController
-            if ($organization && $organization->domain) {
-                $domain = $organization->domain;
-                if (app()->environment('local')) {
-                    $loginUrl = 'http://'.$domain.'.localhost:8000/login';
-                } else {
-                    $loginUrl = 'https://'.$domain.'.relowork.com/login';
-                }
-            } else {
-                // Fallback to current app login route
-                $loginUrl = route('login');
-            }
+        if ($user) {
+            $token = Str::random(64);
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $user->email],
+                ['token' => $token, 'created_at' => now()]
+            );
 
             try {
-                Mail::to($user->email)->send(new VolunteerWelcomeMail($user, $plainPassword, $loginUrl));
+                Mail::to($user->email)->send(new PasswordResetMail($user, $token));
             } catch (\Throwable $e) {
-                Log::error('Volunteer welcome mail failed: '.$e->getMessage());
+                Log::error('Volunteer password reset mail failed: '.$e->getMessage());
             }
         }
 

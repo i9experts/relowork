@@ -19,7 +19,34 @@ class AuthController extends Controller
                 return redirect()->route('cms.admin.dashboard');
             }
 
-            return redirect()->route('cms.dashboard.index');
+            if ($u && $u->is_admin) {
+                return redirect()->route('cms.dashboard.index');
+            }
+
+            if ($u && $u->hasPermission('volunteers')) {
+                return redirect()->route('cms.volunteer.index');
+            }
+            if ($u && $u->hasPermission('families')) {
+                return redirect()->route('cms.family.index');
+            }
+            if ($u && $u->hasPermission('aid_programs')) {
+                return redirect()->route('cms.aid-program.index');
+            }
+            if ($u && $u->hasPermission('financial')) {
+                return redirect()->route('cms.financial-management.index');
+            }
+            if ($u && $u->hasPermission('surveys')) {
+                return redirect()->route('cms.survey.index');
+            }
+            if ($u && $u->hasPermission('reports')) {
+                return redirect()->route('cms.report.index');
+            }
+
+            if ($u && $u->hasPermission('dashboard')) {
+                return redirect()->route('cms.dashboard.index');
+            }
+
+            return redirect()->route('cms.profile.index');
         }
 
         $organization = null;
@@ -144,7 +171,36 @@ class AuthController extends Controller
 
             $request->session()->put('organization_id', $organization->id);
 
-            return redirect()->route('cms.dashboard.index');
+            if ($user && (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
+                return redirect()->route('cms.admin.dashboard');
+            }
+            if ($user && $user->is_admin) {
+                return redirect()->route('cms.dashboard.index');
+            }
+            if ($user && $user->hasPermission('volunteers')) {
+                return redirect()->route('cms.volunteer.index');
+            }
+            if ($user && $user->hasPermission('families')) {
+                return redirect()->route('cms.family.index');
+            }
+            if ($user && $user->hasPermission('aid_programs')) {
+                return redirect()->route('cms.aid-program.index');
+            }
+            if ($user && $user->hasPermission('financial')) {
+                return redirect()->route('cms.financial-management.index');
+            }
+            if ($user && $user->hasPermission('surveys')) {
+                return redirect()->route('cms.survey.index');
+            }
+            if ($user && $user->hasPermission('reports')) {
+                return redirect()->route('cms.report.index');
+            }
+
+            if ($user && $user->hasPermission('dashboard')) {
+                return redirect()->route('cms.dashboard.index');
+            }
+
+            return redirect()->route('cms.profile.index');
         }
 
         if (! $user || ! (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {

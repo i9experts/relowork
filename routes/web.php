@@ -97,9 +97,6 @@ Route::middleware('auth')->group(function () {
     Route::match(['get','post'], '/admin/billing/history', [AdminBillingController::class, 'history'])
         ->name('cms.admin.billing.history')
         ->middleware('permission:super_admin');
-    Route::post('/admin/billing/history', [AdminBillingController::class, 'history'])
-        ->name('cms.admin.billing.history')
-        ->middleware('permission:super_admin');
     Route::get('/admin/billing/history/print', [AdminBillingController::class, 'historyPrint'])
         ->name('cms.admin.billing.history.print')
         ->middleware('permission:super_admin');
@@ -197,11 +194,13 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::get('volunteer-settings', [VolunteerSettingsController::class, 'index'])->name('cms.volunteer-settings.index');
-    Route::post('volunteer-settings/education-level', [VolunteerSettingsController::class, 'storeEducationLevel'])->name('cms.volunteer-settings.education-level.store');
-    Route::post('volunteer-settings/availability', [VolunteerSettingsController::class, 'storeAvailability'])->name('cms.volunteer-settings.availability.store');
-    Route::post('volunteer-settings/project-type', [VolunteerSettingsController::class, 'storeProjectType'])->name('cms.volunteer-settings.project-type.store');
-    Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
+    Route::middleware('permission:settings')->group(function () {
+        Route::get('volunteer-settings', [VolunteerSettingsController::class, 'index'])->name('cms.volunteer-settings.index');
+        Route::post('volunteer-settings/education-level', [VolunteerSettingsController::class, 'storeEducationLevel'])->name('cms.volunteer-settings.education-level.store');
+        Route::post('volunteer-settings/availability', [VolunteerSettingsController::class, 'storeAvailability'])->name('cms.volunteer-settings.availability.store');
+        Route::post('volunteer-settings/project-type', [VolunteerSettingsController::class, 'storeProjectType'])->name('cms.volunteer-settings.project-type.store');
+        Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
+    });
 
     Route::middleware('permission:volunteers')->group(function () {
         Route::resource('volunteer', VolunteerController::class)->names([

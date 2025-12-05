@@ -84,38 +84,11 @@
                                                 name="email" placeholder="Enter Email Address">
                                         </div>
 
-                                        <!-- Password -->
-                                        <div class="col-md-6 mb-3">
-                                            <label for="password">Password <span class="text-danger">*</span></label>
-                                            <div class="input-group">
-                                                <input type="password" class="form-control rounded-0 bg-light" id="password"
-                                                    name="password" autocomplete="new-password" placeholder="Enter Password">
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-secondary" type="button" id="toggle-vol-password" tabindex="-1">
-                                                        <i class="mdi mdi-eye-off"></i>
-                                                    </button>
-                                                </div>
+                                        <!-- <div class="col-md-12 mb-2">
+                                            <div class="alert alert-info rounded-0">
+                                                An email with a secure password setup link will be sent to the volunteer after saving.
                                             </div>
-                                            <small class="text-muted">
-                                                Password must be at least 8 characters and include uppercase, lowercase, numeric and special characters.
-                                            </small>
-                                        </div>
-
-                                        <!-- Confirm Password -->
-                                        <div class="col-md-6 mb-3">
-                                            <label for="password_confirmation">Confirm Password <span class="text-danger">*</span></label>
-                                            <div class="input-group">
-                                                <input type="password" class="form-control rounded-0 bg-light" id="password_confirmation"
-                                                    name="password_confirmation" autocomplete="new-password" placeholder="Re-enter Password">
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-secondary" type="button" id="toggle-vol-password-confirm" tabindex="-1">
-                                                        <i class="mdi mdi-eye-off"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <small class="text-danger d-none" id="vol-password-mismatch">Passwords do not match. Please try again.</small>
-                                            <small class="text-success d-none" id="vol-password-match">Passwords match ✔️</small>
-                                        </div>
+                                        </div> -->
 
                                         <!-- Gender -->
                                         <div class="col-md-6 mb-3">
@@ -453,65 +426,7 @@
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 <script>
     $(function () {
-        // Initialize select2
-        $('.select2').select2({
-            width: '100%'
-        });
-
-        // Password match + toggle logic (reuse pattern from organization-form)
-        const password = document.getElementById('password');
-        const passwordConfirmation = document.getElementById('password_confirmation');
-        const mismatchText = document.getElementById('vol-password-mismatch');
-        const matchText = document.getElementById('vol-password-match');
-
-        function checkPasswordMatch() {
-            if (!password || !passwordConfirmation || !mismatchText || !matchText) return;
-
-            if (passwordConfirmation.value === '') {
-                mismatchText.classList.add('d-none');
-                matchText.classList.add('d-none');
-                return;
-            }
-
-            if (password.value !== passwordConfirmation.value) {
-                mismatchText.classList.remove('d-none');
-                matchText.classList.add('d-none');
-            } else {
-                mismatchText.classList.add('d-none');
-                matchText.classList.remove('d-none');
-            }
-        }
-
-        if (password && passwordConfirmation) {
-            password.addEventListener('input', checkPasswordMatch);
-            passwordConfirmation.addEventListener('input', checkPasswordMatch);
-        }
-
-        function bindPasswordToggle(inputId, toggleBtnId) {
-            const input = document.getElementById(inputId);
-            const btn = document.getElementById(toggleBtnId);
-            if (!input || !btn) return;
-
-            btn.addEventListener('click', function () {
-                const icon = this.querySelector('i');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    if (icon) {
-                        icon.classList.remove('mdi-eye-off');
-                        icon.classList.add('mdi-eye');
-                    }
-                } else {
-                    input.type = 'password';
-                    if (icon) {
-                        icon.classList.remove('mdi-eye');
-                        icon.classList.add('mdi-eye-off');
-                    }
-                }
-            });
-        }
-
-        bindPasswordToggle('password', 'toggle-vol-password');
-        bindPasswordToggle('password_confirmation', 'toggle-vol-password-confirm');
+        $('.select2').select2({ width: '100%' });
     });
 </script>
 @endpush
