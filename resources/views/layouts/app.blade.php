@@ -38,7 +38,7 @@
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
   @else
-    <link href="{{ url('assets/images/logo/relowork-dark-logo.png') }}" rel="shortcut icon" />
+    <link href="{{ url('assets/images/logo/favicon.png') }}" rel="shortcut icon" />
   @endif
 
   <style>
@@ -157,6 +157,7 @@
               </ul>
             </div>
 
+            <!-- dropdown notify -->
             <ul class="nav navbar-nav">
               <li class="custom-dropdown">
                 <button class="notify-toggler custom-dropdown-toggler">
