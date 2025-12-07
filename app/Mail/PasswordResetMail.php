@@ -23,8 +23,19 @@ class PasswordResetMail extends Mailable
 
     public function build()
     {
-        // Build password reset URL that matches PasswordResetController@showResetForm
-        $resetUrl = url('/password/reset/'.$this->token.'?email='.urlencode($this->user->email));
+        $base = config('app.url');
+        $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
+        $host = parse_url($base, PHP_URL_HOST) ?: 'localhost';
+        $org = $this->user->organization_id ? \App\Models\Organization::find($this->user->organization_id) : null;
+        $tenantHost = $host;
+        if ($org && $org->domain) {
+            if ($host === 'localhost' || str_ends_with($host, '.localhost')) {
+                $tenantHost = $org->domain.'.localhost';
+            } else {
+                $tenantHost = $org->domain.'.'.$host;
+            }
+        }
+        $resetUrl = $scheme.'://'.$tenantHost.'/password/reset/'.$this->token.'?email='.urlencode($this->user->email);
 
         return $this->subject('Reset Your Password')
             ->view('emails.password-reset')

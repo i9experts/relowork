@@ -17,6 +17,13 @@ use App\Mail\SystemNotificationMailer;
 
 class FinancialManagementController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:financial')->only(['index','show']);
+        $this->middleware('permission:financial_create')->only(['create','store']);
+        $this->middleware('permission:financial_edit')->only(['edit','update']);
+        $this->middleware('permission:financial_delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */

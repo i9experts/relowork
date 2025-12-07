@@ -13,6 +13,13 @@ use Illuminate\Validation\Rule;
 
 class FamilyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:families')->only(['index','show']);
+        $this->middleware('permission:families_create')->only(['create','store']);
+        $this->middleware('permission:families_edit')->only(['edit','update']);
+        $this->middleware('permission:families_delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */

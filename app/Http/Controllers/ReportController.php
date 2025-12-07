@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Schema;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports')->only(['index','show']);
+        $this->middleware('permission:reports_create')->only(['create','store','generate']);
+        $this->middleware('permission:reports_edit')->only(['edit','update']);
+        $this->middleware('permission:reports_delete')->only(['destroy']);
+        $this->middleware('permission:reports')->only(['export','downloadAll','view']);
+    }
     /**
      * Display a listing of the resource.
      */

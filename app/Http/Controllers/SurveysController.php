@@ -15,6 +15,13 @@ use Illuminate\Support\Facades\Storage;
 
 class SurveysController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:surveys')->only(['index','show']);
+        $this->middleware('permission:surveys_create')->only(['create','store']);
+        $this->middleware('permission:surveys_edit')->only(['edit','update']);
+        $this->middleware('permission:surveys_delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */

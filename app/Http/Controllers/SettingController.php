@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:settings')->only(['index','show']);
+        $this->middleware('permission:settings_create')->only(['create','store']);
+        $this->middleware('permission:settings_edit')->only(['edit','update']);
+        $this->middleware('permission:settings_delete')->only(['destroy']);
+        // Profile and changePassword remain accessible to authenticated users
+    }
     /**
      * Display a listing of the resource.
      */

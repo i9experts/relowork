@@ -32,8 +32,10 @@
       <hr class="mt-2 mb-2">
     </div>
 
+    @php($u = auth()->user())
     <!-- Top Statistics -->
     <div class="row">
+      @if(!$u || $u->hasPermission('families'))
       <!-- First box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-secondary shadow-sm border-0">
@@ -49,7 +51,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('aid_programs'))
       <!-- Second box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-success shadow-sm border-0">
@@ -65,7 +69,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('financial'))
       <!-- Third box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-primary shadow-sm border-0">
@@ -81,7 +87,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('volunteers'))
       <!-- Fourth box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-info shadow-sm border-0">
@@ -97,7 +105,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('financial'))
       <!-- fifth box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-warning shadow-sm border-0">
@@ -112,7 +122,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('surveys'))
       <!-- sixth box -->
       <div class="col-xl-4 col-md-6 mb-3">
         <div class="card card-default bg-danger shadow-sm border-0">
@@ -127,11 +139,13 @@
           </div>
         </div>
       </div>
+      @endif
 
     </div>
 
     <!-- Income And Expenses row -->
     <div class="row">
+      @if(!$u || $u->hasPermission('financial'))
       <div class="col-xl-8">
         <!-- Income and Expenses -->
         <div class="card card-default">
@@ -146,7 +160,9 @@
           </div>
         </div>
       </div>
+      @endif
 
+      @if(!$u || $u->hasPermission('families'))
       <div class="col-xl-4">
         <!-- Pie Chart -->
         <div class="card card-default">
@@ -159,6 +175,7 @@
           </div>
         </div>
       </div>
+      @endif
     </div>
 
     <!-- Activity and Quick Actions -->
@@ -218,17 +235,23 @@
 
           <div class="card-body">
             <div class="d-grid gap-2">
+              @if(!$u || $u->hasPermission('families_create'))
               <a href="{{ route('cms.family.create') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                  Add New Family
               </a>
+              @endif
 
+              @if(!$u || $u->hasPermission('financial'))
               <a href="{{ route('cms.financial-management.index') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                 Approve Aid Requests
               </a>
+              @endif
 
+              @if(!$u || $u->hasPermission('reports'))
               <a href="{{ route('cms.report.index') }}" class="btn btn-outline-primary btn-pill btn-block d-flex align-items-center justify-content-center">
                 Generate Reports
               </a>
+              @endif
             </div>
           </div>
         </div>

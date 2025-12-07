@@ -84,12 +84,6 @@
                                                 name="email" placeholder="Enter Email Address">
                                         </div>
 
-                                        <!-- <div class="col-md-12 mb-2">
-                                            <div class="alert alert-info rounded-0">
-                                                An email with a secure password setup link will be sent to the volunteer after saving.
-                                            </div>
-                                        </div> -->
-
                                         <!-- Gender -->
                                         <div class="col-md-6 mb-3">
                                             <label for="gender" class="d-block mb-2">Gender :</label>
@@ -254,18 +248,15 @@
                                         </div>
 
                                         @if(auth()->user() && auth()->user()->is_admin)
-                                        <div class="row mt-3">
                                             <div class="col-12">
                                                 <label class="d-block mb-1">Access Control</label>
 
                                                 <div class="d-flex justify-content-between align-items-center mb-2 border rounded p-2">
-                                                    <small class="text-muted mb-0">
-                                                        Full Admin Access (all pages)
-                                                    </small>
+                                                    <small class="text-muted mb-0">Full Admin Access (all pages)</small>
                                                     <div class="custom-control custom-checkbox mb-0">
                                                         <input type="hidden" name="is_admin" value="0">
-                                                        <input type="checkbox" class="custom-control-input" id="is_admin"
-                                                            name="is_admin" value="1" {{ old('is_admin') ? 'checked' : '' }}>
+                                                        <input type="checkbox" class="custom-control-input" id="is_admin" name="is_admin" value="1"
+                                                            {{ old('is_admin') ? 'checked' : '' }}>
                                                         <label class="custom-control-label" for="is_admin"></label>
                                                     </div>
                                                 </div>
@@ -274,134 +265,329 @@
                                                     If not admin, select which modules this volunteer can access:
                                                 </small>
                                             </div>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-12 d-flex flex-wrap">
-                                            <!-- Permissions -->
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_dashboard" name="permissions[dashboard]" value="1"
-                                                          {{ old('permissions.dashboard') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_dashboard">
-                                                          Dashboard
-                                                      </label>
-                                                  </div>
-                                              </div>
+
+                                            <div class="col-12">
+
+                                                {{-- ----------------------------------}}
+                                                {{-- DASHBOARD MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-3">Dashboard</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_dashboard"
+                                                        name="permissions[dashboard]" value="1"
+                                                        {{ old('permissions.dashboard') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_dashboard">Dashboard Access</label>
+                                                </div>
 
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_families" name="permissions[families]" value="1"
-                                                          {{ old('permissions.families') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_families">
-                                                          Families
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                {{-- ----------------------------------}}
+                                                {{-- FAMILY MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Family Module</h6>
+                                                <hr class="mt-1 mb-2">
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_aid_programs" name="permissions[aid_programs]" value="1"
-                                                          {{ old('permissions.aid_programs') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_aid_programs">
-                                                          Aid Programs
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_families"
+                                                        name="permissions[families]" value="1"
+                                                        {{ old('permissions.families') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_families">Families (Access)</label>
+                                                </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_financial" name="permissions[financial]" value="1"
-                                                          {{ old('permissions.financial') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_financial">
-                                                          Financial Management
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_families_create"
+                                                                name="permissions[families_create]" value="1"
+                                                                {{ old('permissions.families_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_families_create">Create</label>
+                                                        </div>
+                                                    </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_surveys" name="permissions[surveys]" value="1"
-                                                          {{ old('permissions.surveys') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_surveys">
-                                                          Surveys
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_families_edit"
+                                                                name="permissions[families_edit]" value="1"
+                                                                {{ old('permissions.families_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_families_edit">Edit</label>
+                                                        </div>
+                                                    </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_reports" name="permissions[reports]" value="1"
-                                                          {{ old('permissions.reports') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_reports">
-                                                          Reports
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_families_delete"
+                                                                name="permissions[families_delete]" value="1"
+                                                                {{ old('permissions.families_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_families_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_volunteers" name="permissions[volunteers]" value="1"
-                                                          {{ old('permissions.volunteers') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_volunteers">
-                                                          Volunteers (access module)
-                                                      </label>
-                                                  </div>
-                                              </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_volunteers_create" name="permissions[volunteers_create]" value="1"
-                                                          {{ old('permissions.volunteers_create') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_volunteers_create">
-                                                          Volunteers - Create / Add
-                                                      </label>
-                                                  </div>
-                                              </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_volunteers_edit" name="permissions[volunteers_edit]" value="1"
-                                                          {{ old('permissions.volunteers_edit') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_volunteers_edit">
-                                                          Volunteers - Edit
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                {{-- ----------------------------------}}
+                                                {{-- AID PROGRAM MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Aid Programs</h6>
+                                                <hr class="mt-1 mb-2">
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_volunteers_delete" name="permissions[volunteers_delete]" value="1"
-                                                          {{ old('permissions.volunteers_delete') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_volunteers_delete">
-                                                          Volunteers - Delete
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_aid_programs"
+                                                        name="permissions[aid_programs]" value="1"
+                                                        {{ old('permissions.aid_programs') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_aid_programs">Aid Programs (Access)</label>
+                                                </div>
 
-                                              <div class="col-6 mb-1">
-                                                  <div class="custom-control custom-checkbox">
-                                                      <input type="checkbox" class="custom-control-input"
-                                                          id="perm_settings" name="permissions[settings]" value="1"
-                                                          {{ old('permissions.settings') ? 'checked' : '' }}>
-                                                      <label class="custom-control-label" for="perm_settings">
-                                                          Settings
-                                                      </label>
-                                                  </div>
-                                              </div>
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_aid_programs_create"
+                                                                name="permissions[aid_programs_create]" value="1"
+                                                                {{ old('permissions.aid_programs_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_aid_programs_create">Create</label>
+                                                        </div>
+                                                    </div>
 
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_aid_programs_edit"
+                                                                name="permissions[aid_programs_edit]" value="1"
+                                                                {{ old('permissions.aid_programs_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_aid_programs_edit">Edit</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_aid_programs_delete"
+                                                                name="permissions[aid_programs_delete]" value="1"
+                                                                {{ old('permissions.aid_programs_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_aid_programs_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {{-- ----------------------------------}}
+                                                {{-- FINANCIAL MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Financial Management</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_financial"
+                                                        name="permissions[financial]" value="1"
+                                                        {{ old('permissions.financial') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_financial">Financial (Access)</label>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_financial_create"
+                                                                name="permissions[financial_create]" value="1"
+                                                                {{ old('permissions.financial_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_financial_create">Create</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_financial_edit"
+                                                                name="permissions[financial_edit]" value="1"
+                                                                {{ old('permissions.financial_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_financial_edit">Edit</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="perm_financial_delete"
+                                                                name="permissions[financial_delete]" value="1"
+                                                                {{ old('permissions.financial_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_financial_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {{-- ----------------------------------}}
+                                                {{-- SURVEYS MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Surveys</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_surveys"
+                                                        name="permissions[surveys]" value="1"
+                                                        {{ old('permissions.surveys') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_surveys">Surveys (Access)</label>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_surveys_create" name="permissions[surveys_create]" value="1"
+                                                                {{ old('permissions.surveys_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_surveys_create">Create</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_surveys_edit" name="permissions[surveys_edit]" value="1"
+                                                                {{ old('permissions.surveys_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_surveys_edit">Edit</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_surveys_delete" name="permissions[surveys_delete]" value="1"
+                                                                {{ old('permissions.surveys_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_surveys_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {{-- ----------------------------------}}
+                                                {{-- REPORTS MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Reports</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_reports"
+                                                        name="permissions[reports]" value="1"
+                                                        {{ old('permissions.reports') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_reports">Reports (Access)</label>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_reports_create" name="permissions[reports_create]" value="1"
+                                                                {{ old('permissions.reports_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_reports_create">Create</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_reports_edit" name="permissions[reports_edit]" value="1"
+                                                                {{ old('permissions.reports_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_reports_edit">Edit</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_reports_delete" name="permissions[reports_delete]" value="1"
+                                                                {{ old('permissions.reports_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_reports_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {{-- ----------------------------------}}
+                                                {{-- VOLUNTEERS MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Volunteers</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_volunteers"
+                                                        name="permissions[volunteers]" value="1"
+                                                        {{ old('permissions.volunteers') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_volunteers">Volunteers (Access)</label>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_volunteers_create" name="permissions[volunteers_create]" value="1"
+                                                                {{ old('permissions.volunteers_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_volunteers_create">Create</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_volunteers_edit" name="permissions[volunteers_edit]" value="1"
+                                                                {{ old('permissions.volunteers_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_volunteers_edit">Edit</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_volunteers_delete" name="permissions[volunteers_delete]" value="1"
+                                                                {{ old('permissions.volunteers_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_volunteers_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {{-- ----------------------------------}}
+                                                {{-- SETTINGS MODULE --}}
+                                                {{-- ----------------------------------}}
+                                                <h6 class="mt-4">Settings</h6>
+                                                <hr class="mt-1 mb-2">
+
+                                                <div class="custom-control custom-checkbox mb-2">
+                                                    <input type="checkbox" class="custom-control-input"
+                                                        id="perm_settings" name="permissions[settings]" value="1"
+                                                        {{ old('permissions.settings') ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="perm_settings">Settings (Access)</label>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_settings_create" name="permissions[settings_create]" value="1"
+                                                                {{ old('permissions.settings_create') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_settings_create">Create</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_settings_edit" name="permissions[settings_edit]" value="1"
+                                                                {{ old('permissions.settings_edit') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_settings_edit">Edit / Update</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 mb-2">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                id="perm_settings_delete" name="permissions[settings_delete]" value="1"
+                                                                {{ old('permissions.settings_delete') ? 'checked' : '' }}>
+                                                            <label class="custom-control-label" for="perm_settings_delete">Delete</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
                                         @endif
 
                                     </div>
@@ -427,6 +613,28 @@
 <script>
     $(function () {
         $('.select2').select2({ width: '100%' });
+
+        var groups = {
+            families: ['perm_families_create','perm_families_edit','perm_families_delete'],
+            aid_programs: ['perm_aid_programs_create','perm_aid_programs_edit','perm_aid_programs_delete'],
+            financial: ['perm_financial_create','perm_financial_edit','perm_financial_delete'],
+            surveys: ['perm_surveys_create','perm_surveys_edit','perm_surveys_delete'],
+            reports: ['perm_reports_create','perm_reports_edit','perm_reports_delete'],
+            volunteers: ['perm_volunteers_create','perm_volunteers_edit','perm_volunteers_delete'],
+            settings: ['perm_settings_create','perm_settings_edit','perm_settings_delete']
+        };
+
+        function toggleGroup(mod){
+            var full = $('#perm_'+mod).is(':checked');
+            (groups[mod]||[]).forEach(function(id){
+                $('#'+id).closest('.col-4').toggle(!full);
+            });
+        }
+
+        Object.keys(groups).forEach(function(mod){
+            toggleGroup(mod);
+            $('#perm_'+mod).on('change', function(){ toggleGroup(mod); });
+        });
     });
 </script>
 @endpush

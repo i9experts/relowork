@@ -12,6 +12,13 @@ use Illuminate\Validation\Rule;
 
 class AidProgramController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:aid_programs')->only(['index','show']);
+        $this->middleware('permission:aid_programs_create')->only(['create','store']);
+        $this->middleware('permission:aid_programs_edit')->only(['edit','update']);
+        $this->middleware('permission:aid_programs_delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
