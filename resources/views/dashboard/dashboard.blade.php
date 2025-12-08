@@ -33,11 +33,18 @@
     </div>
 
     @php($u = auth()->user())
+    @php($showFamilies = (!$u || $u->hasPermission('families')))
+    @php($showAidPrograms = (!$u || $u->hasPermission('aid_programs')))
+    @php($showFinancial = (!$u || $u->hasPermission('financial')))
+    @php($showVolunteers = (!$u || $u->hasPermission('volunteers')))
+    @php($showSurveys = (!$u || $u->hasPermission('surveys')))
+    @php($visibleTop = ($showFamilies?1:0)+($showAidPrograms?1:0)+($showFinancial?2:0)+($showVolunteers?1:0)+($showSurveys?1:0))
+    @php($col = $visibleTop <= 1 ? 'col-xl-12 col-md-12' : 'col-xl-4 col-md-6')
     <!-- Top Statistics -->
     <div class="row">
-      @if(!$u || $u->hasPermission('families'))
+      @if($showFamilies)
       <!-- First box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-secondary shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -53,9 +60,9 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('aid_programs'))
+      @if($showAidPrograms)
       <!-- Second box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-success shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -71,9 +78,9 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('financial'))
+      @if($showFinancial)
       <!-- Third box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-primary shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -89,9 +96,9 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('volunteers'))
+      @if($showVolunteers)
       <!-- Fourth box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-info shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -107,9 +114,9 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('financial'))
+      @if($showFinancial)
       <!-- fifth box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-warning shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -124,9 +131,9 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('surveys'))
+      @if($showSurveys)
       <!-- sixth box -->
-      <div class="col-xl-4 col-md-6 mb-3">
+      <div class="{{ $col }} mb-3">
         <div class="card card-default bg-danger shadow-sm border-0">
           <div class="d-flex align-items-center p-4 justify-content-between">
             <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
@@ -145,8 +152,11 @@
 
     <!-- Income And Expenses row -->
     <div class="row">
-      @if(!$u || $u->hasPermission('financial'))
-      <div class="col-xl-8">
+      @php($chartsVisible = ($showFinancial?1:0)+($showFamilies?1:0))
+      @php($leftCol = $chartsVisible === 1 ? 'col-xl-12' : 'col-xl-8')
+      @php($rightCol = $chartsVisible === 1 ? 'col-xl-12' : 'col-xl-4')
+      @if($showFinancial)
+      <div class="{{ $leftCol }}">
         <!-- Income and Expenses -->
         <div class="card card-default">
           <div class="card-header">
@@ -162,8 +172,8 @@
       </div>
       @endif
 
-      @if(!$u || $u->hasPermission('families'))
-      <div class="col-xl-4">
+      @if($showFamilies)
+      <div class="{{ $rightCol }}">
         <!-- Pie Chart -->
         <div class="card card-default">
           <div class="card-header">

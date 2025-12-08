@@ -46,11 +46,13 @@
                 <option value="all_time"     {{ ($range ?? 'this_month') === 'all_time' ? 'selected' : '' }}>All Time</option>
             </select>
 
-            @if($user && $user->hasPermission('financial'))
+            @if($user && $user->hasPermission('financial_create'))
             <a href="{{ route('cms.financial-management.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i>  Add New Transaction
             </a>
 
+            @endif
+            @if($user && $user->hasPermission('financial_export'))
             <a href="{{ route('cms.financial-management.export', ['range' => $range ?? 'this_month']) }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-download me-1"></i> Export Report
             </a>

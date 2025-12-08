@@ -26,9 +26,9 @@ class AdminDashboardController extends Controller
         $data['families'] = Family::whereNotNull('organization_id')->count();
         $data['volunteers'] = Volunteer::whereNotNull('organization_id')->count();
         $data['aidPrograms'] = AidProgram::whereNotNull('organization_id')->count();
-        $data['donationsTotal'] = (int) FinancialManagement::where('transaction_type', 'Donation')->sum('amount');
-        $data['expensesTotal'] = (int) FinancialManagement::whereIn('transaction_type', ['Expense', 'Disbursement'])->sum('amount');
-        $data['netBalance'] = $data['donationsTotal'] - $data['expensesTotal'];
+        // $data['donationsTotal'] = (int) FinancialManagement::where('transaction_type', 'Donation')->sum('amount');
+        // $data['expensesTotal'] = (int) FinancialManagement::whereIn('transaction_type', ['Expense', 'Disbursement'])->sum('amount');
+        // $data['netBalance'] = $data['donationsTotal'] - $data['expensesTotal'];
         $data['activeOrganizations'] = Organization::where('active_status', true)->count();
         $data['inactiveOrganizations'] = Organization::where('active_status', false)->count();
 

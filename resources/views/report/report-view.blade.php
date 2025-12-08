@@ -14,10 +14,12 @@
         <p class="text-muted mb-0">Period: {{ $period ?: 'All' }}</p>
       </div>
       <div class="d-flex gap-2">
-        @if($user && $user->hasPermission('reports'))
+        @if($user && $user->hasPermission('reports_export_csv'))
         <a href="{{ url('report/export').'?type='.urlencode($type).'&period='.urlencode($period).(request('from')?'&from='.urlencode(request('from')):'').(request('to')?'&to='.urlencode(request('to')):'') }}" class="btn btn-primary btn-pill mr-2">
           <i class="mdi mdi-download me-1"></i> Export CSV
         </a>
+        @endif
+        @if($user && $user->hasPermission('reports_download_pdf'))
         <a href="{{ url('report/export').'?type='.urlencode($type).'&period='.urlencode($period).(request('from')?'&from='.urlencode(request('from')):'').(request('to')?'&to='.urlencode(request('to')):'').'&format=pdf' }}" class="btn btn-outline-primary btn-pill mr-2">
           <i class="mdi mdi-file-pdf-box me-1"></i> Download PDF
         </a>

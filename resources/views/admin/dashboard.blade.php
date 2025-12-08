@@ -90,7 +90,7 @@
           <div class="card card-default bg-info shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi-heart-hand text-info" style="font-size:24px;"></i>
+                <i class="mdi mdi-table-edit text-info" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Total Aid Programs</p>
@@ -125,47 +125,6 @@
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Inactive Organizations</p>
                 <span class="h3 d-block text-white mb-0">{{ $inactiveOrganizations }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Financial Summary -->
-        <div class="col-xl-4 col-md-6 mb-3">
-          <div class="card card-default shadow-sm border-0">
-            <div class="d-flex align-items-center p-4 justify-content-between">
-              <div class="icon-md bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-cash text-white" style="font-size:24px;"></i>
-              </div>
-              <div class="text-right">
-                <p class="mb-1">Donations</p>
-                <span class="h5 d-block mb-0">{{ number_format($donationsTotal) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-4 col-md-6 mb-3">
-          <div class="card card-default shadow-sm border-0">
-            <div class="d-flex align-items-center p-4 justify-content-between">
-              <div class="icon-md bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-credit-card text-white" style="font-size:24px;"></i>
-              </div>
-              <div class="text-right">
-                <p class="mb-1">Expenses + Disbursements</p>
-                <span class="h5 d-block mb-0">{{ number_format($expensesTotal) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-4 col-md-6 mb-3">
-          <div class="card card-default shadow-sm border-0">
-            <div class="d-flex align-items-center p-4 justify-content-between">
-              <div class="icon-md bg-success rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-chart-line text-white" style="font-size:24px;"></i>
-              </div>
-              <div class="text-right">
-                <p class="mb-1">Net Balance</p>
-                <span class="h5 d-block mb-0">{{ number_format($netBalance) }}</span>
               </div>
             </div>
           </div>

@@ -35,7 +35,7 @@
             <p class="text-muted fs-5">Manage and track all registered families</p>
         </div>
 
-        @if($user && $user->hasPermission('families'))
+        @if($user && $user->hasPermission('families_create'))
         <div>
             <a href="{{ route('cms.family.create') }}" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Add New Family
@@ -147,7 +147,8 @@
 
 
                                     <td>
-                                        @if(auth()->check() && auth()->user()->hasPermission('families'))
+                                        @php($uu = auth()->user())
+                                        @if(auth()->check() && $uu && ($uu->hasPermission('families_edit') || $uu->hasPermission('families_delete')))
                                             <div class="dropdown">
                                                 <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button"
                                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -155,18 +156,17 @@
                                                 </button>
 
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('cms.family.edit', $family->id) }}">Edit</a>
+                                                    @if($uu->hasPermission('families_edit'))
+                                                    <a class="dropdown-item" href="{{ route('cms.family.edit', $family->id) }}">Edit</a>
+                                                    @endif
 
-                                                    <form action="{{ route('cms.family.destroy', $family->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Delete this Family?');">
+                                                    @if($uu->hasPermission('families_delete'))
+                                                    <form action="{{ route('cms.family.destroy', $family->id) }}" method="POST" onsubmit="return confirm('Delete this Family?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="dropdown-item text-danger">
-                                                            Delete
-                                                        </button>
+                                                        <button type="submit" class="dropdown-item text-danger">Delete</button>
                                                     </form>
+                                                    @endif
                                                 </div>
                                             </div>
                                         @endif

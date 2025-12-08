@@ -16,7 +16,7 @@ class PermissionMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $permission): Response
+    public function handle(Request $request, Closure $next, string ...$permissions): Response
     {
         $user = $request->user();
 
@@ -54,7 +54,7 @@ class PermissionMiddleware
         }
 
         // Super admin permission must be explicitly held
-        if ($permission === 'super_admin') {
+        if (in_array('super_admin', $permissions, true)) {
             return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized: Super Admin access required.');
         }
 
@@ -71,8 +71,13 @@ class PermissionMiddleware
             return $next($request);
         }
 
-        if (is_array($perms) && ($perms[$permission] ?? false)) {
-            return $next($request);
+        // Allow access if ANY of the provided permissions is granted
+        if (is_array($perms)) {
+            foreach ($permissions as $permKey) {
+                if ($perms[$permKey] ?? false) {
+                    return $next($request);
+                }
+            }
         }
 
         return redirect()->route('cms.dashboard.index')->with('error', 'Unauthorized to access this page.');

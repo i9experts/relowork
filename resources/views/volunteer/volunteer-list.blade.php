@@ -26,7 +26,7 @@
 
     @php
         $user = auth()->user();
-        $canViewVolunteers = $user && $user->hasPermission('volunteers');
+        $canViewVolunteers = $user && $user->hasPermission('volunteers_view');
         $canCreateVolunteers = $user && $user->hasPermission('volunteers_create');
         $canEditVolunteers = $user && $user->hasPermission('volunteers_edit');
         $canDeleteVolunteers = $user && $user->hasPermission('volunteers_delete');
@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <!-- <div class="row">
 
         <div class="col-6">
             <div class="card">
@@ -181,7 +181,7 @@
             </div>
         </div>
 
-    </div>
+    </div> -->
 
     <!-- Total Volunteers List --> 
     <div class="row mt-3">

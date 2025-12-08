@@ -24,8 +24,9 @@ class PasswordResetMail extends Mailable
     public function build()
     {
         $base = config('app.url');
-        $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
+        $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'http';
         $host = parse_url($base, PHP_URL_HOST) ?: 'localhost';
+        $port = parse_url($base, PHP_URL_PORT);
         $org = $this->user->organization_id ? \App\Models\Organization::find($this->user->organization_id) : null;
         $tenantHost = $host;
         if ($org && $org->domain) {
@@ -35,7 +36,8 @@ class PasswordResetMail extends Mailable
                 $tenantHost = $org->domain.'.'.$host;
             }
         }
-        $resetUrl = $scheme.'://'.$tenantHost.'/password/reset/'.$this->token.'?email='.urlencode($this->user->email);
+        $portSuffix = $port ? (':'.$port) : '';
+        $resetUrl = $scheme.'://'.$tenantHost.$portSuffix.'/password/reset/'.$this->token.'?email='.urlencode($this->user->email);
 
         return $this->subject('Reset Your Password')
             ->view('emails.password-reset')

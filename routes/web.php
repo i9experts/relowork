@@ -117,7 +117,7 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'cms.organization-form.destroy',
     ]);
 
-    Route::middleware('permission:families')->group(function () {
+    Route::middleware('permission:families,families_list,families_view,families_create,families_edit,families_delete')->group(function () {
         Route::resource('family', FamilyController::class)->names([
             'index' => 'cms.family.index',
             'create' => 'cms.family.create',
@@ -135,7 +135,7 @@ Route::middleware('auth')->group(function () {
         Route::post('family/quick-create', [FamilyController::class, 'quickCreate'])->name('cms.family.quick-create');
     });
 
-    Route::middleware('permission:aid_programs')->group(function () {
+    Route::middleware('permission:aid_programs,aid_programs_list,aid_programs_view,aid_programs_create,aid_programs_edit,aid_programs_delete')->group(function () {
         Route::resource('aid-program', AidProgramController::class)->names([
             'index' => 'cms.aid-program.index',
             'create' => 'cms.aid-program.create',
@@ -148,7 +148,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Place export route BEFORE resource to avoid conflict with the 'show' route
-    Route::middleware('permission:financial')->group(function () {
+    Route::middleware('permission:financial,financial_list,financial_view,financial_create,financial_edit,financial_delete,financial_export')->group(function () {
         Route::get('financial-management/export', [FinancialManagementController::class, 'export'])
             ->name('cms.financial-management.export');
         Route::resource('financial-management', FinancialManagementController::class)->names([
@@ -162,7 +162,7 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-    Route::middleware('permission:surveys')->group(function () {
+    Route::middleware('permission:surveys,surveys_list,surveys_view,surveys_create,surveys_edit,surveys_delete')->group(function () {
         Route::resource('survey', SurveysController::class)->names([
             'index' => 'cms.survey.index',
             'create' => 'cms.survey.create',
@@ -175,7 +175,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Reports: define specific routes before resource to avoid conflicts
-    Route::middleware('permission:reports')->group(function () {
+    Route::middleware('permission:reports,reports_view,reports_download_all,reports_download,reports_export_csv,reports_download_pdf')->group(function () {
         Route::get('report/export', [ReportController::class, 'export'])->name('cms.report.export');
         Route::get('report/download-all', [ReportController::class, 'downloadAll'])->name('cms.report.downloadAll');
         Route::post('reports/generate', [ReportController::class, 'generate'])->name('cms.report.generate');
@@ -202,7 +202,7 @@ Route::middleware('auth')->group(function () {
         Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
     });
 
-    Route::middleware('permission:volunteers')->group(function () {
+    Route::middleware('permission:volunteers,volunteers_view,volunteers_create,volunteers_edit,volunteers_delete')->group(function () {
         Route::resource('volunteer', VolunteerController::class)->names([
             'index' => 'cms.volunteer.index',
             'create' => 'cms.volunteer.create',

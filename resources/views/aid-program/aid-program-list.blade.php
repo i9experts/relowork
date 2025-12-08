@@ -35,7 +35,7 @@
             <p class="text-muted fs-5">Manage and track all aid distribution programs</p>
         </div>
 
-        @if($user && $user->hasPermission('aid_programs'))
+        @if($user && $user->hasPermission('aid_programs_create'))
         <div>
             <a href="{{ route('cms.aid-program.create') }}" type="button" class="btn btn-pill btn-primary rounded-pill px-3 d-flex align-items-center shadow-sm">
                 <i class="mdi mdi-plus-circle-outline mr-1"></i> Create New Program
@@ -183,7 +183,7 @@
                     </div>
                 </div>
 
-                @if($user && $user->hasPermission('aid_programs'))
+                @if($user && $user->hasPermission('aid_programs_view'))
                 <a href="{{ route('cms.aid-program.show', $program->id) }}" class="btn btn-outline-primary w-100 mt-3">View Details</a>
                 @endif
 

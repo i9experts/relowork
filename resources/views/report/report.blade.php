@@ -35,9 +35,12 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
+                @php($user = auth()->user())
+                @if($user && $user->hasPermission('reports_download_all'))
                 <a href="{{ url('report/download-all') }}" class="btn btn-outline-primary btn-pill mb-0 d-flex align-items-center mr-2 shadow-sm px-3">
                     <i class="mdi mdi-download me-1"></i> Download All
                 </a>
+                @endif
             </div>
 
         </div>
@@ -202,8 +205,10 @@
                                         <small class="text-muted d-block">{{ data_get($filters,'type') ?: 'All' }} • {{ data_get($filters,'period') ?: 'All' }} • {{ now()->toDateTimeString() }}</small>
                                       </td>
                                       <td class="text-end">
-                                        @if($user && $user->hasPermission('reports'))
+                                        @if($user && $user->hasPermission('reports_view'))
                                         <a href="{{ url('report/view').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')).(data_get($filters,'from_date')?'&from='.urlencode(data_get($filters,'from_date')):'').(data_get($filters,'to_date')?'&to='.urlencode(data_get($filters,'to_date')):'') }}" class="btn btn-sm btn-outline-primary me-2">View Report</a>
+                                        @endif
+                                        @if($user && $user->hasPermission('reports_download'))
                                         <a href="{{ url('report/export').'?type='.urlencode(data_get($filters,'type')).'&period='.urlencode(data_get($filters,'period')).(data_get($filters,'from_date')?'&from='.urlencode(data_get($filters,'from_date')):'').(data_get($filters,'to_date')?'&to='.urlencode(data_get($filters,'to_date')):'') }}" class="btn btn-sm btn-primary me-2"><i class="mdi mdi-download"></i> Download</a>
                                         @endif
                                       </td>

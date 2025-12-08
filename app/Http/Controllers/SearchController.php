@@ -19,9 +19,7 @@ class SearchController extends Controller
             $items[] = ['label' => 'Billing Settings', 'href' => route('cms.admin.billing.settings')];
             $items[] = ['label' => 'New Organization', 'href' => route('organization.register')];
         } else {
-            if (!$u || $u->hasPermission('dashboard')) {
-                $items[] = ['label' => 'Dashboard', 'href' => route('cms.dashboard.index')];
-            }
+            $items[] = ['label' => 'Dashboard', 'href' => route('cms.dashboard.index')];
             if (!$u || $u->hasPermission('families')) {
                 $items[] = ['label' => 'Families', 'href' => route('cms.family.index')];
             }

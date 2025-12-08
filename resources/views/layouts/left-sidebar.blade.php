@@ -66,16 +66,15 @@
           </a>
         </li>
         @else
-        @if(!$user || $user->hasPermission('dashboard'))
         <li class="{{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.dashboard.*') ? 'active' : '' }}" href="{{ route('cms.dashboard.index') }}">
             <i class="mdi mdi-view-dashboard"></i>
             <span class="nav-text">Dashboard</span>
           </a>
         </li>
-        @endif
 
-        @if(!$user || $user->hasPermission('families'))
+        @php($canFamilies = (!$user) || ($user->hasPermission('families') || $user->hasPermission('families_list') || $user->hasPermission('families_view') || $user->hasPermission('families_create') || $user->hasPermission('families_edit') || $user->hasPermission('families_delete')))
+        @if($canFamilies)
         <li class="{{ request()->routeIs('cms.family.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.family.*') ? 'active' : '' }}" href="{{ route('cms.family.index') }}">
             <i class="mdi mdi-home"></i>
@@ -84,7 +83,8 @@
         </li>
         @endif
 
-        @if(!$user || $user->hasPermission('aid_programs'))
+        @php($canAid = (!$user) || ($user->hasPermission('aid_programs') || $user->hasPermission('aid_programs_list') || $user->hasPermission('aid_programs_view') || $user->hasPermission('aid_programs_create') || $user->hasPermission('aid_programs_edit') || $user->hasPermission('aid_programs_delete')))
+        @if($canAid)
         <li class="{{ request()->routeIs('cms.aid-program.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.aid-program.*') ? 'active' : '' }}" href="{{ route('cms.aid-program.index') }}">
             <i class="mdi mdi-heart"></i>
@@ -93,7 +93,8 @@
         </li>
         @endif
 
-        @if(!$user || $user->hasPermission('financial'))
+        @php($canFin = (!$user) || ($user->hasPermission('financial') || $user->hasPermission('financial_list') || $user->hasPermission('financial_view') || $user->hasPermission('financial_create') || $user->hasPermission('financial_edit') || $user->hasPermission('financial_delete') || $user->hasPermission('financial_export')))
+        @if($canFin)
         <li class="{{ request()->routeIs('cms.financial-management.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.financial-management.*') ? 'active' : '' }}" href="{{ route('cms.financial-management.index') }}">
             <i class="mdi mdi-cash-multiple"></i>
@@ -102,7 +103,8 @@
         </li>
         @endif
 
-        @if(!$user || $user->hasPermission('surveys'))
+        @php($canSurv = (!$user) || ($user->hasPermission('surveys') || $user->hasPermission('surveys_list') || $user->hasPermission('surveys_view') || $user->hasPermission('surveys_create') || $user->hasPermission('surveys_edit') || $user->hasPermission('surveys_delete')))
+        @if($canSurv)
         <li class="{{ request()->routeIs('cms.survey.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.survey.*') ? 'active' : '' }}" href="{{ route('cms.survey.index') }}">
             <i class="mdi mdi-clipboard-text"></i>
@@ -111,7 +113,8 @@
         </li>
         @endif
 
-        @if(!$user || $user->hasPermission('reports'))
+        @php($canRep = (!$user) || ($user->hasPermission('reports') || $user->hasPermission('reports_view') || $user->hasPermission('reports_download_all') || $user->hasPermission('reports_download') || $user->hasPermission('reports_export_csv') || $user->hasPermission('reports_download_pdf')))
+        @if($canRep)
         <li class="{{ request()->routeIs('cms.report.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.report.*') ? 'active' : '' }}" href="{{ route('cms.report.index') }}">
             <i class="mdi mdi-chart-bar"></i>
@@ -120,7 +123,8 @@
         </li>
         @endif
 
-        @if(!$user || $user->hasPermission('volunteers'))
+        @php($canVol = (!$user) || ($user->hasPermission('volunteers') || $user->hasPermission('volunteers_view') || $user->hasPermission('volunteers_create') || $user->hasPermission('volunteers_edit') || $user->hasPermission('volunteers_delete')))
+        @if($canVol)
         <li class="{{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.volunteer.*') ? 'active' : '' }}" href="{{ route('cms.volunteer.index') }}">
             <i class="mdi mdi-account-heart"></i>
