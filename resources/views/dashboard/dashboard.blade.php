@@ -151,10 +151,11 @@
     </div>
 
     <!-- Income And Expenses row -->
+    @php($chartsVisible = ($showFinancial?1:0)+($showFamilies?1:0))
+    @if($chartsVisible > 0)
     <div class="row">
-      @php($chartsVisible = ($showFinancial?1:0)+($showFamilies?1:0))
-      @php($leftCol = $chartsVisible === 1 ? 'col-xl-12' : 'col-xl-8')
-      @php($rightCol = $chartsVisible === 1 ? 'col-xl-12' : 'col-xl-4')
+      @php($leftCol = $chartsVisible === 1 ? 'col-xl-12 col-md-12' : 'col-xl-6 col-md-6')
+      @php($rightCol = $chartsVisible === 1 ? 'col-xl-12 col-md-12' : 'col-xl-6 col-md-6')
       @if($showFinancial)
       <div class="{{ $leftCol }}">
         <!-- Income and Expenses -->
@@ -187,10 +188,17 @@
       </div>
       @endif
     </div>
+    @endif
 
     <!-- Activity and Quick Actions -->
+    @php($showActivity = (!$u || $u->hasPermission('financial') || $u->hasPermission('volunteers')))
+    @php($showQuickActions = (!$u || $u->hasPermission('families_create') || $u->hasPermission('financial') || $u->hasPermission('reports')))
+    @php($aqVisible = ($showActivity?1:0)+($showQuickActions?1:0))
+    @if($aqVisible > 0)
     <div class="row">
-      <div class="col-xl-6">
+      @php($aqCol = $aqVisible === 1 ? 'col-xl-12 col-md-12' : 'col-xl-6 col-md-6')
+      @if($showActivity)
+      <div class="{{ $aqCol }}">
         <!-- Recent Activity -->
         <div class="card card-default scrollable">
           <div class="card-header align-items-center d-flex justify-content-between">
@@ -234,8 +242,10 @@
           </div>
         </div>
       </div>
+      @endif
 
-      <div class="col-xl-6">
+      @if($showQuickActions)
+      <div class="{{ $aqCol }}">
         <!-- Quick Actions -->
         <div class="card card-default scrollable">
           <div class="card-header">
@@ -266,7 +276,9 @@
           </div>
         </div>
       </div>
+      @endif
     </div>
+    @endif
 
   </div>
 </div>

@@ -159,6 +159,41 @@
 
             <!-- dropdown notify -->
             <ul class="nav navbar-nav">
+              @php
+                $u = auth()->user();
+                $showNotify = (!$u) ? false : (
+                  $u->hasPermission('dashboard') ||
+                  $u->hasPermission('families') ||
+                  $u->hasPermission('families_view') ||
+                  $u->hasPermission('families_create') ||
+                  $u->hasPermission('families_edit') ||
+                  $u->hasPermission('families_delete') ||
+                  $u->hasPermission('aid_programs') ||
+                  $u->hasPermission('aid_programs_view') ||
+                  $u->hasPermission('aid_programs_create') ||
+                  $u->hasPermission('aid_programs_edit') ||
+                  $u->hasPermission('aid_programs_delete') ||
+                  $u->hasPermission('financial') ||
+                  $u->hasPermission('financial_create') ||
+                  $u->hasPermission('financial_edit') ||
+                  $u->hasPermission('financial_export') ||
+                  $u->hasPermission('surveys') ||
+                  $u->hasPermission('surveys_view') ||
+                  $u->hasPermission('surveys_edit') ||
+                  $u->hasPermission('reports') ||
+                  $u->hasPermission('reports_view') ||
+                  $u->hasPermission('reports_download') ||
+                  $u->hasPermission('reports_export_csv') ||
+                  $u->hasPermission('reports_download_all') ||
+                  $u->hasPermission('volunteers') ||
+                  $u->hasPermission('volunteers_view') ||
+                  $u->hasPermission('volunteers_create') ||
+                  $u->hasPermission('volunteers_edit') ||
+                  $u->hasPermission('volunteers_delete') ||
+                  (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin())
+                );
+              @endphp
+              @if($showNotify)
               <li class="custom-dropdown">
                 <button class="notify-toggler custom-dropdown-toggler">
                   <i class="mdi mdi-bell-outline icon"></i>
@@ -195,20 +230,28 @@
                   </footer>
                 </div>
               </li>
+              @endif
 
               <!-- User Account -->
               <li class="dropdown user-menu">
                 <button class="dropdown-toggle nav-link" data-toggle="dropdown">
                   @php
                     $u = Auth::user();
-                    $__avatar = optional($u)->avatar_path;
-                    $__volPic = null;
-                    if (!$__avatar && $u) {
-                      $vol = \App\Models\Volunteer::where('user_id', $u->id)->first();
-                      $__volPic = optional($vol)->picture_path;
+                    $__profileImage = url('assets/images/user/user-defult-profile.png');
+                    if ($u) {
+                      $avatar = $u->avatar_path;
+                      if (!empty($avatar)) {
+                        $__profileImage = asset('storage/' . $avatar);
+                      } else {
+                        $vol = \App\Models\Volunteer::where('user_id', $u->id)->first();
+                        $pic = optional($vol)->picture_path;
+                        if (!empty($pic)) {
+                          $__profileImage = asset($pic);
+                        }
+                      }
                     }
                   @endphp
-                  <img src="{{ $__avatar ? asset('storage/' . $__avatar) : ($__volPic ? asset($__volPic) : url('assets/images/user/user-defult-profile.png')) }}"
+                  <img src="{{ $__profileImage ?? url('assets/images/user/user-defult-profile.png') }}"
                       class="user-image rounded-circle" alt="User Image">
                   <span class="d-none d-lg-inline-block">{{ Auth::user()->full_name ?? Auth::user()->name }}</span>
                 </button>
