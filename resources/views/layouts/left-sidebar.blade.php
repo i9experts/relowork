@@ -113,7 +113,7 @@
         </li>
         @endif
 
-        @php($canRep = (!$user) || ($user->hasPermission('reports') || $user->hasPermission('reports_view') || $user->hasPermission('reports_download_all') || $user->hasPermission('reports_download') || $user->hasPermission('reports_export_csv') || $user->hasPermission('reports_download_pdf')))
+        @php($canRep = (!$user) || ($user->hasPermission('reports') || $user->hasPermission('reports_list') || $user->hasPermission('reports_view') || $user->hasPermission('reports_download_all') || $user->hasPermission('reports_download') || $user->hasPermission('reports_export_csv') || $user->hasPermission('reports_download_pdf')))
         @if($canRep)
         <li class="{{ request()->routeIs('cms.report.*') ? 'active' : '' }}">
           <a class="sidenav-item-link {{ request()->routeIs('cms.report.*') ? 'active' : '' }}" href="{{ route('cms.report.index') }}">
@@ -150,11 +150,13 @@
     <div class="sidebar-footer">
         <div class="sidebar-footer-content d-flex justify-content-center">
             <ul class="d-flex">
+                @if(!$user || $user->hasPermission('settings'))
                 <li>
                     <a href="{{ route('cms.setting.index') }}" data-toggle="tooltip" title="Profile settings">
                         <i class="mdi mdi-settings"></i>
                     </a>
                 </li>
+                @endif
             </ul>
         </div>
     </div>

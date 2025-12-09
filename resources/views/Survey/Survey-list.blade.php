@@ -210,16 +210,30 @@
                                 </div>
                             </div>
 
-                            @if($user && ($user->hasPermission('surveys_view') || $user->hasPermission('surveys_edit')))
-                            <div class="d-flex justify-content-between mt-3">
-                                @if($user->hasPermission('surveys_view'))
-                                  <a href="{{ route('cms.survey.show', $survey->id) }}" class="btn btn-outline-primary w-50 mr-2">View Details</a>
-                                @endif
-                                @if($user->hasPermission('surveys_edit'))
-                                  <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary w-50">Edit</a>
-                                @endif
+                            <div class="row mt-3">
+                                @if($user && ($user->hasPermission('surveys_view') || $user->hasPermission('surveys_edit')))
+                                    @php
+                                        $viewCol = $user->hasPermission('surveys_view') ? ($user->hasPermission('surveys_edit') ? 'col-6' : 'col-12') : '';
+                                        $editCol = $user->hasPermission('surveys_edit') ? ($user->hasPermission('surveys_view') ? 'col-6' : 'col-12') : '';
+                                    @endphp
+
+                                    @if($user->hasPermission('surveys_view'))
+                                        <div class="{{ $viewCol }}">
+                                            <a href="{{ route('cms.survey.show', $survey->id) }}" class="btn btn-outline-primary w-100">View Details</a>
+                                        </div>
+                                    @endif
+
+                                    @if($user->hasPermission('surveys_edit'))
+                                        <div class="{{ $editCol }}">
+                                            <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary w-100">Edit</a>
+                                        </div>
+                                    @endif
+                                    @else
+                                        <div class="col-12 d-flex justify-content-center mt-3">
+                                            <span class="badge badge-info">No Access</span>
+                                        </div>
+                                    @endif
                             </div>
-                            @endif
 
                         </div>
                     </div>

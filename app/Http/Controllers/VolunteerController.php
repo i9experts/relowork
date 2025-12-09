@@ -21,7 +21,8 @@ class VolunteerController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:volunteers')->only(['index','show']);
+        $this->middleware('permission:volunteers_list,volunteers_view,volunteers_create,volunteers_edit,volunteers_delete')->only(['index']);
+        $this->middleware('permission:volunteers_view')->only(['show']);
         $this->middleware('permission:volunteers_create')->only(['create','store']);
         $this->middleware('permission:volunteers_edit')->only(['edit','update']);
         $this->middleware('permission:volunteers_delete')->only(['destroy']);

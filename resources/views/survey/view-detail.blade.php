@@ -11,9 +11,27 @@
         <p class="text-muted mb-0">Full details and attachments</p>
       </div>
       <div>
-        <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary mr-2">Edit</a>
-        <a href="{{ route('cms.survey.index') }}" class="btn btn-secondary">Back</a>
+          @php($user = auth()->user())
+
+          @if($user && ($user->hasPermission('surveys_edit') || $user->hasPermission('surveys_delete')))
+              @if($user->hasPermission('surveys_edit'))
+              <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary mr-2">Edit</a>
+              @endif
+
+              @if($user->hasPermission('surveys_delete'))
+              <form action="{{ route('cms.survey.destroy', $survey->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this survey?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger mr-2">Delete</button>
+              </form>
+              @endif
+          @else
+              <span class="badge badge-info text-light mr-2">No Actions</span>
+          @endif
+
+          <a href="{{ route('cms.survey.index') }}" class="btn btn-secondary">Back</a>
       </div>
+
     </div>
 
     <div class="row">

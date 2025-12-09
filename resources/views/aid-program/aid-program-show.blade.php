@@ -17,13 +17,25 @@
         <p class="text-muted mb-0">Code: {{ $aidProgram->program_code }} · {{ $aidProgram->status }}</p>
       </div>
       <div class="d-flex gap-2">
-        <a href="{{ route('cms.aid-program.edit', $aidProgram->id) }}" class="btn btn-primary mr-2">Edit</a>
-        <form method="POST" action="{{ route('cms.aid-program.destroy', $aidProgram->id) }}" onsubmit="return confirm('Are you sure you want to delete this program?');">
-          @csrf
-          @method('DELETE')
-          <button type="submit" class="btn btn-outline-danger">Delete</button>
-        </form>
+          @php($user = auth()->user())
+          
+          @if($user && ($user->hasPermission('aid_programs_edit') || $user->hasPermission('aid_programs_delete')))
+              @if($user->hasPermission('aid_programs_edit'))
+              <a href="{{ route('cms.aid-program.edit', $aidProgram->id) }}" class="btn btn-primary mr-2">Edit</a>
+              @endif
+
+              @if($user->hasPermission('aid_programs_delete'))
+              <form method="POST" action="{{ route('cms.aid-program.destroy', $aidProgram->id) }}" onsubmit="return confirm('Are you sure you want to delete this program?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
+              </form>
+              @endif
+          @else
+              <span class="badge badge-info text-light">No Actions</span>
+          @endif
       </div>
+
     </div>
 
     <div class="row">

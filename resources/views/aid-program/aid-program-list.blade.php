@@ -184,8 +184,13 @@
                 </div>
 
                 @if($user && $user->hasPermission('aid_programs_view'))
-                <a href="{{ route('cms.aid-program.show', $program->id) }}" class="btn btn-outline-primary w-100 mt-3">View Details</a>
+                    <a href="{{ route('cms.aid-program.show', $program->id) }}" class="btn btn-outline-primary w-100 mt-3">View Details</a>
+                @else
+                    <div class="d-flex justify-content-center mt-3">
+                        <span class="badge badge-info">No Access</span>
+                    </div>
                 @endif
+
 
                 </div>
             </div>

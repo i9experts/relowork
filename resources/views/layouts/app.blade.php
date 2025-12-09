@@ -228,12 +228,14 @@
                           </a>
                       </li>
 
+                      @if($u && $u->hasPermission('settings'))
                       <li>
                           <a class="dropdown-link-item" href="{{ route('cms.setting.index') }}">
                               <i class="mdi mdi-settings"></i>
                               <span class="nav-text">Setting</span>
                           </a>
                       </li>
+                      @endif
 
                       <li class="dropdown-footer">
                           <form method="POST" action="{{ route('logout') }}" class="m-0">

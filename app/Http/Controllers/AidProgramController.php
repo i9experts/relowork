@@ -14,7 +14,8 @@ class AidProgramController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:aid_programs')->only(['index','show']);
+        $this->middleware('permission:aid_programs_list,aid_programs_view,aid_programs_create,aid_programs_edit,aid_programs_delete')->only(['index']);
+        $this->middleware('permission:aid_programs_view')->only(['show']);
         $this->middleware('permission:aid_programs_create')->only(['create','store']);
         $this->middleware('permission:aid_programs_edit')->only(['edit','update']);
         $this->middleware('permission:aid_programs_delete')->only(['destroy']);

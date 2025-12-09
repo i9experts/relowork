@@ -17,11 +17,11 @@ class ReportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:reports')->only(['index','show']);
-        $this->middleware('permission:reports_create')->only(['create','store','generate']);
-        $this->middleware('permission:reports_edit')->only(['edit','update']);
-        $this->middleware('permission:reports_delete')->only(['destroy']);
-        $this->middleware('permission:reports')->only(['export','downloadAll','view']);
+        $this->middleware('permission:reports,reports_list,reports_view,reports_download,reports_export_csv,reports_download_pdf,reports_download_all')->only(['index']);
+        $this->middleware('permission:reports,reports_list,reports_view')->only(['generate']);
+        $this->middleware('permission:reports,reports_view,reports_download_pdf')->only(['view']);
+        $this->middleware('permission:reports_export_csv')->only(['export']);
+        $this->middleware('permission:reports_download_all')->only(['downloadAll']);
     }
     /**
      * Display a listing of the resource.

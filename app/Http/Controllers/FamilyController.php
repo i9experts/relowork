@@ -15,7 +15,8 @@ class FamilyController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:families')->only(['index','show']);
+        $this->middleware('permission:families_list,families_view,families_create,families_edit,families_delete')->only(['index']);
+        $this->middleware('permission:families_view')->only(['show']);
         $this->middleware('permission:families_create')->only(['create','store']);
         $this->middleware('permission:families_edit')->only(['edit','update']);
         $this->middleware('permission:families_delete')->only(['destroy']);

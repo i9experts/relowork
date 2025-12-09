@@ -175,7 +175,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Reports: define specific routes before resource to avoid conflicts
-    Route::middleware('permission:reports,reports_view,reports_download_all,reports_download,reports_export_csv,reports_download_pdf')->group(function () {
+    Route::middleware('permission:reports,reports_list,reports_view,reports_download_all,reports_download,reports_export_csv,reports_download_pdf')->group(function () {
         Route::get('report/export', [ReportController::class, 'export'])->name('cms.report.export');
         Route::get('report/download-all', [ReportController::class, 'downloadAll'])->name('cms.report.downloadAll');
         Route::post('reports/generate', [ReportController::class, 'generate'])->name('cms.report.generate');

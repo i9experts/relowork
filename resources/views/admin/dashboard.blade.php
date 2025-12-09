@@ -10,8 +10,11 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h4 class="fw-bold text-dark mb-1">Super Admin Dashboard</h4>
-          <p class="text-muted fs-5">Platform-wide overview of all organizations.</p>
+          <p class="text-muted fs-5">
+          Platform-wide overview: Track all organizations, users, volunteers, and programs with full control.
+          </p>
         </div>
+
 
         <a href="{{ route('cms.setting.index') }}" class="btn btn-outline-secondary btn-sm ms-auto">
           Settings
@@ -30,7 +33,7 @@
           <div class="card card-default bg-secondary shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-domain text-secondary" style="font-size:24px;"></i>
+                <i class="mdi mdi-city text-secondary" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Total Organizations</p>
@@ -45,7 +48,7 @@
           <div class="card card-default bg-success shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi mdi-account-group-outline text-success" style="font-size:24px;"></i>
+                <i class="mdi mdi-account-group text-success" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Total Users</p>
@@ -105,7 +108,7 @@
           <div class="card card-default bg-danger shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi-office-building text-danger" style="font-size:24px;"></i>
+                <i class="mdi mdi-city-variant text-danger" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Active Organizations</p>
@@ -120,7 +123,7 @@
           <div class="card card-default bg-dark shadow-sm border-0">
             <div class="d-flex align-items-center p-4 justify-content-between">
               <div class="icon-md bg-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                <i class="mdi-office-building text-dark" style="font-size:24px;"></i>
+                <i class="mdi mdi-account-off text-dark" style="font-size:24px;"></i>
               </div>
               <div class="text-right">
                 <p class="text-white mb-1 fw-semibold">Inactive Organizations</p>

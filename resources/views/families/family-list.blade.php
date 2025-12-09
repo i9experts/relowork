@@ -169,8 +169,11 @@
                                                     @endif
                                                 </div>
                                             </div>
+                                        @else
+                                            <span class="badge badge-info text-light">No Actions</span>
                                         @endif
                                     </td>
+
                                 </tr>
                             @empty
                                 <tr>

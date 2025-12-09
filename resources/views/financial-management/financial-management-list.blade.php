@@ -187,20 +187,32 @@
                         <td>{{ optional($transaction->recordedBy)->name ?? '-' }}</td>
                         <td>{{ optional($transaction->approvedBy)->name ?? '-' }}</td>
                         <td>
-                            <div class="dropdown">
-                              <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
-                                Actions
-                              </button>
-                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="{{ route('cms.financial-management.edit', $transaction->id) }}">Edit</a>
-                                <form action="{{ route('cms.financial-management.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item text-danger">Delete</button>
-                                </form>
+                          @php($user = auth()->user())
+
+                          @if($user && ($user->hasPermission('financial_edit') || $user->hasPermission('financial_delete')))
+                              <div class="dropdown">
+                                  <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
+                                      Actions
+                                  </button>
+                                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                      @if($user->hasPermission('financial_edit'))
+                                      <a class="dropdown-item" href="{{ route('cms.financial-management.edit', $transaction->id) }}">Edit</a>
+                                      @endif
+
+                                      @if($user->hasPermission('financial_delete'))
+                                      <form action="{{ route('cms.financial-management.destroy', $transaction->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                                          @csrf
+                                          @method('DELETE')
+                                          <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                      </form>
+                                      @endif
+                                  </div>
                               </div>
-                            </div>
-                        </td>
+                          @else
+                              <span class="badge badge-info text-light">No Actions</span>
+                          @endif
+                      </td>
+
 
                     </tr>
                     @endforeach
