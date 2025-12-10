@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Family;
+use App\Models\Surveys;
+use App\Models\Language;
+use App\Models\Volunteer;
 use App\Models\SurveyAsset;
 use App\Models\SurveyMember;
-use App\Models\Surveys;
 use App\Models\SurveyUpload;
-use App\Models\Volunteer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +60,7 @@ class SurveysController extends Controller
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
         $data['families'] = Family::where('organization_id', $organizationId)->get();
+        $data['languages'] = Language::orderBy('name')->get();
 
         return view('survey.survey-assessment-form')->with($data);
     }
@@ -495,7 +497,7 @@ class SurveysController extends Controller
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteers'] = Volunteer::where('organization_id', $organizationId)->get();
         $data['families'] = Family::where('organization_id', $organizationId)->get();
-
+        $data['languages'] = Language::orderBy('name')->get();
         return view('survey.survey-assessment-edit-form')->with($data);
     }
 

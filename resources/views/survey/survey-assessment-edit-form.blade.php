@@ -344,7 +344,12 @@
                   <label for="primary_languages">Primary Language(s)</label>
                   <select id="primary_languages" name="primary_languages[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
                     @php $langs = collect(data_get($survey->flags_json,'primary_languages',[])); @endphp
-                    <option {{ $langs->contains('Urdu') ? 'selected' : '' }}>Urdu</option><option {{ $langs->contains('Sindhi') ? 'selected' : '' }}>Sindhi</option><option {{ $langs->contains('Punjabi') ? 'selected' : '' }}>Punjabi</option><option {{ $langs->contains('Pashto') ? 'selected' : '' }}>Pashto</option><option {{ $langs->contains('English') ? 'selected' : '' }}>English</option>
+                    @foreach ($languages as $lang)
+                        <option value="{{ $lang->name }}"
+                            {{ $langs->contains($lang->name) ? 'selected' : '' }}>
+                            {{ $lang->name }}
+                        </option>
+                    @endforeach
                   </select>
                 </div>
 

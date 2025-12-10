@@ -268,7 +268,11 @@
                 <div class="col-md-6 mb-3">
                   <label for="primary_languages">Primary Language(s)</label>
                   <select id="primary_languages" name="primary_languages[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option>Urdu</option><option>Sindhi</option><option>Punjabi</option><option>Pashto</option><option>English</option>
+                  @foreach($languages as $language)
+                      <option value="{{ $language->id }}" {{ old('language_id') == $language->id ? 'selected' : '' }}>
+                          {{ $language->name }} ({{ $language->code }})
+                      </option>
+                  @endforeach
                   </select>
                 </div>
 
