@@ -126,7 +126,7 @@
                       <select class="form-control rounded-0 bg-light select2" id="family_id" name="family_id" style="width: 100%;" required>
                         <option >Select Family</option>
                         @foreach($families as $fam)
-                          <option value="{{ $fam->id }}" {{ old('family_id')==$fam->id?'selected':'' }}>{{ $fam->family_code }} - {{ $fam->head_of_family_name }}</option>
+                          <option value="{{ $fam->id }}" {{ old('family_id')==$fam->id?'selected':'' }}>{{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} - {{ $fam->head_of_family_name }}</option>
                         @endforeach
                       </select>
                     </div>

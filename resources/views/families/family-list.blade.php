@@ -122,7 +122,7 @@
                             @forelse($families as $family)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $family->family_code ?? '—' }}</td>
+                                    <td>{{ (\Illuminate\Support\Str::startsWith($family->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($family->family_code ?? '', '-')) : ($family->family_code ?? '—')) }}</td>
                                     <td>{{ $family->head_of_family_name }}</td>
                                     <td>{{ $family->members_count ?? 0 }}</td>
 

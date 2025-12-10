@@ -116,7 +116,7 @@
                         <option >Select Family</option>
                         @php($famSel = old('family_id', $financialManagement->family_id))
                         @foreach($families as $fam)
-                          <option value="{{ $fam->id }}" {{ (string)$famSel===(string)$fam->id?'selected':'' }}>{{ $fam->family_code }} - {{ $fam->head_of_family_name }}</option>
+                          <option value="{{ $fam->id }}" {{ (string)$famSel===(string)$fam->id?'selected':'' }}>{{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} - {{ $fam->head_of_family_name }}</option>
                         @endforeach
                       </select>
                     </div>

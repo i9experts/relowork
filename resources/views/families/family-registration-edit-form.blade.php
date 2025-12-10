@@ -37,9 +37,16 @@
                         <h4 class="card-title fw-bold mb-1">Family Registration Form</h4>
                         <p class="text-muted mb-4">Purpose: To collect detailed beneficiary family data for eligibility and tracking.</p>
                       </div>
-                      <div>
-                        <span class="badge badge-secondary" style="font-size:0.95rem;">{{ $family->family_code ?? '' }}</span>
-                      </div>
+                      <span class="badge badge-secondary ms-auto" style="font-size:0.95rem;">
+                          {{
+                              (
+                                  \Illuminate\Support\Str::startsWith($family->family_code ?? '', 'FAM-')
+                                  ? ('FAM-' . \Illuminate\Support\Str::afterLast($family->family_code ?? '', '-'))
+                                  : ($family->family_code ?? '')
+                              )
+                          }}
+                      </span>
+
                     </div>
                     <div class="row">
                         <div class="col-md-12">

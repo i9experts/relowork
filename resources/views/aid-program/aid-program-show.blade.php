@@ -42,23 +42,21 @@
       <div class="col-lg-8 mb-3">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body p-4">
-            @php
-              $budget = (int)($aidProgram->total_budget ?? 0);
-              $disbursed = (int)($aidProgram->disbursed_amount ?? 0);
-              $pct = $budget > 0 ? min(100, (int) round(($disbursed / $budget) * 100)) : 0;
-            @endphp
+            @php($__budget = (int)($aidProgram->total_budget ?? 0))
+            @php($__disbursed = (int)($aidProgram->disbursed_amount ?? 0))
+            @php($__pct = $__budget > 0 ? min(100, (int) round(($__disbursed / $__budget) * 100)) : 0)
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                 <span class="detail-label d-block">Budget</span>
-                <h6 class="mb-0 fw-bold">PKR {{ number_format($budget) }}</h6>
+                <h6 class="mb-0 fw-bold">PKR {{ number_format($__budget) }}</h6>
               </div>
               <div class="text-end">
                 <span class="detail-label d-block">Disbursed</span>
-                <h6 class="mb-0 fw-bold">PKR {{ number_format($disbursed) }}</h6>
+                <h6 class="mb-0 fw-bold">PKR {{ number_format($__disbursed) }}</h6>
               </div>
             </div>
             <div class="progress mb-3">
-              <div class="progress-bar" role="progressbar" style="width: {{ $pct }}%" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100">{{ $pct }}%</div>
+              <div class="progress-bar" role="progressbar" style="width: {{ $__pct }}%" aria-valuenow="{{ $__pct }}" aria-valuemin="0" aria-valuemax="100">{{ $__pct }}%</div>
             </div>
 
             <div class="row g-3">
@@ -128,7 +126,7 @@
             @else
               <ul class="mb-0">
                 @foreach($aidProgram->families as $fam)
-                  <li>{{ $fam->family_code }} — {{ $fam->head_of_family_name }}</li>
+                  <li>{{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} — {{ $fam->head_of_family_name }}</li>
                 @endforeach
               </ul>
             @endif
@@ -158,19 +156,19 @@
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body p-4">
             <h6 class="fw-bold mb-3">Attachments</h6>
-            @if($aidProgram->attachments->isEmpty())
+            @php($atts = $aidProgram->attachments ?? collect())
+            @if($atts->isEmpty())
               <div class="text-muted">No attachments uploaded.</div>
             @else
               <div class="row">
-                @foreach($aidProgram->attachments as $att)
+                @foreach($atts as $att)
                   <div class="col-md-3 mb-3">
                     <div class="border rounded p-2 text-center">
-                      @php 
-                        $isImage = isset($att->type) && str_starts_with($att->type, 'image/');
-                        $p = $att->path ?? '';
-                        if (str_starts_with($p, 'public/')) { $p = substr($p, 7); }
-                        $url = Storage::disk('public')->url($p);
-                      @endphp
+                      @php($type = (string)($att->type ?? ''))
+                      @php($p = (string)($att->path ?? ''))
+                      @php($p = \Illuminate\Support\Str::startsWith($p, 'public/') ? substr($p, 7) : $p)
+                      @php($url = Storage::disk('public')->url($p))
+                      @php($isImage = \Illuminate\Support\Str::startsWith($type, 'image/'))
                       @if($isImage)
                         <a href="{{ $url }}" target="_blank">
                           <img src="{{ $url }}" alt="{{ $att->original_name }}" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">

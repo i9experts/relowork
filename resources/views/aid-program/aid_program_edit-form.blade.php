@@ -146,7 +146,7 @@
                     <select class="form-control select2" name="families[]" multiple="multiple" style="width: 100%;" required>
                         @foreach($families as $fam)
                           <option value="{{ $fam->id }}" {{ in_array($fam->id, (array)$oldFamilies) ? 'selected' : '' }}>
-                            {{ $fam->family_code }} - {{ $fam->head_of_family_name }}
+                            {{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} - {{ $fam->head_of_family_name }}
                           </option>
                         @endforeach
                     </select>

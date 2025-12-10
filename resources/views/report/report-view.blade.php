@@ -116,7 +116,7 @@
                   <td>{{ $row->transaction_type }}</td>
                   <td>{{ $row->amount }}</td>
                   <td>{{ optional($row->aidProgram)->program_title ?: '-' }}</td>
-                  <td>{{ optional($row->family)->family_code ?: '-' }}</td>
+                  <td>{{ (\Illuminate\Support\Str::startsWith(optional($row->family)->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast(optional($row->family)->family_code ?? '', '-')) : (optional($row->family)->family_code ?? '-')) }}</td>
                   <td>{{ optional($row->recordedBy)->name ?: '-' }}</td>
                   <td>{{ optional($row->approvedBy)->name ?: '-' }}</td>
                 </tr>
@@ -128,7 +128,7 @@
                   <td>{{ (int)($row->families_count ?? 0) }}</td>
                   <td>{{ (int)($row->volunteers_count ?? 0) }}</td>
                   <td>{{ (int) collect($row->families ?? [])->sum(function($f){ return (int) ($f->family_members_count ?? 0); }) }}</td>
-                  <td>{{ collect($row->families ?? [])->pluck('family_code')->filter()->take(5)->join(', ') }}</td>
+                  <td>{{ collect($row->families ?? [])->pluck('family_code')->filter()->map(function($c){ return (\Illuminate\Support\Str::startsWith($c ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($c ?? '', '-')) : ($c ?? '')); })->take(5)->join(', ') }}</td>
                   <td>{{ collect($row->volunteers ?? [])->pluck('full_name')->filter()->take(5)->join(', ') }}</td>
                   <td>{{ optional($row->created_at)->format('Y-m-d') }}</td>
                 </tr>
@@ -136,7 +136,7 @@
                 <tr>
                   <td>{{ (($rows->currentPage()-1) * $rows->perPage()) + $loop->iteration }}</td>
                   <td>{{ $row->survey_code ?: ('S-'.$row->id) }}</td>
-                  <td>{{ optional($row->family)->family_code ?: '-' }}</td>
+                  <td>{{ (\Illuminate\Support\Str::startsWith(optional($row->family)->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast(optional($row->family)->family_code ?? '', '-')) : (optional($row->family)->family_code ?? '-')) }}</td>
                   <td>{{ optional($row->enumerator)->full_name ?: '-' }}</td>
                   <td>{{ $row->members_count }}</td>
                   <td>{{ $row->uploads_count }}</td>
@@ -155,7 +155,7 @@
                 @else
                 <tr>
                   <td>{{ (($rows->currentPage()-1) * $rows->perPage()) + $loop->iteration }}</td>
-                  <td>{{ $row->family_code }}</td>
+                  <td>{{ (\Illuminate\Support\Str::startsWith($row->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($row->family_code ?? '', '-')) : ($row->family_code ?? '')) }}</td>
                   <td>{{ $row->head_of_family_name }}</td>
                   <td>{{ $row->members_count }}</td>
                   <td>{{ optional($row->volunteer)->full_name ?: '-' }}</td>

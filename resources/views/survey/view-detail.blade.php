@@ -99,8 +99,10 @@
                   @php
                     $familyName = optional($survey->family)->family_name ?? optional($survey->family)->head_of_family_name;
                     $familyId = optional($survey->family)->id;
+                    $familyCode = optional($survey->family)->family_code;
+                    $familyCodeDisplay = \Illuminate\Support\Str::startsWith($familyCode ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($familyCode ?? '', '-')) : ($familyCode ?? '');
                   @endphp
-                  <div>Family name & Id : {{ $familyName ?? '-' }} | {{ $familyId ? '#'.$familyId : '-' }}</div>
+                  <div>Family code & name & Id : {{ $familyCodeDisplay ?: '-' }} | {{ $familyName ?? '-' }} | {{ $familyId ? '#'.$familyId : '-' }}</div>
                 </div>
               </div>
               <div class="col-6 mt-2">

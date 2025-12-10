@@ -58,7 +58,7 @@
                   <select id="enumerator_id" name="enumerator_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option disabled {{ $survey->enumerator_id ? '' : 'selected' }}>Select Volunteer</option>
                     @foreach($volunteers as $vol)
-                    <option value="{{ $vol->id }}" {{ (string)($survey->enumerator_id) === (string)$vol->id ? 'selected' : '' }}>{{ $vol->volunteer_code ?? '' }} - {{ $vol->full_name }}</option>
+                    <option value="{{ $vol->id }}" {{ (string)($survey->enumerator_id) === (string)$vol->id ? 'selected' : '' }}>{{ $vol->full_name }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -190,7 +190,7 @@
                   <select id="family_id" name="family_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option value="new" {{ $survey->family_id ? '' : 'selected' }}>New family</option>
                     @foreach($families as $fam)
-                    <option value="{{ $fam->id }}" {{ (string)$survey->family_id === (string)$fam->id ? 'selected' : '' }}>{{ $fam->family_code ?? '' }} - {{ $fam->head_of_family_name }}</option>
+                    <option value="{{ $fam->id }}" {{ (string)$survey->family_id === (string)$fam->id ? 'selected' : '' }}>{{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} - {{ $fam->head_of_family_name }}</option>
                     @endforeach
                   </select>
                 </div>

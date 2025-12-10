@@ -49,10 +49,9 @@ class FamilyController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
-        $org = $organizationId ? Organization::find($organizationId) : null;
         $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-'.strtoupper($org->domain ?? ('ORG'.(string) $organizationId));
-        $data['next_family_code'] = $prefix.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $prefix = 'FAM-';
+        $data['next_family_code'] = $prefix.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         return view('families.family-registration-form')->with($data);
     }
@@ -94,10 +93,9 @@ class FamilyController extends Controller
             'members.*.occupation' => ['nullable', 'string', 'max:100'],
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
-        $org = $organizationId ? Organization::find($organizationId) : null;
         $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-'.strtoupper($org->domain ?? ('ORG'.(string) $organizationId));
-        $familyCode = $prefix.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $prefix = 'FAM-';
+        $familyCode = $prefix.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $familyCode, $organizationId) {
             $family = Family::create([

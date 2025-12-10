@@ -43,7 +43,7 @@
                   <select id="enumerator_id" name="enumerator_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option disabled selected>Select Volunteer</option>
                     @foreach($volunteers as $vol)
-                    <option value="{{ $vol->id }}" {{ (old('vol_id') == $vol->id) ? 'selected' : '' }}>{{ $vol->volunteer_code ?? '' }} - {{ $vol->full_name }}</option>
+                    <option value="{{ $vol->id }}" {{ (old('vol_id') == $vol->id) ? 'selected' : '' }}>{{ $vol->full_name }}</option>
                     @endforeach
                   </select>
                 </div>
@@ -143,7 +143,7 @@
                   <select id="family_id" name="family_id" class="form-control select2 rounded-0 bg-light" style="width:100%;">
                     <option value="new" selected>Select family</option>
                     @foreach($families as $fam)
-                    <option value="{{ $fam->id }}" {{ (old('fam_id') == $fam->id) ? 'selected' : '' }}>{{ $fam->family_code ?? '' }} - {{ $fam->head_of_family_name }}</option>
+                    <option value="{{ $fam->id }}" {{ (old('fam_id') == $fam->id) ? 'selected' : '' }}>{{ (\Illuminate\Support\Str::startsWith($fam->family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($fam->family_code ?? '', '-')) : ($fam->family_code ?? '')) }} - {{ $fam->head_of_family_name }}</option>
                     @endforeach
                   </select>
                 </div>

@@ -44,7 +44,7 @@
                       </div>
                       
                       <span class="badge badge-secondary ms-auto" style="font-size:0.95rem;">
-                          {{ (\Illuminate\Support\Str::startsWith($next_family_code ?? '', 'FAM-') ? ('FAM-' . \Illuminate\Support\Str::afterLast($next_family_code ?? '', '-')) : ($next_family_code ?? '')) }}
+                          {{ $next_family_code ?? '' }}
                       </span>
                     </div>
 
