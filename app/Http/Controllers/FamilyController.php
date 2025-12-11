@@ -49,9 +49,7 @@ class FamilyController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
-        $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-';
-        $data['next_family_code'] = $prefix.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $data['next_family_code'] = $this->nextFamilyCode($organizationId);
 
         return view('families.family-registration-form')->with($data);
     }
@@ -93,9 +91,7 @@ class FamilyController extends Controller
             'members.*.occupation' => ['nullable', 'string', 'max:100'],
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
-        $seq = (int) Family::where('organization_id', $organizationId)->count() + 1;
-        $prefix = 'FAM-';
-        $familyCode = $prefix.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $familyCode = $this->nextFamilyCode($organizationId);
 
         DB::transaction(function () use ($validated, $familyCode, $organizationId) {
             $family = Family::create([
@@ -153,6 +149,22 @@ class FamilyController extends Controller
         }
 
         return redirect()->route('cms.family.index')->with('success', 'Family registered successfully!');
+    }
+
+    protected function nextFamilyCode(int $organizationId): string
+    {
+        $codes = Family::where('organization_id', $organizationId)
+            ->whereNotNull('family_code')
+            ->pluck('family_code')
+            ->all();
+        $max = 0;
+        foreach ($codes as $c) {
+            $parts = explode('-', (string) $c);
+            $n = count($parts) ? (int) preg_replace('/\D/', '', end($parts)) : 0;
+            if ($n > $max) { $max = $n; }
+        }
+        $next = $max + 1;
+        return 'FAM-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 
     /**

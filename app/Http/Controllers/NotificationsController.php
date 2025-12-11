@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AidProgram;
 use App\Models\Family;
 use App\Models\FinancialManagement;
+use App\Models\Surveys;
 use App\Models\Volunteer;
 use Illuminate\Http\Request;
 
@@ -104,6 +105,27 @@ class NotificationsController extends Controller
             }
         }
 
+        if (!$u || $u->hasPermission('surveys')) {
+            $surveysQ = Surveys::query();
+            if (!$isSuper) { $surveysQ->where('organization_id', $organizationId); }
+            $surveys = $surveysQ
+                ->orderByDesc('updated_at')
+                ->limit(5)
+                ->get();
+            foreach ($surveys as $s) {
+                $items[] = [
+                    'title' => 'Survey',
+                    'desc' => ($s->survey_code ?: ('#'.$s->id)),
+                    'time' => optional($s->updated_at)->diffForHumans(),
+                    'ts' => optional($s->updated_at)->timestamp,
+                    'badge' => ($s->revisit_flag ? 'success' : 'light'),
+                    'badgeLabel' => ($s->revisit_flag ? 'Active' : 'Completed'),
+                    'href' => route('cms.survey.show', $s->id),
+                    'type' => 'other',
+                ];
+            }
+        }
+
         usort($items, function ($a, $b) {
             return (int)($b['ts'] ?? 0) <=> (int)($a['ts'] ?? 0);
         });
@@ -128,4 +150,3 @@ class NotificationsController extends Controller
         ]);
     }
 }
-

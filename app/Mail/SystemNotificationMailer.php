@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SystemNotificationMailer
 {
@@ -27,7 +28,7 @@ class SystemNotificationMailer
                 ], function ($m) use ($admin) {
                     $m->to($admin->email)->subject('New Organization Registered');
                 });
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) { Log::error('system org registered mail failed', ['error' => $e->getMessage()]); }
         }
     }
 
@@ -100,7 +101,7 @@ class SystemNotificationMailer
                 Mail::send('emails.system.system-error', $payload, function ($m) use ($admin) {
                     $m->to($admin->email)->subject('System Error');
                 });
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) { Log::error('system error mail failed', ['error' => $e->getMessage()]); }
         }
     }
 
@@ -112,7 +113,7 @@ class SystemNotificationMailer
                 Mail::send('emails.digest.weekly-digest', $digest, function ($m) use ($admin) {
                     $m->to($admin->email)->subject('Weekly Global Digest');
                 });
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) { Log::error('weekly digest mail failed', ['error' => $e->getMessage()]); }
         }
     }
 
@@ -124,8 +125,7 @@ class SystemNotificationMailer
                 Mail::send('emails.security.security-alert', $payload, function ($m) use ($admin) {
                     $m->to($admin->email)->subject('Security Alert');
                 });
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) { Log::error('security alert mail failed', ['error' => $e->getMessage()]); }
         }
     }
 }
-

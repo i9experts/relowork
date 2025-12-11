@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SystemNotificationMailer;
+use Illuminate\Support\Facades\Log;
 
 class OrganizationController extends Controller
 {
@@ -158,10 +159,11 @@ class OrganizationController extends Controller
             Mail::to($organization->email)->send(new \App\Mail\OrganizationOtpMail($organization));
         } catch (\Throwable $e) {
             // In case of mail failure, we still allow manual OTP retrieval if needed.
-            try { SystemNotificationMailer::sendSystemErrorAlert(['message' => 'OTP mail send failed', 'context' => $e->getMessage()]); } catch (\Throwable $e2) {}
+            Log::error('otp mail send failed', ['error' => $e->getMessage()]);
+            try { SystemNotificationMailer::sendSystemErrorAlert(['message' => 'OTP mail send failed', 'context' => $e->getMessage()]); } catch (\Throwable $e2) { Log::error('system error mail cascade failed', ['error' => $e2->getMessage()]); }
         }
 
-        try { SystemNotificationMailer::sendOrganizationRegistered($organization); } catch (\Throwable $e) {}
+        try { SystemNotificationMailer::sendOrganizationRegistered($organization); } catch (\Throwable $e) { Log::error('system org registered send failed', ['error' => $e->getMessage()]); }
 
         return redirect()->route('organization.otp.show', ['organization' => $organization->id])
             ->with('success', 'We\'ve sent a verification code to your email. Please verify to continue.');

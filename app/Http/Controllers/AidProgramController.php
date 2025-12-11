@@ -95,8 +95,7 @@ class AidProgramController extends Controller
             'attachments.*' => ['file', 'max:5120'],
         ]);
 
-        $seq = (int) AidProgram::where('organization_id', $organizationId)->count() + 1;
-        $programCode = 'PRG-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+        $programCode = $this->nextProgramCode($organizationId);
 
         DB::transaction(function () use ($validated, $request, $programCode, $organizationId) {
             $program = AidProgram::create([
@@ -149,6 +148,22 @@ class AidProgramController extends Controller
         });
 
         return redirect()->route('cms.aid-program.index')->with('success', 'Aid program created successfully!');
+    }
+
+    protected function nextProgramCode(int $organizationId): string
+    {
+        $codes = AidProgram::where('organization_id', $organizationId)
+            ->whereNotNull('program_code')
+            ->pluck('program_code')
+            ->all();
+        $max = 0;
+        foreach ($codes as $c) {
+            $parts = explode('-', (string) $c);
+            $n = count($parts) ? (int) preg_replace('/\D/', '', end($parts)) : 0;
+            if ($n > $max) { $max = $n; }
+        }
+        $next = $max + 1;
+        return 'PRG-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 
     /**

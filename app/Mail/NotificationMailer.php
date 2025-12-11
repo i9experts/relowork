@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class NotificationMailer
 {
@@ -13,7 +14,6 @@ class NotificationMailer
         if (! $organizationId) {
             return null;
         }
-
         return Setting::where('organization_id', $organizationId)->first();
     }
 
@@ -52,6 +52,7 @@ class NotificationMailer
                     $m->to($admin->email)->subject('New Activity Notification');
                 });
             } catch (\Throwable $e) {
+                Log::error('org email notification failed', ['admin' => $admin->id ?? null, 'error' => $e->getMessage()]);
             }
         }
     }
@@ -90,4 +91,4 @@ class NotificationMailer
             }
         }
     }
-}
+} // <-- ye single closing brace class ke liye
