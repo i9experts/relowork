@@ -95,7 +95,8 @@ class AidProgramController extends Controller
             'attachments.*' => ['file', 'max:5120'],
         ]);
 
-        $programCode = 'PRG-'.str_pad((string) ((AidProgram::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
+        $seq = (int) AidProgram::where('organization_id', $organizationId)->count() + 1;
+        $programCode = 'PRG-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         DB::transaction(function () use ($validated, $request, $programCode, $organizationId) {
             $program = AidProgram::create([
