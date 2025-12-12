@@ -22,7 +22,7 @@ it('generates family codes per org using max+1', function () {
     Family::create(['organization_id' => $orgA->id, 'family_code' => 'FAM-0001', 'head_of_family_name' => 'A1', 'cnic' => '11111-1111111-1', 'gender' => 'Male', 'zakat_eligibility' => false, 'volunteer_id' => $volA->id]);
     Family::create(['organization_id' => $orgA->id, 'family_code' => 'FAM-0003', 'head_of_family_name' => 'A3', 'cnic' => '22222-2222222-2', 'gender' => 'Male', 'zakat_eligibility' => false, 'volunteer_id' => $volA->id]);
 
-    actingAs($adminB)
+    $this->actingAs($adminB)
         ->post(route('cms.family.store'), [
             'head_of_family_name' => 'B1',
             'cnic' => '33333-3333333-3',
@@ -46,7 +46,7 @@ it('generates program codes per org using max+1', function () {
     $famB = Family::create(['organization_id' => $orgB->id, 'family_code' => 'FAM-0001', 'head_of_family_name' => 'B HF', 'cnic' => '55555-5555555-5', 'gender' => 'Male', 'zakat_eligibility' => false, 'volunteer_id' => $volB->id]);
     AidProgram::create(['organization_id' => $orgA->id, 'program_code' => 'PRG-0002', 'program_title' => 'A2']);
 
-    actingAs($adminB)
+    $this->actingAs($adminB)
         ->post(route('cms.aid-program.store'), [
             'program_title' => 'B1',
             'volunteer_id' => $volB->id,
@@ -59,7 +59,7 @@ it('generates program codes per org using max+1', function () {
 
 it('enforces permissions for non-admin users', function () {
     $org = Organization::create(['registration_number' => 'REG-C', 'organization_name' => 'Org C', 'email' => 'orgc@example.com']);
-    $user = User::create(['name' => 'U', 'email' => 'u@example.com', 'password' => bcrypt('x'), 'organization_id' => $org->id, 'is_admin' => false, 'permissions' => ['families' => true]]);
-    actingAs($user)->get(route('cms.aid-program.index'))->assertStatus(302);
-    actingAs($user)->get(route('cms.family.index'))->assertOk();
+    $user = User::create(['name' => 'U', 'email' => 'u@example.com', 'password' => bcrypt('x'), 'organization_id' => $org->id, 'is_admin' => false, 'permissions' => ['families_list' => true]]);
+    $this->actingAs($user)->get(route('cms.aid-program.index'))->assertStatus(302);
+    $this->actingAs($user)->get(route('cms.family.index'))->assertOk();
 });

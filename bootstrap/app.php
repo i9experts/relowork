@@ -89,6 +89,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('web', InactiveLogout::class);
         $middleware->appendToGroup('web', TenantContextMiddleware::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureModelBelongsToTenant::class);
 
         // Route middleware aliases
         $middleware->alias([

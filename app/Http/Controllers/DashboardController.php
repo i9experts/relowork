@@ -39,19 +39,25 @@ class DashboardController extends Controller
         ];
 
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $incomeByMonth = \DB::table('financial_management')
+            ->selectRaw('MONTH(date) as m, SUM(amount) as total')
+            ->where('organization_id', $organizationId)
+            ->whereYear('date', now()->year)
+            ->whereIn('transaction_type', ['Donation', 'Transfer'])
+            ->groupBy('m')
+            ->pluck('total', 'm');
+        $expensesByMonth = \DB::table('financial_management')
+            ->selectRaw('MONTH(date) as m, SUM(amount) as total')
+            ->where('organization_id', $organizationId)
+            ->whereYear('date', now()->year)
+            ->whereIn('transaction_type', ['Expense', 'Disbursement'])
+            ->groupBy('m')
+            ->pluck('total', 'm');
         $income = [];
         $expenses = [];
         for ($m = 1; $m <= 12; $m++) {
-            $income[] = (int) FinancialManagement::where('organization_id', $organizationId)
-                ->whereIn('transaction_type', ['Donation', 'Transfer'])
-                ->whereYear('date', now()->year)
-                ->whereMonth('date', $m)
-                ->sum('amount');
-            $expenses[] = (int) FinancialManagement::where('organization_id', $organizationId)
-                ->whereIn('transaction_type', ['Expense', 'Disbursement'])
-                ->whereYear('date', now()->year)
-                ->whereMonth('date', $m)
-                ->sum('amount');
+            $income[] = (int) ($incomeByMonth[$m] ?? 0);
+            $expenses[] = (int) ($expensesByMonth[$m] ?? 0);
         }
         $data['monthlyAid'] = ['months' => $months, 'income' => $income, 'expenses' => $expenses];
 

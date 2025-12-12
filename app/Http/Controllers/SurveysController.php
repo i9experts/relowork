@@ -413,10 +413,14 @@ class SurveysController extends Controller
             }
             // If no family linked, create a new family with members and attach to survey
             else {
-                $nextCode = 'FAM-'.str_pad((string) ((Family::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT);
-
-                // Determine organization for survey-created family
                 $organizationId = optional($request->user())->organization_id ?? session('organization_id');
+                $nextCode = DB::table('families')
+                    ->where('organization_id', $organizationId)
+                    ->whereNotNull('family_code')
+                    ->selectRaw('MAX(CAST(SUBSTR(family_code, INSTR(family_code, "-") + 1) AS INTEGER)) as max_num')
+                    ->lockForUpdate()
+                    ->value('max_num');
+                $nextCode = 'FAM-'.str_pad((string) (((int) ($nextCode ?? 0)) + 1), 4, '0', STR_PAD_LEFT);
 
                 $family = Family::create([
                     'family_code' => $nextCode,

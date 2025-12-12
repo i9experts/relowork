@@ -63,7 +63,7 @@ class FamilyController extends Controller
 
         $validated = $request->validate([
             'head_of_family_name' => ['required', 'string', 'max:255'],
-            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic'],
+            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,NULL,id,organization_id,'.$organizationId],
             'gender' => ['required', 'string', 'in:Male,Female,Other'],
             'age' => ['nullable', 'integer', 'min:0'],
             'marital_status' => ['nullable', 'string', 'in:Married,Widowed,Divorced,Single'],
@@ -91,9 +91,8 @@ class FamilyController extends Controller
             'members.*.occupation' => ['nullable', 'string', 'max:100'],
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
-        $familyCode = $this->nextFamilyCode($organizationId);
-
-        DB::transaction(function () use ($validated, $familyCode, $organizationId) {
+        DB::transaction(function () use ($validated, $organizationId) {
+            $familyCode = $this->nextFamilyCode($organizationId);
             $family = Family::create([
                 'family_code' => $familyCode,
                 'organization_id' => $organizationId,
@@ -153,17 +152,13 @@ class FamilyController extends Controller
 
     protected function nextFamilyCode(int $organizationId): string
     {
-        $codes = Family::where('organization_id', $organizationId)
+        $max = DB::table('families')
+            ->where('organization_id', $organizationId)
             ->whereNotNull('family_code')
-            ->pluck('family_code')
-            ->all();
-        $max = 0;
-        foreach ($codes as $c) {
-            $parts = explode('-', (string) $c);
-            $n = count($parts) ? (int) preg_replace('/\D/', '', end($parts)) : 0;
-            if ($n > $max) { $max = $n; }
-        }
-        $next = $max + 1;
+            ->selectRaw('MAX(CAST(SUBSTR(family_code, INSTR(family_code, "-") + 1) AS INTEGER)) as max_num')
+            ->lockForUpdate()
+            ->value('max_num');
+        $next = ((int) ($max ?? 0)) + 1;
         return 'FAM-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 
@@ -195,7 +190,7 @@ class FamilyController extends Controller
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
         $validated = $request->validate([
             'head_of_family_name' => ['required', 'string', 'max:255'],
-            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,'.$family->id],
+            'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d{1}$/', 'unique:families,cnic,'.$family->id.',id,organization_id,'.$organizationId],
             'gender' => ['required', 'string', 'in:Male,Female,Other'],
             'age' => ['nullable', 'integer', 'min:0'],
             'marital_status' => ['nullable', 'string', 'in:Married,Widowed,Divorced,Single'],
@@ -360,19 +355,23 @@ class FamilyController extends Controller
         // Determine organization for quick-created family
         $organizationId = optional($request->user())->organization_id ?? session('organization_id');
 
-        $family = Family::create([
-            'organization_id' => $organizationId,
-            'head_of_family_name' => $data['head_of_family'],
-            'cnic' => $data['survey_cnic'] ?? null,
-            'family_members_count' => $data['household_size'] ?? 0,
-            'zakat_eligibility' => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
-            'monthly_income' => $data['monthly_income'] ?? null,
-            'monthly_expense' => $data['monthly_expenses'] ?? null,
-            'address' => $data['address_full'] ?? null,
-            'province' => $data['province'] ?? null,
-            'city' => $data['district'] ?? null,
-            'area' => $data['tehsil'] ?? null,
-        ]);
+        $family = DB::transaction(function () use ($organizationId, $data) {
+            $code = $this->nextFamilyCode($organizationId);
+            return Family::create([
+                'family_code' => $code,
+                'organization_id' => $organizationId,
+                'head_of_family_name' => $data['head_of_family'],
+                'cnic' => $data['survey_cnic'] ?? null,
+                'family_members_count' => $data['household_size'] ?? 0,
+                'zakat_eligibility' => isset($data['zakat_elig']) ? ($data['zakat_elig'] === 'yes') : false,
+                'monthly_income' => $data['monthly_income'] ?? null,
+                'monthly_expense' => $data['monthly_expenses'] ?? null,
+                'address' => $data['address_full'] ?? null,
+                'province' => $data['province'] ?? null,
+                'city' => $data['district'] ?? null,
+                'area' => $data['tehsil'] ?? null,
+            ]);
+        });
 
         return response()->json(['ok' => true, 'family' => $family]);
     }

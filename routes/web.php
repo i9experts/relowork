@@ -107,7 +107,7 @@ Route::middleware('auth')->group(function () {
         ->name('cms.admin.billing.settings.update')
         ->middleware('permission:super_admin');
 
-    Route::resource('organization-form', OrganizationController::class)->names([
+    Route::resource('organization-form', OrganizationController::class)->middleware('permission:super_admin')->names([
         'index' => 'cms.organization-form.index',
         'create' => 'cms.organization-form.create',
         'store' => 'cms.organization-form.store',

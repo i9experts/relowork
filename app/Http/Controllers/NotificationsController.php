@@ -21,7 +21,109 @@ class NotificationsController extends Controller
 
         $isSuper = ($u && (method_exists($u,'isSystemAdmin') && $u->isSystemAdmin()));
 
-        if (!$u || $u->hasPermission('families')) {
+        if ($isSuper) {
+            $orgRecent = \App\Models\Organization::orderByDesc('created_at')->limit(5)->get();
+            foreach ($orgRecent as $org) {
+                $items[] = [
+                    'title' => 'Organization Registered',
+                    'desc' => ($org->organization_name ?: '-'),
+                    'time' => optional($org->created_at)->diffForHumans(),
+                    'ts' => optional($org->created_at)->timestamp,
+                    'badge' => 'success',
+                    'badgeLabel' => 'Registered',
+                    'href' => route('cms.admin.organizations'),
+                    'type' => 'other',
+                ];
+            }
+
+            $orgActivated = \App\Models\Organization::where('active_status', true)->orderByDesc('updated_at')->limit(5)->get();
+            foreach ($orgActivated as $org) {
+                $items[] = [
+                    'title' => 'Organization Activated',
+                    'desc' => ($org->organization_name ?: '-'),
+                    'time' => optional($org->updated_at)->diffForHumans(),
+                    'ts' => optional($org->updated_at)->timestamp,
+                    'badge' => 'primary',
+                    'badgeLabel' => 'Activated',
+                    'href' => route('cms.admin.organizations'),
+                    'type' => 'other',
+                ];
+            }
+
+            $orgDeactivated = \App\Models\Organization::where('active_status', false)->orderByDesc('updated_at')->limit(5)->get();
+            foreach ($orgDeactivated as $org) {
+                $items[] = [
+                    'title' => 'Organization Deactivated',
+                    'desc' => ($org->organization_name ?: '-'),
+                    'time' => optional($org->updated_at)->diffForHumans(),
+                    'ts' => optional($org->updated_at)->timestamp,
+                    'badge' => 'danger',
+                    'badgeLabel' => 'Deactivated',
+                    'href' => route('cms.admin.organizations'),
+                    'type' => 'other',
+                ];
+            }
+
+            $billingAlert = \App\Models\Organization::whereNotNull('subscription_expires_at')
+                ->where('subscription_expires_at', '<', now())
+                ->orderByDesc('subscription_expires_at')
+                ->limit(5)
+                ->get();
+            foreach ($billingAlert as $org) {
+                $items[] = [
+                    'title' => 'Billing Alert',
+                    'desc' => ($org->organization_name ?: '-'),
+                    'time' => optional($org->subscription_expires_at)->diffForHumans(),
+                    'ts' => optional($org->subscription_expires_at)->timestamp,
+                    'badge' => 'warning',
+                    'badgeLabel' => 'Billing',
+                    'href' => route('cms.admin.billing.settings'),
+                    'type' => 'other',
+                ];
+            }
+
+            $threshold = (int) (env('HIGH_VALUE_TX_THRESHOLD', 100000));
+            $hvTx = FinancialManagement::where('amount', '>=', $threshold)
+                ->orderByDesc('date')
+                ->limit(5)
+                ->get();
+            foreach ($hvTx as $t) {
+                $items[] = [
+                    'title' => 'High-Value Transaction',
+                    'desc' => ($t->transaction_type.' — '.(string)($t->amount)),
+                    'time' => optional($t->date)->diffForHumans(),
+                    'ts' => optional($t->date)->timestamp,
+                    'badge' => 'secondary',
+                    'badgeLabel' => ($t->transaction_type ?: 'Transaction'),
+                    'href' => route('cms.admin.billing.history'),
+                    'type' => 'other',
+                ];
+            }
+
+            usort($items, function ($a, $b) {
+                return (int)($b['ts'] ?? 0) <=> (int)($a['ts'] ?? 0);
+            });
+            $message = array_values(array_filter($items, function ($i) { return $i['type'] === 'message'; }));
+            $other = array_values(array_filter($items, function ($i) { return $i['type'] === 'other'; }));
+            $all = array_slice($items, 0, 12);
+            $unread = array_values(array_filter($all, function ($i) use ($since) { return (int)($i['ts'] ?? 0) > $since; }));
+
+            return response()->json([
+                'all' => $all,
+                'message' => $message,
+                'other' => $other,
+                'counts' => [
+                    'all' => count($all),
+                    'message' => count($message),
+                    'other' => count($other),
+                    'unread' => count($unread),
+                ],
+                'lastUpdated' => now()->diffForHumans(),
+                'nowTs' => now()->getTimestamp(),
+            ]);
+        }
+
+        if ($isSuper || !$u || $u->hasPermission('families')) {
             $familiesQ = Family::query();
             if (!$isSuper) { $familiesQ->where('organization_id', $organizationId); }
             $families = $familiesQ
@@ -30,8 +132,8 @@ class NotificationsController extends Controller
                 ->get();
             foreach ($families as $f) {
                 $items[] = [
-                    'title' => 'Family #'.$f->id,
-                    'desc' => ($f->family_name ?: $f->head_of_family_name ?: '-'),
+                    'title' => 'Family',
+                    'desc' => ($f->family_code ?: ($f->head_of_family_name ?: '-')),
                     'time' => optional($f->updated_at)->diffForHumans(),
                     'ts' => optional($f->updated_at)->timestamp,
                     'badge' => 'info',
@@ -42,7 +144,7 @@ class NotificationsController extends Controller
             }
         }
 
-        if (!$u || $u->hasPermission('aid_programs')) {
+        if ($isSuper || !$u || $u->hasPermission('aid_programs')) {
             $programsQ = AidProgram::query();
             if (!$isSuper) { $programsQ->where('organization_id', $organizationId); }
             $programs = $programsQ
@@ -63,7 +165,7 @@ class NotificationsController extends Controller
             }
         }
 
-        if (!$u || $u->hasPermission('financial')) {
+        if ($isSuper || !$u || $u->hasPermission('financial')) {
             $txQ = FinancialManagement::query();
             if (!$isSuper) { $txQ->where('organization_id', $organizationId); }
             $tx = $txQ
@@ -84,7 +186,7 @@ class NotificationsController extends Controller
             }
         }
 
-        if (!$u || $u->hasPermission('volunteers')) {
+        if ($isSuper || !$u || $u->hasPermission('volunteers')) {
             $volunteersQ = Volunteer::query();
             if (!$isSuper) { $volunteersQ->where('organization_id', $organizationId); }
             $volunteers = $volunteersQ
@@ -105,7 +207,7 @@ class NotificationsController extends Controller
             }
         }
 
-        if (!$u || $u->hasPermission('surveys')) {
+        if ($isSuper || !$u || $u->hasPermission('surveys')) {
             $surveysQ = Surveys::query();
             if (!$isSuper) { $surveysQ->where('organization_id', $organizationId); }
             $surveys = $surveysQ
