@@ -253,14 +253,14 @@
                   @endphp
                   <img src="{{ $__profileImage ?? url('assets/images/user/user-defult-profile.png') }}"
                       class="user-image rounded-circle" alt="User Image">
-                  <span class="d-none d-lg-inline-block">{{ Auth::user()->full_name ?? Auth::user()->name }}</span>
+                  <span class="d-none d-lg-inline-block">{{ $u ? ($u->full_name ?? $u->name) : 'Guest' }}</span>
                 </button>
 
                   <ul class="dropdown-menu dropdown-menu-right">
 
                       <li class="px-3 py-2 border-bottom text-center"> 
-                        <strong>{{ Auth::user()->full_name ?? Auth::user()->name }}</strong><br>
-                        <small>{{ Auth::user()->email }}</small>
+                        <strong>{{ $u ? ($u->full_name ?? $u->name) : 'Guest' }}</strong><br>
+                        <small>{{ $u ? $u->email : '' }}</small>
                       </li>
 
 
@@ -280,15 +280,17 @@
                       </li>
                       @endif
 
-                      <li class="dropdown-footer">
-                          <form method="POST" action="{{ route('logout') }}" class="m-0">
-                              @csrf
-                              <button type="submit" class="dropdown-item d-flex align-items-center">
-                                  <i class="mdi mdi-logout mr-2"></i>
-                                  <span>Log Out</span>
-                              </button>
-                          </form>
-                      </li>
+                      @if($u)
+                        <li class="dropdown-footer">
+                            <form method="POST" action="{{ route('logout') }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="dropdown-item d-flex align-items-center">
+                                    <i class="mdi mdi-logout mr-2"></i>
+                                    <span>Log Out</span>
+                                </button>
+                            </form>
+                        </li>
+                      @endif
 
                   </ul>
               </li>
