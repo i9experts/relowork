@@ -72,18 +72,25 @@
                       </select>
                     </div>
 
-                    <!-- Mode of Payment -->
+                    <!-- Mode of Payment (Edit Form Expanded) -->
                     <div class="col-md-6 mb-3">
                       <label for="payment_mode">Mode of Payment</label>
                       <select class="form-control rounded-0 bg-light select2" id="payment_mode" name="payment_mode" style="width: 100%;">
-                        <option>Select Mode of Payment</option>
+                        <option disabled {{ $pay = old('payment_mode', $financialManagement->payment_mode) ? '' : 'selected' }}>Select Mode of Payment</option>
                         @php($pay = old('payment_mode', $financialManagement->payment_mode))
                         <option value="Cash" {{ $pay=='Cash'?'selected':'' }}>Cash</option>
                         <option value="Bank Transfer" {{ $pay=='Bank Transfer'?'selected':'' }}>Bank Transfer</option>
                         <option value="Easypaisa" {{ $pay=='Easypaisa'?'selected':'' }}>Easypaisa</option>
                         <option value="Cheque" {{ $pay=='Cheque'?'selected':'' }}>Cheque</option>
+                        <option value="PayPal" {{ $pay=='PayPal'?'selected':'' }}>PayPal</option>
+                        <option value="Bank Deposit" {{ $pay=='Bank Deposit'?'selected':'' }}>Bank Deposit</option>
+                        <option value="Mobile Wallet" {{ $pay=='Mobile Wallet'?'selected':'' }}>Mobile Wallet</option>
+                        <option value="Credit Card" {{ $pay=='Credit Card'?'selected':'' }}>Credit Card</option>
+                        <option value="Debit Card" {{ $pay=='Debit Card'?'selected':'' }}>Debit Card</option>
+                        <option value="Other" {{ $pay=='Other'?'selected':'' }}>Other</option>
                       </select>
                     </div>
+
 
                     <!-- Amount -->
                     <div class="col-md-6 mb-3">

@@ -89,13 +89,18 @@
                     <div class="col-md-6 mb-3">
                       <label for="payment_mode">Mode of Payment</label>
                       <select class="form-control rounded-0 bg-light select2" id="payment_mode" name="payment_mode" style="width: 100%;">
-                        <option>Select Mode of Payment</option>
-                        <option value="Cash" {{ old('payment_mode')=='Cash'?'selected':'' }}>Cash</option>
-                        <option value="Bank Transfer" {{ old('payment_mode')=='Bank Transfer'?'selected':'' }}>Bank Transfer</option>
-                        <option value="Easypaisa" {{ old('payment_mode')=='Easypaisa'?'selected':'' }}>Easypaisa</option>
-                        <option value="Cheque" {{ old('payment_mode')=='Cheque'?'selected':'' }}>Cheque</option>
+                        <option disabled {{ old('payment_mode', $transaction->payment_mode ?? null) ? '' : 'selected' }}>Select Mode of Payment</option>
+                        <option value="Cash" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Cash'?'selected':'' }}>Cash</option>
+                        <option value="Bank Transfer" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Bank Transfer'?'selected':'' }}>Bank Transfer</option>
+                        <option value="Easypaisa" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Easypaisa'?'selected':'' }}>Easypaisa</option>
+                        <option value="Cheque" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Cheque'?'selected':'' }}>Cheque</option>
+                        <option value="PayPal" {{ old('payment_mode', $transaction->payment_mode ?? '')=='PayPal'?'selected':'' }}>PayPal</option>
+                        <option value="Bank Deposit" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Bank Deposit'?'selected':'' }}>Bank Deposit</option>
+                        <option value="Mobile Wallet" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Mobile Wallet'?'selected':'' }}>Mobile Wallet</option>
+                        <option value="Other" {{ old('payment_mode', $transaction->payment_mode ?? '')=='Other'?'selected':'' }}>Other</option>
                       </select>
                     </div>
+
 
                     <!-- Amount -->
                     <div class="col-md-6 mb-3">

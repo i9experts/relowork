@@ -49,7 +49,7 @@ class FamilyController extends Controller
     {
         $organizationId = optional(request()->user())->organization_id ?? session('organization_id');
         $data['volunteer'] = Volunteer::where('organization_id', $organizationId)->get();
-        $data['next_family_code'] = $this->nextFamilyCode($organizationId);
+        $data['next_family_code'] = $this->nextFamilyCode($organizationId, false);
 
         return view('families.family-registration-form')->with($data);
     }
@@ -92,7 +92,7 @@ class FamilyController extends Controller
             'members.*.cnic' => ['nullable', 'string', 'max:15'],
         ]);
         DB::transaction(function () use ($validated, $organizationId) {
-            $familyCode = $this->nextFamilyCode($organizationId);
+            $familyCode = $this->nextFamilyCode($organizationId, true);
             $family = Family::create([
                 'family_code' => $familyCode,
                 'organization_id' => $organizationId,
@@ -150,14 +150,25 @@ class FamilyController extends Controller
         return redirect()->route('cms.family.index')->with('success', 'Family registered successfully!');
     }
 
-    protected function nextFamilyCode(int $organizationId): string
+    protected function nextFamilyCode(int $organizationId, bool $forUpdate = false): string
     {
-        $max = DB::table('families')
+        $driver = DB::getDriverName();
+        $expr = 'MAX(CAST(SUBSTR(family_code, INSTR(family_code, "-") + 1) AS INTEGER)) as max_num';
+        if ($driver === 'mysql') {
+            $expr = 'MAX(CAST(SUBSTRING(family_code, LOCATE("-", family_code) + 1) AS UNSIGNED)) as max_num';
+        } elseif ($driver === 'pgsql') {
+            $expr = "MAX(CAST(SPLIT_PART(family_code, '-', 2) AS INTEGER)) as max_num";
+        } elseif ($driver === 'sqlsrv') {
+            $expr = "MAX(CAST(SUBSTRING(family_code, CHARINDEX('-', family_code) + 1, 200) AS INT)) as max_num";
+        }
+        $q = DB::table('families')
             ->where('organization_id', $organizationId)
             ->whereNotNull('family_code')
-            ->selectRaw('MAX(CAST(SUBSTR(family_code, INSTR(family_code, "-") + 1) AS INTEGER)) as max_num')
-            ->lockForUpdate()
-            ->value('max_num');
+            ->selectRaw($expr);
+        if ($forUpdate && in_array($driver, ['mysql', 'pgsql', 'sqlsrv'], true)) {
+            $q->lockForUpdate();
+        }
+        $max = $q->value('max_num');
         $next = ((int) ($max ?? 0)) + 1;
         return 'FAM-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }

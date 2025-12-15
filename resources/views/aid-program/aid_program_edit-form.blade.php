@@ -54,14 +54,29 @@
                   <label for="program_type">Program Type</label>
                   <select class="form-control rounded-0 bg-light select2" id="program_type" name="program_type" style="width: 100%;">
                     <option disabled {{ old('program_type', $aidProgram->program_type ?? null) ? '' : 'selected' }}>Select Program Type</option>
-                    <option value="Food" {{ old('program_type', $aidProgram->program_type ?? '')=='Food'?'selected':'' }}>Food</option>
-                    <option value="Education" {{ old('program_type', $aidProgram->program_type ?? '')=='Education'?'selected':'' }}>Education</option>
-                    <option value="Water" {{ old('program_type', $aidProgram->program_type ?? '')=='Water'?'selected':'' }}>Water</option>
-                    <option value="Medical" {{ old('program_type', $aidProgram->program_type ?? '')=='Medical'?'selected':'' }}>Medical</option>
-                    <option value="Housing" {{ old('program_type', $aidProgram->program_type ?? '')=='Housing'?'selected':'' }}>Housing</option>
-                    <option value="Emergency" {{ old('program_type', $aidProgram->program_type ?? '')=='Emergency'?'selected':'' }}>Emergency</option>
+                    <option value="Food Assistance" {{ old('program_type', $aidProgram->program_type ?? '')=='Food Assistance'?'selected':'' }}>Food Assistance</option>
+                    <option value="Education Support" {{ old('program_type', $aidProgram->program_type ?? '')=='Education Support'?'selected':'' }}>Education Support</option>
+                    <option value="Medical Aid" {{ old('program_type', $aidProgram->program_type ?? '')=='Medical Aid'?'selected':'' }}>Medical Aid</option>
+                    <option value="Clean Water & Sanitation" {{ old('program_type', $aidProgram->program_type ?? '')=='Clean Water & Sanitation'?'selected':'' }}>Clean Water & Sanitation</option>
+                    <option value="Shelter / Housing" {{ old('program_type', $aidProgram->program_type ?? '')=='Shelter / Housing'?'selected':'' }}>Shelter / Housing</option>
+                    <option value="Emergency Relief" {{ old('program_type', $aidProgram->program_type ?? '')=='Emergency Relief'?'selected':'' }}>Emergency Relief</option>
+                    <option value="Disaster Response" {{ old('program_type', $aidProgram->program_type ?? '')=='Disaster Response'?'selected':'' }}>Disaster Response</option>
+                    <option value="Orphan Support" {{ old('program_type', $aidProgram->program_type ?? '')=='Orphan Support'?'selected':'' }}>Orphan Support</option>
+                    <option value="Widow Support" {{ old('program_type', $aidProgram->program_type ?? '')=='Widow Support'?'selected':'' }}>Widow Support</option>
+                    <option value="Disability Support" {{ old('program_type', $aidProgram->program_type ?? '')=='Disability Support'?'selected':'' }}>Disability Support</option>
+                    <option value="Elderly Care" {{ old('program_type', $aidProgram->program_type ?? '')=='Elderly Care'?'selected':'' }}>Elderly Care</option>
+                    <option value="Livelihood Support" {{ old('program_type', $aidProgram->program_type ?? '')=='Livelihood Support'?'selected':'' }}>Livelihood Support</option>
+                    <option value="Skill Development" {{ old('program_type', $aidProgram->program_type ?? '')=='Skill Development'?'selected':'' }}>Skill Development</option>
+                    <option value="Microfinance" {{ old('program_type', $aidProgram->program_type ?? '')=='Microfinance'?'selected':'' }}>Microfinance / Interest-Free Loan</option>
+                    <option value="Community Development" {{ old('program_type', $aidProgram->program_type ?? '')=='Community Development'?'selected':'' }}>Community Development</option>
+                    <option value="Ramadan Program" {{ old('program_type', $aidProgram->program_type ?? '')=='Ramadan Program'?'selected':'' }}>Ramadan Program</option>
+                    <option value="Winter Relief" {{ old('program_type', $aidProgram->program_type ?? '')=='Winter Relief'?'selected':'' }}>Winter Relief</option>
+                    <option value="Qurbani Program" {{ old('program_type', $aidProgram->program_type ?? '')=='Qurbani Program'?'selected':'' }}>Qurbani Program</option>
+                    <option value="Health Awareness" {{ old('program_type', $aidProgram->program_type ?? '')=='Health Awareness'?'selected':'' }}>Health Awareness</option>
+                    <option value="Nutrition Program" {{ old('program_type', $aidProgram->program_type ?? '')=='Nutrition Program'?'selected':'' }}>Nutrition Program</option>
                   </select>
                 </div>
+
 
                 <!-- Description -->
                 <div class="col-md-6 mb-3">
@@ -122,10 +137,22 @@
                     <option disabled {{ old('fund_source', $aidProgram->fund_source ?? null) ? '' : 'selected' }}>Select Fund Source</option>
                     <option value="Zakat" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Zakat'?'selected':'' }}>Zakat</option>
                     <option value="Sadaqah" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Sadaqah'?'selected':'' }}>Sadaqah</option>
+                    <option value="Sadqa-e-Jariyah" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Sadqa-e-Jariyah'?'selected':'' }}>Sadqa-e-Jariyah</option>
                     <option value="General Donation" {{ old('fund_source', $aidProgram->fund_source ?? '')=='General Donation'?'selected':'' }}>General Donation</option>
                     <option value="Grant" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Grant'?'selected':'' }}>Grant</option>
+                    <option value="Corporate CSR" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Corporate CSR'?'selected':'' }}>Corporate CSR</option>
+                    <option value="Government Funding" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Government Funding'?'selected':'' }}>Government Funding</option>
+                    <option value="Individual Donor" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Individual Donor'?'selected':'' }}>Individual Donor</option>
+                    <option value="Online Campaign" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Online Campaign'?'selected':'' }}>Online Campaign</option>
+                    <option value="Crowdfunding" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Crowdfunding'?'selected':'' }}>Crowdfunding</option>
+                    <option value="Waqf" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Waqf'?'selected':'' }}>Waqf</option>
+                    <option value="International NGO" {{ old('fund_source', $aidProgram->fund_source ?? '')=='International NGO'?'selected':'' }}>International NGO</option>
+                    <option value="Local NGO" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Local NGO'?'selected':'' }}>Local NGO</option>
+                    <option value="Event Fundraising" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Event Fundraising'?'selected':'' }}>Event Fundraising</option>
+                    <option value="Anonymous Donor" {{ old('fund_source', $aidProgram->fund_source ?? '')=='Anonymous Donor'?'selected':'' }}>Anonymous Donor</option>
                   </select>
                 </div>
+
 
                 <!-- Responsible Volunteer / Supervisor -->
                 <div class="col-md-6 mb-3">
@@ -158,11 +185,19 @@
                   <label for="monitoring_frequency">Monitoring Frequency</label>
                   <select class="form-control rounded-0 bg-light select2" id="monitoring_frequency" name="monitoring_frequency" style="width: 100%;">
                     <option disabled {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? null) ? '' : 'selected' }}>Select Frequency</option>
+                    <option value="Daily" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Daily'?'selected':'' }}>Daily</option>
                     <option value="Weekly" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Weekly'?'selected':'' }}>Weekly</option>
+                    <option value="Bi-Weekly" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Bi-Weekly'?'selected':'' }}>Bi-Weekly</option>
                     <option value="Monthly" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Monthly'?'selected':'' }}>Monthly</option>
+                    <option value="Bi-Monthly" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Bi-Monthly'?'selected':'' }}>Bi-Monthly</option>
                     <option value="Quarterly" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Quarterly'?'selected':'' }}>Quarterly</option>
+                    <option value="Bi-Annual" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Bi-Annual'?'selected':'' }}>Bi-Annual</option>
+                    <option value="Annual" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='Annual'?'selected':'' }}>Annual</option>
+                    <option value="On Completion" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='On Completion'?'selected':'' }}>On Completion</option>
+                    <option value="As Required" {{ old('monitoring_frequency', $aidProgram->monitoring_frequency ?? '')=='As Required'?'selected':'' }}>As Required</option>
                   </select>
                 </div>
+
 
                 <!-- Progress Notes -->
                 <div class="col-md-6 mb-3">

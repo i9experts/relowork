@@ -95,7 +95,7 @@ class AidProgramController extends Controller
             'attachments.*' => ['file', 'max:5120'],
         ]);
 
-        $programCode = $this->nextProgramCode($organizationId);
+        $programCode = $this->nextProgramCode($organizationId, true);
 
         DB::transaction(function () use ($validated, $request, $programCode, $organizationId) {
             $program = AidProgram::create([
@@ -150,14 +150,25 @@ class AidProgramController extends Controller
         return redirect()->route('cms.aid-program.index')->with('success', 'Aid program created successfully!');
     }
 
-    protected function nextProgramCode(int $organizationId): string
+    protected function nextProgramCode(int $organizationId, bool $forUpdate = false): string
     {
-        $max = DB::table('aid_programs')
+        $driver = DB::getDriverName();
+        $expr = 'MAX(CAST(SUBSTR(program_code, INSTR(program_code, "-") + 1) AS INTEGER)) as max_num';
+        if ($driver === 'mysql') {
+            $expr = 'MAX(CAST(SUBSTRING(program_code, LOCATE("-", program_code) + 1) AS UNSIGNED)) as max_num';
+        } elseif ($driver === 'pgsql') {
+            $expr = "MAX(CAST(SPLIT_PART(program_code, '-', 2) AS INTEGER)) as max_num";
+        } elseif ($driver === 'sqlsrv') {
+            $expr = "MAX(CAST(SUBSTRING(program_code, CHARINDEX('-', program_code) + 1, 200) AS INT)) as max_num";
+        }
+        $q = DB::table('aid_programs')
             ->where('organization_id', $organizationId)
             ->whereNotNull('program_code')
-            ->selectRaw('MAX(CAST(SUBSTR(program_code, INSTR(program_code, "-") + 1) AS INTEGER)) as max_num')
-            ->lockForUpdate()
-            ->value('max_num');
+            ->selectRaw($expr);
+        if ($forUpdate && in_array($driver, ['mysql', 'pgsql', 'sqlsrv'], true)) {
+            $q->lockForUpdate();
+        }
+        $max = $q->value('max_num');
         $next = ((int) ($max ?? 0)) + 1;
         return 'PRG-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }

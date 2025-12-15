@@ -11,9 +11,16 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
+pest()
+    ->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
+
+// Ensure Unit tests also bootstrap the Laravel application and have DB available when needed
+uses(Tests\TestCase::class)
+    ->in('Unit');
+uses(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Unit');
 
 /*
 |--------------------------------------------------------------------------

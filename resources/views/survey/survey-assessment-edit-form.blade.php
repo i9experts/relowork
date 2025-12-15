@@ -63,6 +63,7 @@
                   </select>
                 </div>
 
+                <!-- Survey Mode (Edit Form Long Version) -->
                 <div class="col-md-6 mb-3">
                   <label for="survey_mode">Survey Mode</label>
                   <select id="survey_mode" name="survey_mode" class="form-control select2 rounded-0 bg-light" style="width:100%;">
@@ -71,6 +72,9 @@
                     <option value="Phone" {{ $survey->survey_mode==='Phone' ? 'selected' : '' }}>Phone</option>
                     <option value="WhatsApp" {{ $survey->survey_mode==='WhatsApp' ? 'selected' : '' }}>WhatsApp</option>
                     <option value="Web" {{ $survey->survey_mode==='Web' ? 'selected' : '' }}>Web</option>
+                    <option value="Email" {{ $survey->survey_mode==='Email' ? 'selected' : '' }}>Email</option>
+                    <option value="SMS" {{ $survey->survey_mode==='SMS' ? 'selected' : '' }}>SMS</option>
+                    <option value="Video Call" {{ $survey->survey_mode==='Video Call' ? 'selected' : '' }}>Video Call</option>
                   </select>
                 </div>
 
@@ -313,32 +317,46 @@
                   <input type="text" id="uc" name="uc" class="form-control rounded-0 bg-light" value="{{ data_get($survey->flags_json,'uc') }}">
                 </div>
 
+                <!-- Settlement Type -->
                 <div class="col-md-6 mb-3">
-                  <label for="settlement_type">Settlement Type</label>
-                  <select id="settlement_type" name="settlement_type" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'settlement_type') ? '' : 'selected' }}>Select</option>
-                    @php $st = data_get($survey->flags_json,'settlement_type'); @endphp
-                    <option {{ $st==='Urban' ? 'selected' : '' }}>Urban</option><option {{ $st==='Peri-urban' ? 'selected' : '' }}>Peri-urban</option><option {{ $st==='Rural' ? 'selected' : '' }}>Rural</option><option {{ $st==='Informal' ? 'selected' : '' }}>Informal</option>
-                  </select>
+                    <label for="settlement_type">Settlement Type</label>
+                    @php $st = data_get($survey->flags_json, 'settlement_type'); @endphp
+                    <select id="settlement_type" name="settlement_type" class="form-control rounded-0 bg-light select2" style="width:100%;">
+                        <option disabled {{ $st ? '' : 'selected' }}>Select Settlement Type</option>
+                        <option value="Urban" {{ $st==='Urban' ? 'selected' : '' }}>Urban</option>
+                        <option value="Peri-urban" {{ $st==='Peri-urban' ? 'selected' : '' }}>Peri-urban</option>
+                        <option value="Rural" {{ $st==='Rural' ? 'selected' : '' }}>Rural</option>
+                        <option value="Informal" {{ $st==='Informal' ? 'selected' : '' }}>Informal</option>
+                    </select>
                 </div>
 
+                <!-- Tenure Type -->
                 <div class="col-md-6 mb-3">
-                  <label for="tenure_type">Tenure Type</label>
-                  <select id="tenure_type" name="tenure_type" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'tenure_type') ? '' : 'selected' }}>Select</option>
-                    @php $tt = data_get($survey->flags_json,'tenure_type'); @endphp
-                    <option {{ $tt==='Owned' ? 'selected' : '' }}>Owned</option><option {{ $tt==='Rented' ? 'selected' : '' }}>Rented</option><option {{ $tt==='Informal' ? 'selected' : '' }}>Informal</option><option {{ $tt==='IDP' ? 'selected' : '' }}>IDP</option><option {{ $tt==='Host' ? 'selected' : '' }}>Host</option>
-                  </select>
+                    <label for="tenure_type">Tenure Type</label>
+                    @php $tt = data_get($survey->flags_json, 'tenure_type'); @endphp
+                    <select id="tenure_type" name="tenure_type" class="form-control rounded-0 bg-light select2" style="width:100%;">
+                        <option disabled {{ $tt ? '' : 'selected' }}>Select Tenure Type</option>
+                        <option value="Owned" {{ $tt==='Owned' ? 'selected' : '' }}>Owned</option>
+                        <option value="Rented" {{ $tt==='Rented' ? 'selected' : '' }}>Rented</option>
+                        <option value="Informal" {{ $tt==='Informal' ? 'selected' : '' }}>Informal</option>
+                        <option value="IDP" {{ $tt==='IDP' ? 'selected' : '' }}>IDP</option>
+                        <option value="Host" {{ $tt==='Host' ? 'selected' : '' }}>Host</option>
+                    </select>
                 </div>
 
+                <!-- Displacement Status -->
                 <div class="col-md-6 mb-3">
-                  <label for="displacement_status">Displacement Status</label>
-                  <select id="displacement_status" name="displacement_status" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'displacement_status') ? '' : 'selected' }}>Select</option>
-                    @php $ds = data_get($survey->flags_json,'displacement_status'); @endphp
-                    <option {{ $ds==='None' ? 'selected' : '' }}>None</option><option {{ $ds==='IDP' ? 'selected' : '' }}>IDP</option><option {{ $ds==='Returnee' ? 'selected' : '' }}>Returnee</option><option {{ $ds==='Migrant' ? 'selected' : '' }}>Migrant</option>
-                  </select>
+                    <label for="displacement_status">Displacement Status</label>
+                    @php $ds = data_get($survey->flags_json, 'displacement_status'); @endphp
+                    <select id="displacement_status" name="displacement_status" class="form-control rounded-0 bg-light select2" style="width:100%;">
+                        <option disabled {{ $ds ? '' : 'selected' }}>Select Displacement Status</option>
+                        <option value="None" {{ $ds==='None' ? 'selected' : '' }}>None</option>
+                        <option value="IDP" {{ $ds==='IDP' ? 'selected' : '' }}>IDP</option>
+                        <option value="Returnee" {{ $ds==='Returnee' ? 'selected' : '' }}>Returnee</option>
+                        <option value="Migrant" {{ $ds==='Migrant' ? 'selected' : '' }}>Migrant</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="primary_languages">Primary Language(s)</label>
@@ -361,13 +379,30 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="primary_income">Primary Income Source</label>
-                  <select id="primary_income" name="primary_income" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'primary_income') ? '' : 'selected' }}>Select</option>
-                    @php $pi = data_get($survey->flags_json,'primary_income'); @endphp
-                    <option {{ $pi==='Labor' ? 'selected' : '' }}>Labor</option><option {{ $pi==='Small business' ? 'selected' : '' }}>Small business</option><option {{ $pi==='Agriculture' ? 'selected' : '' }}>Agriculture</option><option {{ $pi==='Transport' ? 'selected' : '' }}>Transport</option><option {{ $pi==='Domestic work' ? 'selected' : '' }}>Domestic work</option><option {{ $pi==='None' ? 'selected' : '' }}>None</option>
-                  </select>
+                    <label for="primary_income">Primary Income Source</label>
+                    @php
+                        $pi = old('primary_income', data_get($survey->flags_json ?? [], 'primary_income'));
+                    @endphp
+                    <select id="primary_income" name="primary_income" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ $pi ? '' : 'selected' }}>Select Primary Income Source</option>
+                        <option value="Labor" {{ $pi==='Labor' ? 'selected' : '' }}>Labor</option>
+                        <option value="Small business" {{ $pi==='Small business' ? 'selected' : '' }}>Small business</option>
+                        <option value="Agriculture" {{ $pi==='Agriculture' ? 'selected' : '' }}>Agriculture</option>
+                        <option value="Transport" {{ $pi==='Transport' ? 'selected' : '' }}>Transport</option>
+                        <option value="Domestic work" {{ $pi==='Domestic work' ? 'selected' : '' }}>Domestic work</option>
+                        <option value="Fishing" {{ $pi==='Fishing' ? 'selected' : '' }}>Fishing</option>
+                        <option value="Crafts" {{ $pi==='Crafts' ? 'selected' : '' }}>Crafts</option>
+                        <option value="Trade" {{ $pi==='Trade' ? 'selected' : '' }}>Trade</option>
+                        <option value="Remittances" {{ $pi==='Remittances' ? 'selected' : '' }}>Remittances</option>
+                        <option value="Government job" {{ $pi==='Government job' ? 'selected' : '' }}>Government job</option>
+                        <option value="Private job" {{ $pi==='Private job' ? 'selected' : '' }}>Private job</option>
+                        <option value="Casual work" {{ $pi==='Casual work' ? 'selected' : '' }}>Casual work</option>
+                        <option value="Self-employed" {{ $pi==='Self-employed' ? 'selected' : '' }}>Self-employed</option>
+                        <option value="Unemployed" {{ $pi==='Unemployed' ? 'selected' : '' }}>Unemployed</option>
+                        <option value="None" {{ $pi==='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="monthly_income">Monthly Income (PKR)</label>
@@ -384,13 +419,21 @@
                   <input type="number" id="debt_outstanding" name="debt_outstanding" class="form-control rounded-0 bg-light" min="0" value="{{ data_get($survey->flags_json,'debt_outstanding') }}">
                 </div>
 
-                <div class="col-md-6 mb-3">
-                  <label for="debt_source">Debt Source</label>
-                  <select id="debt_source" name="debt_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'debt_source') ? '' : 'selected' }}>Select</option>
-                    @php $ds2 = data_get($survey->flags_json,'debt_source'); @endphp
-                    <option {{ $ds2==='Informal' ? 'selected' : '' }}>Informal</option><option {{ $ds2==='MFI' ? 'selected' : '' }}>MFI</option><option {{ $ds2==='Bank' ? 'selected' : '' }}>Bank</option>
-                  </select>
+                <div class="col-md-6 mb-3"> 
+                    <label for="debt_source">Debt Source</label>
+                    @php
+                        $ds = old('debt_source', data_get($survey->flags_json ?? [], 'debt_source'));
+                    @endphp
+                    <select id="debt_source" name="debt_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ $ds ? '' : 'selected' }}>Select</option>
+                        <option value="Informal" {{ $ds==='Informal' ? 'selected' : '' }}>Informal</option>
+                        <option value="MFI" {{ $ds==='MFI' ? 'selected' : '' }}>MFI</option>
+                        <option value="Bank" {{ $ds==='Bank' ? 'selected' : '' }}>Bank</option>
+                        <option value="Friends/Family" {{ $ds==='Friends/Family' ? 'selected' : '' }}>Friends/Family</option>
+                        <option value="Cooperative" {{ $ds==='Cooperative' ? 'selected' : '' }}>Cooperative</option>
+                        <option value="Employer" {{ $ds==='Employer' ? 'selected' : '' }}>Employer</option>
+                        <option value="None" {{ $ds==='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -419,21 +462,35 @@
 
 
                 <div class="col-md-6 mb-3">
-                  <label for="banking_access">Banking Access</label>
-                  <select id="banking_access" name="banking_access" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'banking_access') ? '' : 'selected' }}>Select</option>
-                    @php $ba = data_get($survey->flags_json,'banking_access'); @endphp
-                    <option {{ $ba==='Bank' ? 'selected' : '' }}>Bank</option><option {{ $ba==='Mobile wallet' ? 'selected' : '' }}>Mobile wallet</option><option {{ $ba==='None' ? 'selected' : '' }}>None</option>
-                  </select>
+                    <label for="banking_access">Banking Access</label>
+                    @php
+                        $ba = old('banking_access', data_get($survey->flags_json ?? [], 'banking_access'));
+                    @endphp
+                    <select id="banking_access" name="banking_access" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ $ba ? '' : 'selected' }}>Select</option>
+                        <option value="Bank" {{ $ba==='Bank' ? 'selected' : '' }}>Bank</option>
+                        <option value="Mobile wallet" {{ $ba==='Mobile wallet' ? 'selected' : '' }}>Mobile wallet</option>
+                        <option value="Credit union" {{ $ba==='Credit union' ? 'selected' : '' }}>Credit union</option>
+                        <option value="Microfinance" {{ $ba==='Microfinance' ? 'selected' : '' }}>Microfinance</option>
+                        <option value="Employer" {{ $ba==='Employer' ? 'selected' : '' }}>Employer</option>
+                        <option value="None" {{ $ba==='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
 
+
                 <div class="col-md-6 mb-3">
-                  <label for="digital_literacy">Digital Literacy Level</label>
-                  <select id="digital_literacy" name="digital_literacy" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled {{ data_get($survey->flags_json,'digital_literacy') ? '' : 'selected' }}>Select</option>
-                    @php $dl = data_get($survey->flags_json,'digital_literacy'); @endphp
-                    <option {{ $dl==='None' ? 'selected' : '' }}>None</option><option {{ $dl==='Basic' ? 'selected' : '' }}>Basic</option><option {{ $dl==='Intermediate' ? 'selected' : '' }}>Intermediate</option><option {{ $dl==='Advanced' ? 'selected' : '' }}>Advanced</option>
-                  </select>
+                    <label for="digital_literacy">Digital Literacy Level</label>
+                    @php
+                        $dl = old('digital_literacy', data_get($survey->flags_json ?? [], 'digital_literacy'));
+                    @endphp
+                    <select id="digital_literacy" name="digital_literacy" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ $dl ? '' : 'selected' }}>Select</option>
+                        <option value="None" {{ $dl==='None' ? 'selected' : '' }}>None</option>
+                        <option value="Basic" {{ $dl==='Basic' ? 'selected' : '' }}>Basic</option>
+                        <option value="Intermediate" {{ $dl==='Intermediate' ? 'selected' : '' }}>Intermediate</option>
+                        <option value="Advanced" {{ $dl==='Advanced' ? 'selected' : '' }}>Advanced</option>
+                        <option value="Expert" {{ $dl==='Expert' ? 'selected' : '' }}>Expert</option>
+                    </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -474,22 +531,43 @@
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="food_needs">Specific needs</label>
-                  <select id="food_needs" name="food_needs[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    @php $fn = collect(data_get($survey->flags_json,'food_needs',[])); @endphp
-                    <option {{ $fn->contains('Ration') ? 'selected' : '' }}>Ration</option><option {{ $fn->contains('Cash for food') ? 'selected' : '' }}>Cash for food</option><option {{ $fn->contains('Nutrition support') ? 'selected' : '' }}>Nutrition support</option>
-                  </select>
+                    <label for="food_needs">Specific Needs</label>
+                    @php 
+                        $fn = collect(data_get($survey->flags_json,'food_needs',[])); 
+                    @endphp
+                    <select id="food_needs" name="food_needs[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Ration" {{ $fn->contains('Ration') ? 'selected' : '' }}>Ration</option>
+                        <option value="Cash for food" {{ $fn->contains('Cash for food') ? 'selected' : '' }}>Cash for food</option>
+                        <option value="Nutrition support" {{ $fn->contains('Nutrition support') ? 'selected' : '' }}>Nutrition support</option>
+                        <option value="Cooking fuel" {{ $fn->contains('Cooking fuel') ? 'selected' : '' }}>Cooking fuel</option>
+                        <option value="Infant formula" {{ $fn->contains('Infant formula') ? 'selected' : '' }}>Infant formula</option>
+                        <option value="Food vouchers" {{ $fn->contains('Food vouchers') ? 'selected' : '' }}>Food vouchers</option>
+                        <option value="School meals" {{ $fn->contains('School meals') ? 'selected' : '' }}>School meals</option>
+                        <option value="Supplements" {{ $fn->contains('Supplements') ? 'selected' : '' }}>Supplements</option>
+                        <option value="Emergency rations" {{ $fn->contains('Emergency rations') ? 'selected' : '' }}>Emergency rations</option>
+                        <option value="Other" {{ $fn->contains('Other') ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
+
 
                 <!-- D2 WASH -->
                 <div class="col-md-12 mb-2 mt-2"><strong>D2. WASH</strong></div>
                 <div class="col-md-6 mb-3">
-                  <label for="water_source">Primary water source</label>
-                  <select id="water_source" name="water_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    @php $ws = data_get($survey->flags_json,'water_source'); @endphp
-                    <option {{ $ws==='Piped' ? 'selected' : '' }}>Piped</option><option {{ $ws==='Bore' ? 'selected' : '' }}>Bore</option><option {{ $ws==='Tanker' ? 'selected' : '' }}>Tanker</option><option {{ $ws==='Surface' ? 'selected' : '' }}>Surface</option>
-                  </select>
+                    <label for="water_source">Primary Water Source</label>
+                    @php $ws = data_get($survey->flags_json, 'water_source'); @endphp
+                    <select id="water_source" name="water_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ $ws ? '' : 'selected' }}>Select Water Source</option>
+                        <option value="Piped" {{ $ws==='Piped' ? 'selected' : '' }}>Piped</option>
+                        <option value="Borehole" {{ $ws==='Borehole' ? 'selected' : '' }}>Borehole</option>
+                        <option value="Tanker" {{ $ws==='Tanker' ? 'selected' : '' }}>Tanker</option>
+                        <option value="Surface water" {{ $ws==='Surface water' ? 'selected' : '' }}>Surface water</option>
+                        <option value="Protected well" {{ $ws==='Protected well' ? 'selected' : '' }}>Protected well</option>
+                        <option value="Unprotected well" {{ $ws==='Unprotected well' ? 'selected' : '' }}>Unprotected well</option>
+                        <option value="Rainwater" {{ $ws==='Rainwater' ? 'selected' : '' }}>Rainwater</option>
+                        <option value="Other" {{ $ws==='Other' ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
+
                 <div class="col-md-6 mb-3">
                   <label for="water_distance">Distance to water (mins one-way)</label>
                   <input type="number" id="water_distance" name="water_distance" class="form-control rounded-0 bg-light" min="0" value="{{ data_get($survey->flags_json,'water_distance') }}">
@@ -552,26 +630,36 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="pref_assistance">Preferred Assistance Modality</label>
-                  @php $prefAssistance = (array) data_get($survey->flags_json,'pref_assistance',[]); @endphp
-                  <select id="pref_assistance" name="pref_assistance[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option value="Cash" {{ in_array('Cash',$prefAssistance) ? 'selected' : '' }}>Cash</option>
-                    <option value="In-kind" {{ in_array('In-kind',$prefAssistance) ? 'selected' : '' }}>In-kind</option>
-                    <option value="Services" {{ in_array('Services',$prefAssistance) ? 'selected' : '' }}>Services</option>
-                    <option value="Vouchers" {{ in_array('Vouchers',$prefAssistance) ? 'selected' : '' }}>Vouchers</option>
-                  </select>
+                    <label for="pref_assistance">Preferred Assistance Modality</label>
+                    @php $prefAssistance = (array) data_get($survey->flags_json,'pref_assistance',[]); @endphp
+                    <select id="pref_assistance" name="pref_assistance[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Cash" {{ in_array('Cash',$prefAssistance) ? 'selected' : '' }}>Cash</option>
+                        <option value="In-kind" {{ in_array('In-kind',$prefAssistance) ? 'selected' : '' }}>In-kind</option>
+                        <option value="Services" {{ in_array('Services',$prefAssistance) ? 'selected' : '' }}>Services</option>
+                        <option value="Vouchers" {{ in_array('Vouchers',$prefAssistance) ? 'selected' : '' }}>Vouchers</option>
+                        <option value="Cash + In-kind" {{ in_array('Cash + In-kind',$prefAssistance) ? 'selected' : '' }}>Cash + In-kind</option>
+                        <option value="Cash + Services" {{ in_array('Cash + Services',$prefAssistance) ? 'selected' : '' }}>Cash + Services</option>
+                        <option value="In-kind + Services" {{ in_array('In-kind + Services',$prefAssistance) ? 'selected' : '' }}>In-kind + Services</option>
+                        <option value="All" {{ in_array('All',$prefAssistance) ? 'selected' : '' }}>All</option>
+                        <option value="Other" {{ in_array('Other',$prefAssistance) ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label for="program_pref">Program Type Preference</label>
-                  @php $programPref = (array) data_get($survey->flags_json,'program_pref',[]); @endphp
-                  <select id="program_pref" name="program_pref[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option value="Food" {{ in_array('Food',$programPref) ? 'selected' : '' }}>Food</option>
-                    <option value="Water" {{ in_array('Water',$programPref) ? 'selected' : '' }}>Water</option>
-                    <option value="Education" {{ in_array('Education',$programPref) ? 'selected' : '' }}>Education</option>
-                    <option value="Medical" {{ in_array('Medical',$programPref) ? 'selected' : '' }}>Medical</option>
-                    <option value="Livelihood" {{ in_array('Livelihood',$programPref) ? 'selected' : '' }}>Livelihood</option>
-                  </select>
+                    <label for="program_pref">Program Type Preference</label>
+                    @php $programPref = (array) data_get($survey->flags_json,'program_pref',[]); @endphp
+                    <select id="program_pref" name="program_pref[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Food" {{ in_array('Food',$programPref) ? 'selected' : '' }}>Food</option>
+                        <option value="Water" {{ in_array('Water',$programPref) ? 'selected' : '' }}>Water</option>
+                        <option value="Education" {{ in_array('Education',$programPref) ? 'selected' : '' }}>Education</option>
+                        <option value="Medical" {{ in_array('Medical',$programPref) ? 'selected' : '' }}>Medical</option>
+                        <option value="Livelihood" {{ in_array('Livelihood',$programPref) ? 'selected' : '' }}>Livelihood</option>
+                        <option value="Shelter" {{ in_array('Shelter',$programPref) ? 'selected' : '' }}>Shelter</option>
+                        <option value="Protection" {{ in_array('Protection',$programPref) ? 'selected' : '' }}>Protection</option>
+                        <option value="Nutrition" {{ in_array('Nutrition',$programPref) ? 'selected' : '' }}>Nutrition</option>
+                        <option value="WASH" {{ in_array('WASH',$programPref) ? 'selected' : '' }}>WASH</option>
+                        <option value="Other" {{ in_array('Other',$programPref) ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
 
                 <!-- G,H,I,J,K condensed inputs -->

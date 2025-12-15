@@ -48,16 +48,21 @@
                   </select>
                 </div>
 
+                <!-- Survey Mode (Create Form) -->
                 <div class="col-md-6 mb-3">
                   <label for="survey_mode">Survey Mode</label>
                   <select id="survey_mode" name="survey_mode" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select Mode</option>
-                    <option value="In-person">In-person</option>
-                    <option value="Phone">Phone</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Web">Web</option>
+                    <option disabled {{ old('survey_mode') ? '' : 'selected' }}>Select Mode</option>
+                    <option value="In-person" {{ old('survey_mode')=='In-person'?'selected':'' }}>In-person</option>
+                    <option value="Phone" {{ old('survey_mode')=='Phone'?'selected':'' }}>Phone</option>
+                    <option value="WhatsApp" {{ old('survey_mode')=='WhatsApp'?'selected':'' }}>WhatsApp</option>
+                    <option value="Web" {{ old('survey_mode')=='Web'?'selected':'' }}>Web</option>
+                    <option value="Email" {{ old('survey_mode')=='Email'?'selected':'' }}>Email</option>
+                    <option value="SMS" {{ old('survey_mode')=='SMS'?'selected':'' }}>SMS</option>
+                    <option value="Video Call" {{ old('survey_mode')=='Video Call'?'selected':'' }}>Video Call</option>
                   </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="datetime">Date & Time</label>
@@ -241,29 +246,43 @@
                   <input type="text" id="uc" name="uc" class="form-control rounded-0 bg-light">
                 </div>
 
+                <!-- Settlement Type -->
                 <div class="col-md-6 mb-3">
-                  <label for="settlement_type">Settlement Type</label>
-                  <select id="settlement_type" name="settlement_type" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>Urban</option><option>Peri-urban</option><option>Rural</option><option>Informal</option>
-                  </select>
+                    <label for="settlement_type">Settlement Type</label>
+                    <select class="form-control rounded-0 bg-light select2" id="settlement_type" name="settlement_type" style="width: 100%;">
+                        <option disabled {{ old('settlement_type') ? '' : 'selected' }}>Select Settlement Type</option>
+                        <option value="Urban" {{ old('settlement_type')=='Urban'?'selected':'' }}>Urban</option>
+                        <option value="Peri-urban" {{ old('settlement_type')=='Peri-urban'?'selected':'' }}>Peri-urban</option>
+                        <option value="Rural" {{ old('settlement_type')=='Rural'?'selected':'' }}>Rural</option>
+                        <option value="Informal" {{ old('settlement_type')=='Informal'?'selected':'' }}>Informal</option>
+                    </select>
                 </div>
 
+                <!-- Tenure Type -->
                 <div class="col-md-6 mb-3">
-                  <label for="tenure_type">Tenure Type</label>
-                  <select id="tenure_type" name="tenure_type" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>Owned</option><option>Rented</option><option>Informal</option><option>IDP</option><option>Host</option>
-                  </select>
+                    <label for="tenure_type">Tenure Type</label>
+                    <select class="form-control rounded-0 bg-light select2" id="tenure_type" name="tenure_type" style="width: 100%;">
+                        <option disabled {{ old('tenure_type') ? '' : 'selected' }}>Select Tenure Type</option>
+                        <option value="Owned" {{ old('tenure_type')=='Owned'?'selected':'' }}>Owned</option>
+                        <option value="Rented" {{ old('tenure_type')=='Rented'?'selected':'' }}>Rented</option>
+                        <option value="Informal" {{ old('tenure_type')=='Informal'?'selected':'' }}>Informal</option>
+                        <option value="IDP" {{ old('tenure_type')=='IDP'?'selected':'' }}>IDP</option>
+                        <option value="Host" {{ old('tenure_type')=='Host'?'selected':'' }}>Host</option>
+                    </select>
                 </div>
 
+                <!-- Displacement Status -->
                 <div class="col-md-6 mb-3">
-                  <label for="displacement_status">Displacement Status</label>
-                  <select id="displacement_status" name="displacement_status" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>None</option><option>IDP</option><option>Returnee</option><option>Migrant</option>
-                  </select>
+                    <label for="displacement_status">Displacement Status</label>
+                    <select class="form-control rounded-0 bg-light select2" id="displacement_status" name="displacement_status" style="width: 100%;">
+                        <option disabled {{ old('displacement_status') ? '' : 'selected' }}>Select Displacement Status</option>
+                        <option value="None" {{ old('displacement_status')=='None'?'selected':'' }}>None</option>
+                        <option value="IDP" {{ old('displacement_status')=='IDP'?'selected':'' }}>IDP</option>
+                        <option value="Returnee" {{ old('displacement_status')=='Returnee'?'selected':'' }}>Returnee</option>
+                        <option value="Migrant" {{ old('displacement_status')=='Migrant'?'selected':'' }}>Migrant</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="primary_languages">Primary Language(s)</label>
@@ -285,11 +304,26 @@
 
                 <div class="col-md-6 mb-3">
                   <label for="primary_income">Primary Income Source</label>
-                  <select id="primary_income" name="primary_income" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>Labor</option><option>Small business</option><option>Agriculture</option><option>Transport</option><option>Domestic work</option><option>None</option>
-                  </select>
+                    <select id="primary_income" name="primary_income" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ old('primary_income') ? '' : 'selected' }}>Select</option>
+                        <option value="Labor" {{ old('primary_income')=='Labor' ? 'selected' : '' }}>Labor</option>
+                        <option value="Small business" {{ old('primary_income')=='Small business' ? 'selected' : '' }}>Small business</option>
+                        <option value="Agriculture" {{ old('primary_income')=='Agriculture' ? 'selected' : '' }}>Agriculture</option>
+                        <option value="Transport" {{ old('primary_income')=='Transport' ? 'selected' : '' }}>Transport</option>
+                        <option value="Domestic work" {{ old('primary_income')=='Domestic work' ? 'selected' : '' }}>Domestic work</option>
+                        <option value="Fishing" {{ old('primary_income')=='Fishing' ? 'selected' : '' }}>Fishing</option>
+                        <option value="Crafts" {{ old('primary_income')=='Crafts' ? 'selected' : '' }}>Crafts</option>
+                        <option value="Trade" {{ old('primary_income')=='Trade' ? 'selected' : '' }}>Trade</option>
+                        <option value="Remittances" {{ old('primary_income')=='Remittances' ? 'selected' : '' }}>Remittances</option>
+                        <option value="Government job" {{ old('primary_income')=='Government job' ? 'selected' : '' }}>Government job</option>
+                        <option value="Private job" {{ old('primary_income')=='Private job' ? 'selected' : '' }}>Private job</option>
+                        <option value="Casual work" {{ old('primary_income')=='Casual work' ? 'selected' : '' }}>Casual work</option>
+                        <option value="Self-employed" {{ old('primary_income')=='Self-employed' ? 'selected' : '' }}>Self-employed</option>
+                        <option value="Unemployed" {{ old('primary_income')=='Unemployed' ? 'selected' : '' }}>Unemployed</option>
+                        <option value="None" {{ old('primary_income')=='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="monthly_income">Monthly Income (PKR)</label>
@@ -307,12 +341,19 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label for="debt_source">Debt Source</label>
-                  <select id="debt_source" name="debt_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>Informal</option><option>MFI</option><option>Bank</option>
-                  </select>
+                    <label for="debt_source">Debt Source</label>
+                    <select id="debt_source" name="debt_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ old('debt_source') ? '' : 'selected' }}>Select</option>
+                        <option value="Informal" {{ old('debt_source')=='Informal' ? 'selected' : '' }}>Informal</option>
+                        <option value="MFI" {{ old('debt_source')=='MFI' ? 'selected' : '' }}>MFI</option>
+                        <option value="Bank" {{ old('debt_source')=='Bank' ? 'selected' : '' }}>Bank</option>
+                        <option value="Friends/Family" {{ old('debt_source')=='Friends/Family' ? 'selected' : '' }}>Friends/Family</option>
+                        <option value="Cooperative" {{ old('debt_source')=='Cooperative' ? 'selected' : '' }}>Cooperative</option>
+                        <option value="Employer" {{ old('debt_source')=='Employer' ? 'selected' : '' }}>Employer</option>
+                        <option value="None" {{ old('debt_source')=='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label>Asset Ownership</label>
@@ -340,20 +381,31 @@
 
 
                 <div class="col-md-6 mb-3">
-                  <label for="banking_access">Banking Access</label>
-                  <select id="banking_access" name="banking_access" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>Bank</option><option>Mobile wallet</option><option>None</option>
-                  </select>
+                    <label for="banking_access">Banking Access</label>
+                    <select id="banking_access" name="banking_access" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ old('banking_access') ? '' : 'selected' }}>Select</option>
+                        <option value="Bank" {{ old('banking_access')=='Bank' ? 'selected' : '' }}>Bank</option>
+                        <option value="Mobile wallet" {{ old('banking_access')=='Mobile wallet' ? 'selected' : '' }}>Mobile wallet</option>
+                        <option value="Credit union" {{ old('banking_access')=='Credit union' ? 'selected' : '' }}>Credit union</option>
+                        <option value="Microfinance" {{ old('banking_access')=='Microfinance' ? 'selected' : '' }}>Microfinance</option>
+                        <option value="Employer" {{ old('banking_access')=='Employer' ? 'selected' : '' }}>Employer</option>
+                        <option value="None" {{ old('banking_access')=='None' ? 'selected' : '' }}>None</option>
+                    </select>
                 </div>
 
+
                 <div class="col-md-6 mb-3">
-                  <label for="digital_literacy">Digital Literacy Level</label>
-                  <select id="digital_literacy" name="digital_literacy" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option disabled selected>Select</option>
-                    <option>None</option><option>Basic</option><option>Intermediate</option><option>Advanced</option>
-                  </select>
+                    <label for="digital_literacy">Digital Literacy Level</label>
+                    <select id="digital_literacy" name="digital_literacy" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ old('digital_literacy') ? '' : 'selected' }}>Select</option>
+                        <option value="None" {{ old('digital_literacy')=='None' ? 'selected' : '' }}>None</option>
+                        <option value="Basic" {{ old('digital_literacy')=='Basic' ? 'selected' : '' }}>Basic</option>
+                        <option value="Intermediate" {{ old('digital_literacy')=='Intermediate' ? 'selected' : '' }}>Intermediate</option>
+                        <option value="Advanced" {{ old('digital_literacy')=='Advanced' ? 'selected' : '' }}>Advanced</option>
+                        <option value="Expert" {{ old('digital_literacy')=='Expert' ? 'selected' : '' }}>Expert</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6 mb-3">
                   <label for="female_led">Female-Led Household</label>
@@ -391,20 +443,39 @@
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="food_needs">Specific needs</label>
-                  <select id="food_needs" name="food_needs[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option>Ration</option><option>Cash for food</option><option>Nutrition support</option>
-                  </select>
+                    <label for="food_needs">Specific Needs</label>
+                    <select id="food_needs" name="food_needs[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Ration">Ration</option>
+                        <option value="Cash for food">Cash for food</option>
+                        <option value="Nutrition support">Nutrition support</option>
+                        <option value="Cooking fuel">Cooking fuel</option>
+                        <option value="Infant formula">Infant formula</option>
+                        <option value="Food vouchers">Food vouchers</option>
+                        <option value="School meals">School meals</option>
+                        <option value="Supplements">Supplements</option>
+                        <option value="Emergency rations">Emergency rations</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
+
 
                 <!-- D2 WASH -->
                 <div class="col-md-12 mb-2 mt-2"><strong>D2. WASH</strong></div>
                 <div class="col-md-6 mb-3">
-                  <label for="water_source">Primary water source</label>
-                  <select id="water_source" name="water_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
-                    <option>Piped</option><option>Bore</option><option>Tanker</option><option>Surface</option>
-                  </select>
+                    <label for="water_source">Primary Water Source</label>
+                    <select id="water_source" name="water_source" class="form-control select2 rounded-0 bg-light" style="width:100%;">
+                        <option disabled {{ old('water_source') ? '' : 'selected' }}>Select Water Source</option>
+                        <option value="Piped" {{ old('water_source')=='Piped' ? 'selected' : '' }}>Piped</option>
+                        <option value="Borehole" {{ old('water_source')=='Borehole' ? 'selected' : '' }}>Borehole</option>
+                        <option value="Tanker" {{ old('water_source')=='Tanker' ? 'selected' : '' }}>Tanker</option>
+                        <option value="Surface water" {{ old('water_source')=='Surface water' ? 'selected' : '' }}>Surface water</option>
+                        <option value="Protected well" {{ old('water_source')=='Protected well' ? 'selected' : '' }}>Protected well</option>
+                        <option value="Unprotected well" {{ old('water_source')=='Unprotected well' ? 'selected' : '' }}>Unprotected well</option>
+                        <option value="Rainwater" {{ old('water_source')=='Rainwater' ? 'selected' : '' }}>Rainwater</option>
+                        <option value="Other" {{ old('water_source')=='Other' ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
+
                 <div class="col-md-6 mb-3">
                   <label for="water_distance">Distance to water (mins one-way)</label>
                   <input type="number" id="water_distance" name="water_distance" class="form-control rounded-0 bg-light" min="0">
@@ -466,17 +537,34 @@
                 </div> 
 
                 <div class="col-md-6 mb-3">
-                  <label for="pref_assistance">Preferred Assistance Modality</label>
-                  <select id="pref_assistance" name="pref_assistance[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option>Cash</option><option>In-kind</option><option>Services</option><option>Vouchers</option>
-                  </select>
+                    <label for="pref_assistance">Preferred Assistance Modality</label>
+                    <select id="pref_assistance" name="pref_assistance[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Cash" {{ (collect(old('pref_assistance', []))->contains('Cash')) ? 'selected' : '' }}>Cash</option>
+                        <option value="In-kind" {{ (collect(old('pref_assistance', []))->contains('In-kind')) ? 'selected' : '' }}>In-kind</option>
+                        <option value="Services" {{ (collect(old('pref_assistance', []))->contains('Services')) ? 'selected' : '' }}>Services</option>
+                        <option value="Vouchers" {{ (collect(old('pref_assistance', []))->contains('Vouchers')) ? 'selected' : '' }}>Vouchers</option>
+                        <option value="Cash + In-kind" {{ (collect(old('pref_assistance', []))->contains('Cash + In-kind')) ? 'selected' : '' }}>Cash + In-kind</option>
+                        <option value="Cash + Services" {{ (collect(old('pref_assistance', []))->contains('Cash + Services')) ? 'selected' : '' }}>Cash + Services</option>
+                        <option value="In-kind + Services" {{ (collect(old('pref_assistance', []))->contains('In-kind + Services')) ? 'selected' : '' }}>In-kind + Services</option>
+                        <option value="All" {{ (collect(old('pref_assistance', []))->contains('All')) ? 'selected' : '' }}>All</option>
+                        <option value="Other" {{ (collect(old('pref_assistance', []))->contains('Other')) ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label for="program_pref">Program Type Preference</label>
-                  <select id="program_pref" name="program_pref[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
-                    <option>Food</option><option>Water</option><option>Education</option><option>Medical</option><option>Livelihood</option>
-                  </select>
+                    <label for="program_pref">Program Type Preference</label>
+                    <select id="program_pref" name="program_pref[]" class="form-control select2 rounded-0 bg-light" multiple style="width:100%;">
+                        <option value="Food" {{ (collect(old('program_pref', []))->contains('Food')) ? 'selected' : '' }}>Food</option>
+                        <option value="Water" {{ (collect(old('program_pref', []))->contains('Water')) ? 'selected' : '' }}>Water</option>
+                        <option value="Education" {{ (collect(old('program_pref', []))->contains('Education')) ? 'selected' : '' }}>Education</option>
+                        <option value="Medical" {{ (collect(old('program_pref', []))->contains('Medical')) ? 'selected' : '' }}>Medical</option>
+                        <option value="Livelihood" {{ (collect(old('program_pref', []))->contains('Livelihood')) ? 'selected' : '' }}>Livelihood</option>
+                        <option value="Shelter" {{ (collect(old('program_pref', []))->contains('Shelter')) ? 'selected' : '' }}>Shelter</option>
+                        <option value="Protection" {{ (collect(old('program_pref', []))->contains('Protection')) ? 'selected' : '' }}>Protection</option>
+                        <option value="Nutrition" {{ (collect(old('program_pref', []))->contains('Nutrition')) ? 'selected' : '' }}>Nutrition</option>
+                        <option value="WASH" {{ (collect(old('program_pref', []))->contains('WASH')) ? 'selected' : '' }}>WASH</option>
+                        <option value="Other" {{ (collect(old('program_pref', []))->contains('Other')) ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
 
                 <!-- G,H,I,J,K condensed inputs -->
