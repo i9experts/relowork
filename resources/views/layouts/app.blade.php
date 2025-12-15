@@ -152,7 +152,7 @@
                     placeholder="Search..." />
                 </div>
               </form>
-              <ul class="dropdown-menu dropdown-menu-search" style="min-width: 260px;">
+              <ul class="dropdown-menu dropdown-menu-search" style="min-width: 260px; max-height: 240px; overflow-y: auto;">
                 <!-- dynamic search suggestions here -->
               </ul>
             </div>
@@ -378,6 +378,8 @@
         // --- Global Client-side Typeahead Search ---
         var $input = $('#search-input');
         var $menu = $('.dropdown-menu-search');
+        var searchUrl = "{{ route('search') }}";
+        var suggestUrl = "{{ route('search.suggest') }}";
         var index = [];
         var defaults = [];
         function buildIndex(){
@@ -473,9 +475,9 @@
             $menu.append('<li class="dropdown-item text-muted">No results found</li>');
           } else {
             items.forEach(function(it, i){
-              var a = $('<a/>', { 'class': 'dropdown-item d-flex align-items-center', 'href': it.url })
+              var a = $('<a/>', { 'class': 'dropdown-item d-flex align-items-center', 'href': (it.href || it.url) })
                 .append($('<i class="mdi mdi-magnify mr-2"></i>'))
-                .append($('<span/>').text(it.label));
+                .append($('<span/>').text(it.label || it.title || ''));
               var li = $('<li/>').append(a);
               if (i === activeIndex) { a.addClass('active'); }
               $menu.append(li);
@@ -490,22 +492,39 @@
         function update(){
           var q = ($input.val() || '').trim();
           if (q.length === 0) {
-            current = (defaults || []).slice(0, 10);
-            active = current.length ? 0 : -1;
-            render(current, active);
+            current = [];
+            active = -1;
+            $menu.removeClass('show').hide();
             return;
           }
-          current = filterIndex(q);
-          active = current.length ? 0 : -1;
-          render(current, active);
+          $.ajax({ url: suggestUrl, dataType: 'json', data: { q: q }, global: false })
+            .done(function(res){
+              var items = (res && res.suggestions) ? res.suggestions : [];
+              if (!items.length) {
+                current = filterIndex(q);
+              } else {
+                current = items;
+              }
+              active = current.length ? 0 : -1;
+              render(current, active);
+            })
+            .fail(function(){
+              current = filterIndex(q);
+              active = current.length ? 0 : -1;
+              render(current, active);
+            });
         }
 
-        $input.on('focus keyup', function(e){
+        $input.on('keyup input', function(e){
           // Keyboard navigation
           if (e.type === 'keyup') {
             if (e.key === 'ArrowDown' && current.length) { active = (active + 1) % current.length; render(current, active); return; }
             if (e.key === 'ArrowUp' && current.length) { active = (active - 1 + current.length) % current.length; render(current, active); return; }
-            if (e.key === 'Enter') { if (current.length) { window.location.href = current[Math.max(active,0)].url; } return; }
+            if (e.key === 'Enter') {
+              if (current.length) { var sel = current[Math.max(active,0)]; window.location.href = (sel.href || sel.url); return; }
+              var q = ($input.val() || '').trim();
+              if (q.length) { window.location.href = searchUrl + '?q=' + encodeURIComponent(q); return; }
+            }
             if (e.key === 'Escape') { $menu.removeClass('show').hide(); return; }
           }
           clearTimeout(debounce);
@@ -527,6 +546,12 @@
             e.preventDefault();
             window.location.href = href;
           }
+        });
+
+        $('#input-group-search .mdi.mdi-magnify').on('click', function(){
+          if (current.length) { var sel = current[Math.max(active,0)]; window.location.href = (sel.href || sel.url); return; }
+          var q = ($input.val() || '').trim();
+          if (q.length) { window.location.href = searchUrl + '?q=' + encodeURIComponent(q); }
         });
 
         // Quick focus with /
