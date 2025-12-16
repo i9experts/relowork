@@ -15,7 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Mail\VolunteerWelcomeMail;
 
 class VolunteerController extends Controller
 {
@@ -106,6 +108,16 @@ class VolunteerController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&]/',
+            ],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'cnic' => ['nullable', 'string', 'max:15'],
             'gender' => ['nullable', 'in:Male,Female,Other'],
@@ -156,7 +168,7 @@ class VolunteerController extends Controller
             $user = User::create([
                 'name' => $validated['full_name'],
                 'email' => $validated['email'],
-                'password' => \Illuminate\Support\Str::random(24),
+                'password' => Hash::make($validated['password']),
                 'organization_id' => $organizationId,
                 'is_admin' => $request->boolean('is_admin'),
                 'permissions' => $permissionsPayload,
@@ -218,16 +230,28 @@ class VolunteerController extends Controller
         });
 
         if ($user) {
-            $token = Str::random(64);
-            DB::table('password_reset_tokens')->updateOrInsert(
-                ['email' => $user->email],
-                ['token' => $token, 'created_at' => now()]
-            );
-
             try {
-                Mail::to($user->email)->send(new PasswordResetMail($user, $token));
+                $org = Organization::find($organizationId);
+                if (app()->environment('local')) {
+                    $domainHost = 'localhost';
+                    $tenantHost = $domainHost;
+                    if ($org && $org->domain) {
+                        $tenantHost = $org->domain.'.localhost';
+                    }
+                    $loginUrl = 'http://'.$tenantHost.':8000/login';
+                } else {
+                    $base = config('app.url');
+                    $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
+                    $host = parse_url($base, PHP_URL_HOST) ?: 'relowork.com';
+                    $tenantHost = $host;
+                    if ($org && $org->domain) {
+                        $tenantHost = $org->domain.'.'.$host;
+                    }
+                    $loginUrl = $scheme.'://'.$tenantHost.'/login';
+                }
+                Mail::to($user->email)->send(new VolunteerWelcomeMail($user, (string) $validated['password'], $loginUrl));
             } catch (\Throwable $e) {
-                Log::error('Volunteer password reset mail failed: '.$e->getMessage());
+                Log::error('Volunteer welcome mail failed: '.$e->getMessage());
             }
         }
 

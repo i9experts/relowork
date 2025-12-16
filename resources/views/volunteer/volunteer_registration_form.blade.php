@@ -84,6 +84,37 @@
                                                 name="email" placeholder="Enter Email Address">
                                         </div>
 
+                                        <!-- Password -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Password</label>
+                                            <div class="input-group">
+                                                <input type="password" name="password" id="password" class="form-control rounded-0 bg-light" autocomplete="new-password" placeholder="Enter Password">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password" tabindex="-1">
+                                                        <i class="mdi mdi-eye-off"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">
+                                                Password must be at least 8 characters and include uppercase, lowercase, numeric and special characters.
+                                            </small>
+                                        </div>
+
+                                        <!-- Confirm Password -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Confirm Password</label>
+                                            <div class="input-group">
+                                                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control rounded-0 bg-light" autocomplete="new-password" placeholder="Confirm Password">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password-confirmation" tabindex="-1">
+                                                        <i class="mdi mdi-eye-off"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="text-danger d-none" id="password-mismatch">Passwords do not match. Please try again.</small>
+                                            <small class="text-success d-none" id="password-match">Passwords match ✔️</small>
+                                        </div>
+
                                         <!-- Gender -->
                                         <div class="col-md-6 mb-3">
                                             <label for="gender" class="d-block mb-2">Gender :</label>
@@ -574,5 +605,48 @@
 
         // Inputs remain visible; module access and granular actions can be mixed
     });
+    (function () {
+        const password = document.getElementById('password');
+        const passwordConfirmation = document.getElementById('password_confirmation');
+        const mismatchText = document.getElementById('password-mismatch');
+        const matchText = document.getElementById('password-match');
+
+        function checkPasswordMatch() {
+            if (!password || !passwordConfirmation || !mismatchText || !matchText) return;
+            if (passwordConfirmation.value === '') {
+                mismatchText.classList.add('d-none');
+                matchText.classList.add('d-none');
+                return;
+            }
+            if (password.value !== passwordConfirmation.value) {
+                mismatchText.classList.remove('d-none');
+                matchText.classList.add('d-none');
+            } else {
+                mismatchText.classList.add('d-none');
+                matchText.classList.remove('d-none');
+            }
+        }
+        if (password && passwordConfirmation) {
+            password.addEventListener('input', checkPasswordMatch);
+            passwordConfirmation.addEventListener('input', checkPasswordMatch);
+        }
+        function bindPasswordToggle(inputId, toggleBtnId) {
+            const input = document.getElementById(inputId);
+            const btn = document.getElementById(toggleBtnId);
+            if (!input || !btn) return;
+            btn.addEventListener('click', function () {
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (icon) { icon.classList.remove('mdi-eye-off'); icon.classList.add('mdi-eye'); }
+                } else {
+                    input.type = 'password';
+                    if (icon) { icon.classList.remove('mdi-eye'); icon.classList.add('mdi-eye-off'); }
+                }
+            });
+        }
+        bindPasswordToggle('password', 'toggle-password');
+        bindPasswordToggle('password_confirmation', 'toggle-password-confirmation');
+    })();
 </script>
 @endpush
