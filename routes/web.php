@@ -197,9 +197,17 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:settings')->group(function () {
         Route::get('volunteer-settings', [VolunteerSettingsController::class, 'index'])->name('cms.volunteer-settings.index');
         Route::post('volunteer-settings/education-level', [VolunteerSettingsController::class, 'storeEducationLevel'])->name('cms.volunteer-settings.education-level.store');
+        Route::patch('volunteer-settings/education-level/{educationLevel}', [VolunteerSettingsController::class, 'updateEducationLevel'])->name('cms.volunteer-settings.education-level.update');
+        Route::delete('volunteer-settings/education-level/{educationLevel}', [VolunteerSettingsController::class, 'destroyEducationLevel'])->name('cms.volunteer-settings.education-level.destroy');
         Route::post('volunteer-settings/availability', [VolunteerSettingsController::class, 'storeAvailability'])->name('cms.volunteer-settings.availability.store');
+        Route::patch('volunteer-settings/availability/{availability}', [VolunteerSettingsController::class, 'updateAvailability'])->name('cms.volunteer-settings.availability.update');
+        Route::delete('volunteer-settings/availability/{availability}', [VolunteerSettingsController::class, 'destroyAvailability'])->name('cms.volunteer-settings.availability.destroy');
         Route::post('volunteer-settings/project-type', [VolunteerSettingsController::class, 'storeProjectType'])->name('cms.volunteer-settings.project-type.store');
+        Route::patch('volunteer-settings/project-type/{projectType}', [VolunteerSettingsController::class, 'updateProjectType'])->name('cms.volunteer-settings.project-type.update');
+        Route::delete('volunteer-settings/project-type/{projectType}', [VolunteerSettingsController::class, 'destroyProjectType'])->name('cms.volunteer-settings.project-type.destroy');
         Route::post('volunteer-settings/volunteer-role', [VolunteerSettingsController::class, 'storeVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.store');
+        Route::patch('volunteer-settings/volunteer-role/{volunteerRole}', [VolunteerSettingsController::class, 'updateVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.update');
+        Route::delete('volunteer-settings/volunteer-role/{volunteerRole}', [VolunteerSettingsController::class, 'destroyVolunteerRole'])->name('cms.volunteer-settings.volunteer-role.destroy');
     });
 
     Route::middleware('permission:volunteers,volunteers_view,volunteers_create,volunteers_edit,volunteers_delete')->group(function () {

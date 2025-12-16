@@ -188,7 +188,7 @@
         <div class="col-12">
             <div class="card card-default">
                 <div class="card-body">
-                    <table id="productsTable" class="table table-product" style="width:100%">
+                    <table id="productsTable" class="table table-hover table-product" style="width:100%">
                         <thead>
                         <tr>
                             <th>S.no</th>

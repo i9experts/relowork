@@ -133,8 +133,8 @@
                               Actions
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <form action="#" method="POST" onsubmit="return confirm('Are you sure to delete?');">
+                              <button type="button" class="dropdown-item btn-edit-lookup" data-toggle="modal" data-target="#editLookupModal" data-type="education_level" data-id="{{ $item->id }}" data-name="{{ $item->name }}">Edit</button>
+                              <form action="{{ route('cms.volunteer-settings.education-level.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure to delete?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dropdown-item text-danger">Delete</button>
                               </form>
@@ -175,8 +175,8 @@
                               Actions
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <form action="#" method="POST" onsubmit="return confirm('Delete this?');">
+                              <button type="button" class="dropdown-item btn-edit-lookup" data-toggle="modal" data-target="#editLookupModal" data-type="availability" data-id="{{ $item->id }}" data-name="{{ $item->name }}">Edit</button>
+                              <form action="{{ route('cms.volunteer-settings.availability.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Delete this?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dropdown-item text-danger">Delete</button>
                               </form>
@@ -217,8 +217,8 @@
                               Actions
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <form action="#" method="POST" onsubmit="return confirm('Delete this?');">
+                              <button type="button" class="dropdown-item btn-edit-lookup" data-toggle="modal" data-target="#editLookupModal" data-type="project_type" data-id="{{ $item->id }}" data-name="{{ $item->name }}">Edit</button>
+                              <form action="{{ route('cms.volunteer-settings.project-type.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Delete this?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dropdown-item text-danger">Delete</button>
                               </form>
@@ -259,8 +259,8 @@
                               Actions
                             </button>
                             <div class="dropdown-menu">
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <form action="#" method="POST" onsubmit="return confirm('Delete this?');">
+                              <button type="button" class="dropdown-item btn-edit-lookup" data-toggle="modal" data-target="#editLookupModal" data-type="volunteer_role" data-id="{{ $item->id }}" data-name="{{ $item->name }}">Edit</button>
+                              <form action="{{ route('cms.volunteer-settings.volunteer-role.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Delete this?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="dropdown-item text-danger">Delete</button>
                               </form>
@@ -287,4 +287,63 @@
 
   </div>
 </div>
+<div class="modal fade" id="editLookupModal" tabindex="-1" role="dialog" aria-labelledby="editLookupModalTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editLookupModalTitle">Edit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form method="POST" id="editLookupForm">
+        @csrf
+        @method('PATCH')
+        <div class="modal-body">
+          <div class="form-group">
+            <label id="lookupNameLabel">Name</label>
+            <input type="text" class="form-control rounded-0 bg-light" name="name" id="lookupNameInput" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger btn-pill" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary btn-pill">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    var form = document.getElementById('editLookupForm');
+    var titleEl = document.getElementById('editLookupModalTitle');
+    var inputEl = document.getElementById('lookupNameInput');
+    var labelEl = document.getElementById('lookupNameLabel');
+    var routes = {
+      education_level: "{{ route('cms.volunteer-settings.education-level.update', '__ID__') }}",
+      availability: "{{ route('cms.volunteer-settings.availability.update', '__ID__') }}",
+      project_type: "{{ route('cms.volunteer-settings.project-type.update', '__ID__') }}",
+      volunteer_role: "{{ route('cms.volunteer-settings.volunteer-role.update', '__ID__') }}",
+    };
+    var labels = {
+      education_level: "Education Level",
+      availability: "Availability",
+      project_type: "Project Type",
+      volunteer_role: "Volunteer Role"
+    };
+    document.querySelectorAll('.btn-edit-lookup').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.getAttribute('data-type');
+        var id = btn.getAttribute('data-id');
+        var name = btn.getAttribute('data-name');
+        var label = labels[type] || 'Name';
+        titleEl.textContent = 'Edit ' + label;
+        labelEl.textContent = label;
+        inputEl.value = name || '';
+        var action = (routes[type] || '').replace('__ID__', id);
+        form.setAttribute('action', action);
+      });
+    });
+  })();
+</script>
 @endsection

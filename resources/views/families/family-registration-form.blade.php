@@ -105,7 +105,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="contact_number">Contact Number</label>
                                         <input type="text" class="form-control rounded-0 bg-light" id="contact_number"
-                                            placeholder="+92-300-1234567" name="contact_number" value="{{ old('contact_number') }}">
+                                            placeholder="Enter Contact Number" name="contact_number" value="{{ old('contact_number') }}">
                                     </div>
 
                                     <!-- Address -->
@@ -124,9 +124,9 @@
                                             <option value="Sindh" {{ old('province')=='Sindh'?'selected':'' }}>Sindh</option>
                                             <option value="Khyber Pakhtunkhwa" {{ old('province')=='Khyber Pakhtunkhwa'?'selected':'' }}>Khyber Pakhtunkhwa</option>
                                             <option value="Balochistan" {{ old('province')=='Balochistan'?'selected':'' }}>Balochistan</option>
-                                            <option value="Gilgit-Baltistan" {{ old('province')=='Gilgit-Baltistan'?'selected':'' }}>Gilgit-Baltistan</option>
+                                            <!-- <option value="Gilgit-Baltistan" {{ old('province')=='Gilgit-Baltistan'?'selected':'' }}>Gilgit-Baltistan</option>
                                             <option value="Azad Jammu and Kashmir" {{ old('province')=='Azad Jammu and Kashmir'?'selected':'' }}>Azad Jammu and Kashmir</option>
-                                            <option value="Islamabad Capital Territory" {{ old('province')=='Islamabad Capital Territory'?'selected':'' }}>Islamabad Capital Territory</option>
+                                            <option value="Islamabad Capital Territory" {{ old('province')=='Islamabad Capital Territory'?'selected':'' }}>Islamabad Capital Territory</option> -->
                                         </select>
                                     </div>
 
@@ -147,11 +147,11 @@
                                     <!-- GPS Location (optional) -->
                                     <div class="col-md-3 mb-3">
                                         <label for="gps_lat">GPS Latitude</label>
-                                        <input type="number" step="0.000001" class="form-control rounded-0 bg-light" id="gps_lat" name="gps_lat" value="{{ old('gps_lat') }}" placeholder="24.8607">
+                                        <input type="number" step="0.000001" class="form-control rounded-0 bg-light" id="gps_lat" name="gps_lat" value="{{ old('gps_lat') }}" placeholder="Enter GPS Latitude">
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label for="gps_long">GPS Longitude</label>
-                                        <input type="number" step="0.000001" class="form-control rounded-0 bg-light" id="gps_long" name="gps_long" value="{{ old('gps_long') }}" placeholder="67.0011">
+                                        <input type="number" step="0.000001" class="form-control rounded-0 bg-light" id="gps_long" name="gps_long" value="{{ old('gps_long') }}" placeholder="Enter GPS Longitude">
                                     </div>
 
                                     <!-- Family Members Count -->

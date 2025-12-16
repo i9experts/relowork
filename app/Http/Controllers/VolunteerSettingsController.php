@@ -79,4 +79,64 @@ class VolunteerSettingsController extends Controller
 
         return back()->with('success', 'Volunteer role added.');
     }
+
+    public function updateEducationLevel(Request $request, EducationLevel $educationLevel)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $educationLevel->update(['name' => $data['name']]);
+        return back()->with('success', 'Education level updated.');
+    }
+
+    public function destroyEducationLevel(EducationLevel $educationLevel)
+    {
+        $educationLevel->delete();
+        return back()->with('success', 'Education level deleted.');
+    }
+
+    public function updateAvailability(Request $request, Availability $availability)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $availability->update(['name' => $data['name']]);
+        return back()->with('success', 'Availability updated.');
+    }
+
+    public function destroyAvailability(Availability $availability)
+    {
+        $availability->delete();
+        return back()->with('success', 'Availability deleted.');
+    }
+
+    public function updateProjectType(Request $request, ProjectType $projectType)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $projectType->update(['name' => $data['name']]);
+        return back()->with('success', 'Project type updated.');
+    }
+
+    public function destroyProjectType(ProjectType $projectType)
+    {
+        $projectType->delete();
+        return back()->with('success', 'Project type deleted.');
+    }
+
+    public function updateVolunteerRole(Request $request, VolunteerRole $volunteerRole)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+        $volunteerRole->update(['name' => $data['name']]);
+        return back()->with('success', 'Volunteer role updated.');
+    }
+
+    public function destroyVolunteerRole(VolunteerRole $volunteerRole)
+    {
+        $volunteerRole->delete();
+        return back()->with('success', 'Volunteer role deleted.');
+    }
 }

@@ -125,9 +125,9 @@
                                             <option value="Sindh" {{ old('province', $family->province)=='Sindh'?'selected':'' }}>Sindh</option>
                                             <option value="Khyber Pakhtunkhwa" {{ old('province', $family->province)=='Khyber Pakhtunkhwa'?'selected':'' }}>Khyber Pakhtunkhwa</option>
                                             <option value="Balochistan" {{ old('province', $family->province)=='Balochistan'?'selected':'' }}>Balochistan</option>
-                                            <option value="Gilgit-Baltistan" {{ old('province', $family->province)=='Gilgit-Baltistan'?'selected':'' }}>Gilgit-Baltistan</option>
+                                            <!-- <option value="Gilgit-Baltistan" {{ old('province', $family->province)=='Gilgit-Baltistan'?'selected':'' }}>Gilgit-Baltistan</option>
                                             <option value="Azad Jammu and Kashmir" {{ old('province', $family->province)=='Azad Jammu and Kashmir'?'selected':'' }}>Azad Jammu and Kashmir</option>
-                                            <option value="Islamabad Capital Territory" {{ old('province', $family->province)=='Islamabad Capital Territory'?'selected':'' }}>Islamabad Capital Territory</option>
+                                            <option value="Islamabad Capital Territory" {{ old('province', $family->province)=='Islamabad Capital Territory'?'selected':'' }}>Islamabad Capital Territory</option> -->
                                         </select>
                                     </div>
 

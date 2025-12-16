@@ -240,7 +240,7 @@
                 </div>
             </div>
     @empty
-        <div class="alert alert-light border">No surveys found.</div>
+        <div class="alert alert-light text-dark text-center">No surveys found.</div>
     @endforelse
 
     @if(isset($surveys) && method_exists($surveys, 'links'))

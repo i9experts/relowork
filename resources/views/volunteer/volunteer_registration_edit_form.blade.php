@@ -395,6 +395,14 @@
                                     <label class="custom-control-label" for="perm_surveys_edit">Edit</label>
                                 </div>
                             </div>
+                            <div class="col-4 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="perm_surveys_delete"
+                                        name="permissions[surveys_delete]" value="1"
+                                        {{ old('permissions.surveys_delete', $volunteer->user->permissions['surveys_delete'] ?? null) ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="perm_surveys_delete">Delete</label>
+                                </div>
+                            </div>
                         </div>
 
 

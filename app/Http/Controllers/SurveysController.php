@@ -773,6 +773,25 @@ class SurveysController extends Controller
      */
     public function destroy(Surveys $surveys)
     {
-        //
+        DB::transaction(function () use ($surveys) {
+            if (method_exists($surveys, 'uploads')) {
+                $surveys->uploads()->delete();
+            }
+            if (method_exists($surveys, 'members')) {
+                $surveys->members()->delete();
+            }
+            if (method_exists($surveys, 'assets')) {
+                $surveys->assets()->delete();
+            }
+            if (method_exists($surveys, 'needs')) {
+                $surveys->needs()->delete();
+            }
+            if (method_exists($surveys, 'outcomes')) {
+                $surveys->outcomes()->delete();
+            }
+            $surveys->delete();
+        });
+
+        return redirect()->route('cms.survey.index')->with('success', 'Survey deleted successfully.');
     }
 }
