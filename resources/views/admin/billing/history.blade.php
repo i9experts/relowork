@@ -56,18 +56,18 @@
                           <option value="refunded" {{ $st=='refunded' ? 'selected' : '' }}>Refunded</option>
                         </select>
                       </div>
-                      <div class="col-md-4 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">From</label>
                         <input type="date" class="form-control rounded-0 bg-light" name="from" value="{{ request('from') }}">
                       </div>
-                      <div class="col-md-4 mb-3">
+                      <div class="col-md-6 mb-3">
                         <label class="form-label">To</label>
                         <input type="date" class="form-control rounded-0 bg-light" name="to" value="{{ request('to') }}">
                       </div>
-                      <div class="col-md-4 mb-3">
+                      <!-- <div class="col-md-4 mb-3">
                         <label class="form-label">Search</label>
                         <input type="text" class="form-control rounded-0 bg-light" name="q" placeholder="Method or Reference" value="{{ request('q') }}">
-                      </div>
+                      </div> -->
                     </div>
                     <div class="text-end mt-3">
                       <button type="submit" class="btn btn-secondary btn-pill px-4 shadow-sm">
