@@ -9,7 +9,7 @@
   @if($__settings && $__settings->favicon_path)
     <link href="{{ asset('storage/'.$__settings->favicon_path) }}" rel="shortcut icon" />
   @else
-    <link href="-" rel="shortcut icon" />
+    <link href="{{ url('assets/images/logo/favicon.png') }}" rel="shortcut icon" />
   @endif
   <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
   <link href="{{ url('assets/plugins/material/css/materialdesignicons.min.css') }}" rel="stylesheet" />

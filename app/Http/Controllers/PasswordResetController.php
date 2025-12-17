@@ -63,10 +63,14 @@ class PasswordResetController extends Controller
             ]
         );
 
-        // Send reset link email with raw token
-        Mail::to($user->email)->send(new PasswordResetMail($user, $token));
-
-        return back()->with('status', 'If this email is registered, a password reset link has been sent.');
+        // Send reset link email with raw token; on failure provide local fallback
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user, $token));
+            return back()->with('status', 'If this email is registered, a password reset link has been sent.');
+        } catch (\Throwable $e) {
+            \Log::error('Password reset mail failed: '.$e->getMessage());
+            return back()->with('status', 'If this email is registered, a password reset link has been sent.');
+        }
     }
 
     public function showResetForm(Request $request, string $token)

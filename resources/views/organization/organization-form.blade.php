@@ -69,7 +69,9 @@
                   <label class="form-label">Organization Domain <span class="text-danger">*</span></label>
                   <input type="text" name="domain" id="domain" class="form-control" value="{{ old('domain') }}" placeholder="">
                   <small class="text-muted">
-                    Your organization subdomain: <strong><span id="domain-preview">example</span>.relowork</strong>
+                    Your organization subdomain:
+                    @php $suffix = app()->environment('local') ? '.localhost' : '.relowork.com'; @endphp
+                    <strong><span id="domain-preview">example</span>{{ $suffix }}</strong>
                   </small>
 
                   <small class="text-danger d-none" id="domain-error">
