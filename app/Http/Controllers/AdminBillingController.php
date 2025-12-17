@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\OrganizationPayment;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminBillingController extends Controller
 {
@@ -82,7 +83,8 @@ class AdminBillingController extends Controller
         }
         $payments = $query->orderByDesc('paid_at')->orderByDesc('id')->get();
 
-        return view('admin.billing.history-print', compact('payments'));
+        $pdf = Pdf::loadView('admin.billing.history-print', compact('payments'));
+        return $pdf->download('billing-history-'.date('Ymd-His').'.pdf');
     }
 
     public function settings(Request $request)
