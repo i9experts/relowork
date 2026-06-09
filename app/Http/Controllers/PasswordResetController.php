@@ -27,10 +27,18 @@ class PasswordResetController extends Controller
                 $organization = Organization::where('domain', $subdomain)->first();
             }
         } else {
-            // {subdomain}.relowork.com or similar 3-part host
+            // {subdomain}.api.reliowork.com or similar 3-part host
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
                 $organization = Organization::where('domain', $subdomain)->first();
+            }
+        }
+
+        // Check for subdomain from URL parameter (for both local and production)
+        if (!$subdomain && request()->has('subdomain')) {
+            $urlSubdomain = request()->get('subdomain');
+            if ($urlSubdomain) {
+                $organization = Organization::where('domain', $urlSubdomain)->first();
             }
         }
 
@@ -87,9 +95,18 @@ class PasswordResetController extends Controller
                 $organization = Organization::where('domain', $subdomain)->first();
             }
         } else {
+            // {subdomain}.api.reliowork.com or similar 3-part host
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
                 $organization = Organization::where('domain', $subdomain)->first();
+            }
+        }
+
+        // Check for subdomain from URL parameter (for both local and production)
+        if (!$subdomain && $request->has('subdomain')) {
+            $urlSubdomain = $request->get('subdomain');
+            if ($urlSubdomain) {
+                $organization = Organization::where('domain', $urlSubdomain)->first();
             }
         }
 

@@ -20,14 +20,37 @@ class TenantContextMiddleware
                 $subdomain = $parts[0];
             }
         } else {
-            if (count($parts) >= 3) {
+            $base = config('app.url');
+            $baseHost = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
+
+            if ($host === $baseHost) {
+                // Base host (e.g. api.reliowork.com) -> no tenant context
+                $subdomain = null;
+            } elseif (str_ends_with($host, '.'.$baseHost)) {
+                // Tenant host (e.g. org.api.reliowork.com) -> use the left-most label
                 $subdomain = $parts[0];
+            } else {
+                // Any other host pattern -> no tenant
+                $subdomain = null;
+            }
+        }
+
+        // Check for subdomain from URL parameter (for both local and production)
+        if (!$subdomain && $request->has('subdomain')) {
+            $urlSubdomain = $request->get('subdomain');
+            if ($urlSubdomain) {
+                $subdomain = $urlSubdomain;
             }
         }
 
         if ($subdomain) {
             $org = Organization::where('domain', $subdomain)->first();
             if (! $org) {
+                // Don't abort if super admin is trying to login
+                $user = $request->user();
+                if ($user && method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()) {
+                    return $next($request);
+                }
                 abort(404);
             }
 
@@ -39,14 +62,14 @@ class TenantContextMiddleware
                 $targetOrg = \App\Models\Organization::find($user->organization_id);
                 if ($targetOrg && $targetOrg->domain) {
                     if (app()->environment('local')) {
-                        $tenantHost = $targetOrg->domain.'.localhost:8000';
-                        return redirect()->to('http://'.$tenantHost.'/dashboard');
+                        $redirectUrl = 'http://localhost:8000/dashboard?subdomain='.$targetOrg->domain;
+                        return redirect()->to($redirectUrl);
                     } else {
                         $base = config('app.url');
                         $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
-                        $host = parse_url($base, PHP_URL_HOST) ?: 'relowork.com';
-                        $tenantHost = $targetOrg->domain.'.'.$host;
-                        return redirect()->to($scheme.'://'.$tenantHost.'/dashboard');
+                        $host = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
+                        $redirectUrl = $scheme.'://'.$host.'/dashboard?subdomain='.$targetOrg->domain;
+                        return redirect()->to($redirectUrl);
                     }
                 }
                 abort(404);

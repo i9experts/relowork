@@ -71,15 +71,20 @@ class OrganizationOtpController extends Controller
      * Build the login URL for an organization based on environment.
      */
     protected function organizationLoginUrl(Organization $organization): string
-    {
-        $domain = $organization->domain;
+{
+    $domain = $organization->domain;
 
-        if (app()->environment('local')) {
-            // Example: http://orgname.localhost:8000/login
-            return 'http://'.$domain.'.localhost:8000/login';
-        }
-
-        // Production: https://orgname.relowork.com/login
-        return 'https://'.$domain.'.relowork.com/login';
+    if (app()->environment('local')) {
+        // Example: http://orgname.localhost:8000/login?subdomain=orgname
+        return 'http://' . $domain . '.localhost:8000/login?subdomain=' . $domain;
     }
+
+    // Production: build from APP_URL, e.g. https://api.reliowork.com
+    $base = config('app.url');                     // https://api.reliowork.com
+    $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
+    $host = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
+
+    // Temporary: use base domain with subdomain parameter (until DNS is fixed)
+    return $scheme . '://' . $host . '/login?subdomain=' . $domain;
+}
 }

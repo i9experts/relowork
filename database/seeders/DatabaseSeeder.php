@@ -29,12 +29,26 @@ class DatabaseSeeder extends Seeder
         ];
         DB::table('roles')->updateOrInsert(['slug' => $role['slug']], $role);
 
+        // ---------------- Roles ----------------
+        DB::table('roles')->updateOrInsert(
+            ['slug' => 'org_admin'],
+            [
+                'name' => 'Organization Admin',
+                'slug' => 'org_admin',
+                'description' => 'Organization Administrator',
+                'is_system' => false,
+                'organization_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         // ---------------- Super Admin User ----------------
         $user = User::query()->updateOrCreate(
-            ['email' => 'relowork@gmail.com'],
+            ['email' => 'reliowork@gmail.com'],
             [
                 'name' => 'Super Administrator',
-                'password' => bcrypt('Relowork@123'),
+                'password' => bcrypt('Reliowork@123'),
                 'is_admin' => false,
                 'permissions' => ['super_admin' => true],
                 'organization_id' => null,

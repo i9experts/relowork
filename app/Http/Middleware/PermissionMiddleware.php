@@ -41,9 +41,12 @@ class PermissionMiddleware
                 $org = $user->organization_id ? Organization::find($user->organization_id) : null;
                 if ($org && $org->domain) {
                     if (app()->environment('local')) {
-                        $loginUrl = 'http://'.$org->domain.'.localhost:8000/login?error='.urlencode('Your account is inactive. Please contact admin.');
+                        $loginUrl = 'http://localhost:8000/login?error='.urlencode('Your account is inactive. Please contact admin.').'&subdomain='.$org->domain;
                     } else {
-                        $loginUrl = 'https://'.$org->domain.'.relowork.com/login?error='.urlencode('Your account is inactive. Please contact admin.');
+                        $base = config('app.url');
+                        $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
+                        $host = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
+                        $loginUrl = $scheme.'://'.$host.'/login?error='.urlencode('Your account is inactive. Please contact admin.').'&subdomain='.$org->domain;
                     }
 
                     return redirect()->to($loginUrl);

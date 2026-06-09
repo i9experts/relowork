@@ -92,6 +92,13 @@ class User extends Authenticatable
     public function isSystemAdmin(): bool
     {
         try {
+            // Check if user has super_admin permission directly
+            $permissions = $this->permissions ?? [];
+            if (is_array($permissions) && ($permissions['super_admin'] ?? false)) {
+                return true;
+            }
+            
+            // Fallback to role-based check
             return (bool) $this->roles()->where('is_system', true)->exists();
         } catch (\Throwable $e) {
             return false;

@@ -33,7 +33,7 @@
 
                         <!-- Reset Link Details -->
                         <div style="margin:25px 0; padding:20px; background:#edf5ff; border:2px dashed #005bea; border-radius:12px; text-align:center;">
-                            <p style="margin:5px 0;"><strong>Reset Link:</strong> <a href="{{ $loginUrl }}" target="_blank">{{ $loginUrl }}</a></p>
+                            <p style="margin:5px 0;"><strong>Reset Link:</strong> <a href="{{ $resetUrl }}" target="_blank">{{ $resetUrl }}</a></p>
                             <p style="margin:5px 0;"><strong>Email:</strong> {{ $user->email }}</p>
                         </div>
 
@@ -41,7 +41,7 @@
 
                         <!-- Button -->
                         <div style="text-align:center; margin:30px 0;">
-                            <a href="{{ $loginUrl }}" style="display:inline-block; padding:12px 32px; background:#005bea; color:#ffffff; font-size:15px; font-weight:600; border-radius:999px; text-decoration:none; box-shadow:0 4px 15px rgba(0,91,234,0.35);">
+                            <a href="{{ $resetUrl }}" style="display:inline-block; padding:12px 32px; background:#005bea; color:#ffffff; font-size:15px; font-weight:600; border-radius:999px; text-decoration:none; box-shadow:0 4px 15px rgba(0,91,234,0.35);">
                                 Reset Password
                             </a>
                         </div>

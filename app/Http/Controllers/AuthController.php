@@ -50,21 +50,31 @@ class AuthController extends Controller
         }
 
         $organization = null;
+        $subdomain = null;
 
         $host = request()->getHost();
         $parts = explode('.', $host);
 
         if (app()->environment('local')) {
-            // Expect {subdomain}.localhost in local dev
+            // {subdomain}.localhost
             if (count($parts) === 2 && $parts[1] === 'localhost') {
                 $subdomain = $parts[0];
                 $organization = Organization::where('domain', $subdomain)->first();
             }
         } else {
-            // Expect {subdomain}.relowork.com or similar 3-part host
+            // {subdomain}.api.reliowork.com or similar 3-part host
             if (count($parts) >= 3) {
                 $subdomain = $parts[0];
                 $organization = Organization::where('domain', $subdomain)->first();
+            }
+        }
+
+        // Check for subdomain from URL parameter (for both local and production)
+        if (!$subdomain && request()->has('subdomain')) {
+            $urlSubdomain = request()->get('subdomain');
+            if ($urlSubdomain) {
+                $subdomain = $urlSubdomain;
+                $organization = Organization::where('domain', $urlSubdomain)->first();
             }
         }
 
@@ -80,6 +90,29 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // First authenticate user by email/password
+        if (! Auth::attempt([
+            'email' => $credentials['email'],
+            'password' => $credentials['password'],
+        ], $request->boolean('remember'))) {
+            
+            // Debug: Check if user exists
+            $user = \App\Models\User::where('email', $credentials['email'])->first();
+            if (!$user) {
+                return back()->withErrors(['email' => 'User not found.'])->onlyInput('email');
+            }
+            
+            // Debug: Check password
+            if (\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+                return back()->withErrors(['email' => 'Password verification failed in debug.'])->onlyInput('email');
+            }
+            
+            return back()->withErrors(['email' => 'Invalid credentials provided.'])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+        $user = $request->user();
+        
         // Resolve organization from current host (subdomain) and ensure it is verified/active
         $host = $request->getHost();
         $parts = explode('.', $host);
@@ -87,6 +120,7 @@ class AuthController extends Controller
         $subdomain = null;
 
         if (app()->environment('local')) {
+            // Local: {org}.localhost:8000 or plain localhost
             if (count($parts) === 2 && $parts[1] === 'localhost') {
                 $subdomain = $parts[0];
             } elseif (count($parts) === 1 && $parts[0] === 'localhost') {
@@ -95,10 +129,27 @@ class AuthController extends Controller
                 $subdomain = null;
             }
         } else {
-            if (count($parts) >= 3) {
+            // Production: derive base host from APP_URL (e.g. api.reliowork.com)
+            $base = config('app.url');
+            $baseHost = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
+
+            if ($host === $baseHost) {
+                // Base host (e.g. api.reliowork.com) -> no tenant context
+                $subdomain = null;
+            } elseif (str_ends_with($host, '.'.$baseHost)) {
+                // Tenant host (e.g. org.api.reliowork.com) -> use the left-most label
                 $subdomain = $parts[0];
             } else {
+                // Any other host pattern -> no tenant
                 $subdomain = null;
+            }
+        }
+
+        // Check for subdomain from URL parameter (for both local and production)
+        if (!$subdomain && $request->has('subdomain')) {
+            $urlSubdomain = $request->get('subdomain');
+            if ($urlSubdomain) {
+                $subdomain = $urlSubdomain;
             }
         }
 
@@ -109,43 +160,28 @@ class AuthController extends Controller
                 ->where('active_status', true)
                 ->first();
             if (! $organization) {
-                return back()->withErrors([
-                    'email' => 'Your organization is not verified or does not exist.',
-                ])->onlyInput('email');
+                // Don't block login - just continue without organization context
+                // This allows super admin to login even if org doesn't exist
             }
         }
+        
+        // Handle super admin login (no organization context)
+        if (!$organization) {
+            if ($user && (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
+                return redirect()->route('cms.admin.dashboard');
+            }
+            
+            // If no organization context and not super admin, logout
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        $remember = (bool) $request->boolean('remember');
-
-        // First authenticate user by email/password
-        if (! Auth::attempt([
-            'email' => $credentials['email'],
-            'password' => $credentials['password'],
-        ], $remember)) {
-            try {
-                $identifier = $credentials['email'];
-                $ip = $request->ip();
-                $key = 'login_failures:'.md5($identifier.'|'.$ip);
-                $attempts = (int) Cache::get($key, 0) + 1;
-                Cache::put($key, $attempts, now()->addMinutes(10));
-                if ($attempts >= 5) {
-                    SystemNotificationMailer::sendSecurityAlert([
-                        'identifier' => $identifier,
-                        'ip' => $ip,
-                        'attempts' => $attempts,
-                        'window' => '10 minutes',
-                        'actionUrl' => route('cms.admin.users'),
-                    ]);
-                }
-            } catch (\Throwable $e) {}
             return back()->withErrors([
-                'email' => 'Invalid credentials provided.',
+                'email' => 'Please use your organization URL to log in.',
             ])->onlyInput('email');
         }
-
-        $request->session()->regenerate();
-
-        $user = $request->user();
+        
+        // Handle organization context login
         if ($organization) {
             if (! $user || $user->organization_id !== $organization->id) {
                 Auth::logout();
@@ -202,18 +238,6 @@ class AuthController extends Controller
 
             return redirect()->route('cms.profile.index');
         }
-
-        if (! $user || ! (method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin())) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()->withErrors([
-                'email' => 'Please use your organization URL to log in.',
-            ])->onlyInput('email');
-        }
-
-        return redirect()->route('cms.admin.dashboard');
     }
 
     public function logout(Request $request)

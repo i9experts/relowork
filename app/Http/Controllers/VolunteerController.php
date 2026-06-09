@@ -233,21 +233,21 @@ class VolunteerController extends Controller
             try {
                 $org = Organization::find($organizationId);
                 if (app()->environment('local')) {
-                    $domainHost = 'localhost';
-                    $tenantHost = $domainHost;
+                    // Local: use base domain with subdomain parameter
+                    $loginUrl = 'http://localhost:8000/login';
                     if ($org && $org->domain) {
-                        $tenantHost = $org->domain.'.localhost';
+                        $loginUrl .= '?subdomain='.$org->domain;
                     }
-                    $loginUrl = 'http://'.$tenantHost.':8000/login';
                 } else {
                     $base = config('app.url');
                     $scheme = parse_url($base, PHP_URL_SCHEME) ?: 'https';
-                    $host = parse_url($base, PHP_URL_HOST) ?: 'relowork.com';
-                    $tenantHost = $host;
+                    $host = parse_url($base, PHP_URL_HOST) ?: 'api.reliowork.com';
                     if ($org && $org->domain) {
-                        $tenantHost = $org->domain.'.'.$host;
+                        // Temporary: use base domain with subdomain parameter (until DNS is fixed)
+                        $loginUrl = $scheme.'://'.$host.'/login?subdomain='.$org->domain;
+                    } else {
+                        $loginUrl = $scheme.'://'.$host.'/login';
                     }
-                    $loginUrl = $scheme.'://'.$tenantHost.'/login';
                 }
                 Mail::to($user->email)->send(new VolunteerWelcomeMail($user, (string) $validated['password'], $loginUrl));
             } catch (\Throwable $e) {
