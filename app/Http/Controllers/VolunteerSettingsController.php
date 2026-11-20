@@ -7,16 +7,18 @@ use App\Models\EducationLevel;
 use App\Models\Language;
 use App\Models\ProjectType;
 use App\Models\VolunteerRole;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class VolunteerSettingsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $educationLevels = EducationLevel::orderBy('name')->get();
-        $availabilities = Availability::orderBy('name')->get();
-        $projectTypes = ProjectType::orderBy('name')->get();
-        $volunteerRoles = VolunteerRole::orderBy('name')->get();
+        $organizationId = $this->currentOrganizationId($request);
+        $educationLevels = EducationLevel::visibleTo($organizationId)->orderBy('name')->get();
+        $availabilities = Availability::visibleTo($organizationId)->orderBy('name')->get();
+        $projectTypes = ProjectType::visibleTo($organizationId)->orderBy('name')->get();
+        $volunteerRoles = VolunteerRole::visibleTo($organizationId)->orderBy('name')->get();
         $languages = Language::orderBy('name')->get();
 
         return view('volunteer.volunteer-settings', compact(
@@ -26,6 +28,19 @@ class VolunteerSettingsController extends Controller
             'volunteerRoles',
             'languages'
         ));
+    }
+
+    /**
+     * Shared rows (organization_id = null) are used by every organization, so
+     * only a super admin may rename or delete them. Rows owned by another
+     * organization are already rejected by EnsureModelBelongsToTenant.
+     */
+    protected function ensureCanModify(Model $option): void
+    {
+        $user = request()->user();
+        if ($option->organization_id === null && ! ($user && $user->isSystemAdmin())) {
+            abort(403, 'Shared options can only be changed by a super admin.');
+        }
     }
 
     protected function currentOrganizationId(Request $request): ?int
@@ -82,6 +97,7 @@ class VolunteerSettingsController extends Controller
 
     public function updateEducationLevel(Request $request, EducationLevel $educationLevel)
     {
+        $this->ensureCanModify($educationLevel);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -91,12 +107,14 @@ class VolunteerSettingsController extends Controller
 
     public function destroyEducationLevel(EducationLevel $educationLevel)
     {
+        $this->ensureCanModify($educationLevel);
         $educationLevel->delete();
         return back()->with('success', 'Education level deleted.');
     }
 
     public function updateAvailability(Request $request, Availability $availability)
     {
+        $this->ensureCanModify($availability);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -106,12 +124,14 @@ class VolunteerSettingsController extends Controller
 
     public function destroyAvailability(Availability $availability)
     {
+        $this->ensureCanModify($availability);
         $availability->delete();
         return back()->with('success', 'Availability deleted.');
     }
 
     public function updateProjectType(Request $request, ProjectType $projectType)
     {
+        $this->ensureCanModify($projectType);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -121,12 +141,14 @@ class VolunteerSettingsController extends Controller
 
     public function destroyProjectType(ProjectType $projectType)
     {
+        $this->ensureCanModify($projectType);
         $projectType->delete();
         return back()->with('success', 'Project type deleted.');
     }
 
     public function updateVolunteerRole(Request $request, VolunteerRole $volunteerRole)
     {
+        $this->ensureCanModify($volunteerRole);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -136,6 +158,7 @@ class VolunteerSettingsController extends Controller
 
     public function destroyVolunteerRole(VolunteerRole $volunteerRole)
     {
+        $this->ensureCanModify($volunteerRole);
         $volunteerRole->delete();
         return back()->with('success', 'Volunteer role deleted.');
     }

@@ -6,7 +6,7 @@
 <div class="wrapper">
   <div class="content-wrapper">
 
-    @php($currentUser = auth()->user())
+    @php $currentUser = auth()->user(); @endphp
     <div class="d-flex justify-content-between align-items-center mb-1">
       <div>
         <h4 class="fw-bold text-dark mb-1">Volunteer Profile</h4>

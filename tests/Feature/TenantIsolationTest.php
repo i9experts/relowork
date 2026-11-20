@@ -212,14 +212,57 @@ it('blocks deleting another org\'s records', function (string $route, string $ke
     'education level' => ['cms.volunteer-settings.education-level.destroy', 'educationLevel', EducationLevel::class],
 ]);
 
-// Note: SurveysController::destroy() type-hints `Surveys $surveys` while the
-// route parameter is {survey}, so route-model binding never runs and nothing
-// gets deleted for anyone. Once that is fixed this request should 404 like the
-// others; until then this only checks that the record survives.
-it('does not delete another org\'s survey', function () {
-    $this->delete(route('cms.survey.destroy', $this->a['survey']));
+it('blocks deleting another org\'s survey', function () {
+    $this->delete(route('cms.survey.destroy', $this->a['survey']))->assertNotFound();
 
     expect(Surveys::find($this->a['survey']->id))->not->toBeNull();
+});
+
+it('lets an org delete its own survey', function () {
+    $this->delete(route('cms.survey.destroy', $this->b['survey']))
+        ->assertRedirect(route('cms.survey.index'));
+
+    expect(Surveys::find($this->b['survey']->id))->toBeNull();
+});
+
+/*
+| Shared settings options (organization_id = null) are used by every org
+*/
+
+it('shows shared settings options alongside the org\'s own', function () {
+    EducationLevel::create(['name' => 'Shared-Education-Marker']);
+
+    $this->get(route('cms.volunteer-settings.index'))
+        ->assertOk()
+        ->assertSee('Shared-Education-Marker')
+        ->assertSee('Education-B-Marker');
+});
+
+it('blocks an org admin from changing a shared settings option', function () {
+    $shared = EducationLevel::create(['name' => 'Shared-Education-Marker']);
+
+    $this->patch(route('cms.volunteer-settings.education-level.update', $shared), ['name' => 'Hijacked'])
+        ->assertForbidden();
+    $this->delete(route('cms.volunteer-settings.education-level.destroy', $shared))
+        ->assertForbidden();
+
+    expect($shared->fresh()->name)->toBe('Shared-Education-Marker');
+});
+
+it('lets a super admin change a shared settings option', function () {
+    $shared = EducationLevel::create(['name' => 'Shared-Education-Marker']);
+    $super = User::create([
+        'name' => 'Super',
+        'email' => 'super-settings@example.com',
+        'password' => bcrypt('secret'),
+        'permissions' => ['super_admin' => true],
+    ]);
+
+    $this->actingAs($super)
+        ->patch(route('cms.volunteer-settings.education-level.update', $shared), ['name' => 'Renamed'])
+        ->assertRedirect();
+
+    expect($shared->fresh()->name)->toBe('Renamed');
 });
 
 /*

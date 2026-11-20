@@ -187,8 +187,7 @@
                         <td>{{ optional($transaction->recordedBy)->name ?? '-' }}</td>
                         <td>{{ optional($transaction->approvedBy)->name ?? '-' }}</td>
                         <td>
-                          @php($user = auth()->user())
-
+                          @php $user = auth()->user(); @endphp
                           @if($user && ($user->hasPermission('financial_edit') || $user->hasPermission('financial_delete')))
                               <div class="dropdown">
                                   <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">

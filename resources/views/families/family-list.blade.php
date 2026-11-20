@@ -147,7 +147,7 @@
 
 
                                     <td>
-                                        @php($uu = auth()->user())
+                                        @php $uu = auth()->user(); @endphp
                                         @if(auth()->check() && $uu && ($uu->hasPermission('families_edit') || $uu->hasPermission('families_delete')))
                                             <div class="dropdown">
                                                 <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button"

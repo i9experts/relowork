@@ -11,8 +11,7 @@
         <p class="text-muted mb-0">Full details and attachments</p>
       </div>
       <div>
-          @php($user = auth()->user())
-
+          @php $user = auth()->user(); @endphp
           @if($user && ($user->hasPermission('surveys_edit') || $user->hasPermission('surveys_delete')))
               @if($user->hasPermission('surveys_edit'))
               <a href="{{ route('cms.survey.edit', $survey->id) }}" class="btn btn-outline-primary mr-2">Edit</a>
